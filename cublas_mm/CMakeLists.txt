@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(cublas_mm)
 
 find_package(Torch REQUIRED)
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
 
 add_executable(cublas_mm cublas_mm.cpp)
+target_link_libraries(cublas_mm "${PYTHON_LIBRARIES}")
 target_link_libraries(cublas_mm "${TORCH_LIBRARIES}")
 set_property(TARGET cublas_mm PROPERTY CXX_STANDARD 14)
 
