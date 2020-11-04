@@ -37,7 +37,7 @@ void mmul(const float *A, const float *B, float *C, const int m, const int k, co
 	cublasDestroy(handle);
 }
 
-int main() {
+void random_mmul() {
 	// Allocate 3 arrays on CPU
 	int A_rows, A_cols, B_rows, B_cols, C_rows, C_cols;
 	A_rows = A_cols = B_rows = B_cols = C_rows = C_cols = 4;
@@ -76,4 +76,8 @@ int main() {
 	free(cpu_A);
 	free(cpu_B);
 	free(cpu_C);
+}
+
+int main() {
+	random_mmul();
 }
