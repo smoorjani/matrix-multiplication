@@ -1,26 +1,11 @@
 #include <torch/torch.h>
 #include <pybind11/pybind11.h>
+#include "cublas_mm_kernel.cu"
 
 namespace py = pybind11;
 
 /*
  https://pytorch.org/tutorials/advanced/cpp_frontend.html
-
-wget https://download.pytorch.org/libtorch/cu102/libtorch-shared-with-deps-1.7.0.zip
-unzip libtorch-shared-with-deps-1.7.0.zip
-
- ===DIRECTORY STRUCTURE===
- mm/
-   CMakeLists.txt
-   mm.cpp
- libtorch/ (unzipped libtorch)
-
-
- ===BUILD INSTRUCTIONS===
- mkdir build
- cd build
- cmake -DCMAKE_PREFIX_PATH=$PWD/../../libtorch ..
- cmake --build . --config Release
 */
 
 void print_matrix(const float *A, int A_rows, int A_cols);

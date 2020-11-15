@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(cublas_mm)
 
+set(Caffe2_DIR "/home/user/src/pytorch/torch/share/cmake/Caffe2")
+
 find_package(Torch REQUIRED)
 find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
