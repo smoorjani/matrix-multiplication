@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(cublas_mm)
+set(CMAKE_CXX_STANDARD 11)
 
 set(Caffe2_DIR "/home/user/src/pytorch/torch/share/cmake/Caffe2")
 
