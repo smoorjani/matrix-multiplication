@@ -13,5 +13,7 @@ pip3 install -r requirements.txt
 mkdir build_libtorch && cd build_libtorch
 export TORCH_CUDA_ARCH_LIST="7.0"
 python3 ../tools/build_libtorch.py
+cd /home/user/src/pytorch
+python3 setup.py install
 
 cd /home/user/src
