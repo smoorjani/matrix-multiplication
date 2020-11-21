@@ -1,3 +1,6 @@
+#ifndef __CUBLAS_MM_KERNEL_H__
+#define __CUBLAS_MM_KERNEL_H__
+
 #include <iostream>
 #include <torch/extension.h>
 
@@ -83,6 +86,8 @@ void random_mmul() {
 	free(cpu_C);
 }
 
-int main() {
-	random_mmul();
-}
+// int main() {
+// 	random_mmul();
+// }
+
+#endif // __CUBLAS_MM_KERNEL_H__
