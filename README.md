@@ -4,7 +4,7 @@ Sparse mm operations done through cuBLAS and incorporated into Python.
 ## Setup instructions
 
 All instructions are covered in the `setup.sh` script.
-Run the script using `sh setup.sh` then clone the repo.
+Run the script using `sh setup.sh`.
 
 ### Directory Structure
 cublas_mm/
