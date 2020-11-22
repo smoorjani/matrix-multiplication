@@ -3,7 +3,7 @@ from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 '''
 Use the following to build extension:
-sudo python3 setup.py install
+python3 setup.py install
 '''
 
 setup(

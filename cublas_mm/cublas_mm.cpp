@@ -4,16 +4,11 @@
 */
 
 #include <torch/extension.h>
-
-// Remove this for python setup.py install
 #include "cublas_mm_kernel.h"
 
 
 void print_matrix(const float *A, int A_rows, int A_cols);
-// void fill_rand(float *A, int A_rows, int A_cols);
 void mmul(const float *A, const float *B, float *C, const int m, const int k, const int n);
-void mmul_wrapper(const float *A, const float *B, float *C);
-
 
 torch::Tensor torch_mmul(torch::Tensor A, torch::Tensor B) {
     float* A_arr = A.data_ptr<float>();
