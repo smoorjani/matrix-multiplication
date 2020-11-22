@@ -31,9 +31,11 @@ class myLinear(nn.Module):
         if y != self.in_features:
             print('Invalid dimensions')
             return 0
-        output = cublas_mm.mmul(inp, weight.t())
-        if bias is not None:
-            output += bias
+        #output = cublas_mm.mmul(inp, self.weight.t())
+        output = inp @ self.weight.t()
+
+        if self.bias is not None:
+            output += self.bias
         ret = output
         return ret
     
