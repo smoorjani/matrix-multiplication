@@ -56,8 +56,8 @@ void mmul_wrapper(const float *A, const float *B, float *C,
 	cudaMalloc(&gpu_B, B_rows * B_cols * sizeof(float));
 	cudaMalloc(&gpu_C, C_rows * C_cols * sizeof(float));
 
-	print_matrix(A, A_rows, A_cols);
-	print_matrix(B, B_rows, B_cols);
+	//print_matrix(A, A_rows, A_cols);
+	//print_matrix(B, B_rows, B_cols);
 	// Fill the arrays A and B on GPU with random numbers
 	// fill_rand(gpu_A, A_rows, A_cols);
 	// fill_rand(gpu_B, B_rows, B_cols);
@@ -69,18 +69,20 @@ void mmul_wrapper(const float *A, const float *B, float *C,
 
 	for (int row = 0; row < A_rows; row++) {
 		for (int col = 0; col < A_cols; col++) {
-			cudaMemcpy(&gpu_B[rows * B_cols + col], &B[row * B_cols + col], sizeof(float), cudaMemcpyHostToDevice);
+			cudaMemcpy(&gpu_B[row * B_cols + col], &B[row * B_cols + col], sizeof(float), cudaMemcpyHostToDevice);
 		}
 	}
 
+	/*
 	float *cpu_A = (float *)malloc(A_rows * A_cols * sizeof(float));
 	float *cpu_B = (float *)malloc(B_rows * B_cols * sizeof(float));
 	cudaMemcpy(cpu_A, gpu_A, A_rows * A_cols * sizeof(float), cudaMemcpyDeviceToHost);
 	print_matrix(cpu_A, A_rows, A_cols);
 	cudaMemcpy(cpu_B, gpu_B, B_rows * B_cols * sizeof(float), cudaMemcpyDeviceToHost);
 	print_matrix(cpu_B, B_rows, B_cols);
+	*/
 
-	mmul(gpu_A, gpu_B, gpu_C, A_rows, A_cols, B_cols);
+	mmul(gpu_B, gpu_A, gpu_C, B_rows, B_cols, A_cols);
 
 	cudaMemcpy(C, gpu_C, C_rows * C_cols * sizeof(float), cudaMemcpyDeviceToHost);
 
