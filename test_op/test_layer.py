@@ -66,7 +66,7 @@ criterion = nn.NLLLoss()
 for epoch in range(epochs):
     for batch_idx, (data, target) in enumerate(train_loader):
         if batch_idx == 10:
-                break
+            break
         
         data, target = Variable(data), Variable(target)
         # resize data from (batch_size, 1, 28, 28) to (batch_size, 28*28)
@@ -101,4 +101,4 @@ print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
 '''
 
 for param in net.parameters():
-        print(param)
+    print(param)

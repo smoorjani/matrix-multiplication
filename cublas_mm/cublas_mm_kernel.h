@@ -61,13 +61,13 @@ void mmul_wrapper(const float *A, const float *B, float *C,
 	// fill_rand(gpu_B, B_rows, B_cols);
 	for (int row = 0; row < A_rows; row++) {
 		for (int col = 0; col < A_cols; col++) {
-			cudaMemcpy(&gpu_A[row * A_cols + col], &A[row * A_cols + col], sizeof(float), cudaMemcpyHostToDevice);
+			cudaMemcpy(&gpu_A[col * A_rows + row], &A[col * A_rows + row], sizeof(float), cudaMemcpyHostToDevice);
 		}
 	}
 
 	for (int row = 0; row < A_rows; row++) {
 		for (int col = 0; col < A_cols; col++) {
-			cudaMemcpy(&gpu_B[row * B_cols + col], &B[row * B_cols + col], sizeof(float), cudaMemcpyHostToDevice);
+			cudaMemcpy(&gpu_B[col * B_rows + row], &B[col * B_rows + row], sizeof(float), cudaMemcpyHostToDevice);
 		}
 	}
 
