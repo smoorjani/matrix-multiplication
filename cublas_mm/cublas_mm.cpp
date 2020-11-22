@@ -6,10 +6,6 @@
 #include <torch/extension.h>
 #include "cublas_mm_kernel.h"
 
-
-void print_matrix(const float *A, int A_rows, int A_cols);
-void mmul(const float *A, const float *B, float *C, const int m, const int k, const int n);
-
 torch::Tensor torch_mmul(torch::Tensor A, torch::Tensor B) {
     float* A_arr = A.data_ptr<float>();
     float* B_arr = B.data_ptr<float>();
@@ -26,8 +22,6 @@ torch::Tensor torch_mmul(torch::Tensor A, torch::Tensor B) {
     float* C_arr = C.data_ptr<float>();
 
     mmul_wrapper(A_arr, B_arr, C_arr, A_rows, A_cols, B_rows, B_cols, C_rows, C_cols);
-    //print_matrix(C_arr, A_rows, B_cols);
-    // C = torch::from_blob(C_arr.ptr<float>(), {A_rows, B_cols});
     return C;
 }
 
