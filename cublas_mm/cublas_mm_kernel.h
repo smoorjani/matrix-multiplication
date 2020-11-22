@@ -1,6 +1,11 @@
 #ifndef __CUBLAS_MM_KERNEL_H__
 #define __CUBLAS_MM_KERNEL_H__
 
+'''
+MM reproduced from:
+https://gist.github.com/peterwittek/6303527
+'''
+
 #include <iostream>
 #include <torch/extension.h>
 
