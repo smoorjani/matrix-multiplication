@@ -11,7 +11,7 @@ setup(
     ext_modules=[
         CUDAExtension('cublas_mm', [
             'cublas_mm.cpp',
-            'cublas_mm_kernel.cu',
+#            'cublas_mm_kernel.cu',
         ])
     ],
     cmdclass={
