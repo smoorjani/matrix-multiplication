@@ -10,6 +10,13 @@
 #include <cublas_v2.h>
 #include <curand.h>
 
+#define IDX2F(i,j,ld) ((((j)-1)*(ld))+((i)-1))
+#define IDX2C(i,j,ld) (((j)*(ld))+(i))
+
+int ci(int row, int column, int nColumns) {
+  return row*nColumns+column;
+}
+
 // Print matrix A
 void print_matrix(const float *A, int A_rows, int A_cols) {
     for(int i = 0; i < A_rows; ++i){
@@ -63,15 +70,36 @@ void mmul_wrapper(const float *A, const float *B, float *C,
 	// Fill the arrays A and B on GPU with random numbers
 	// fill_rand(gpu_A, A_rows, A_cols);
 	// fill_rand(gpu_B, B_rows, B_cols);
-	cudaMemcpy(gpu_A, A, A_rows * A_cols * sizeof(float),cudaMemcpyHostToDevice);
-	cudaMemcpy(gpu_B, B, B_rows * B_cols * sizeof(float),cudaMemcpyHostToDevice);
+	// cudaMemcpy(gpu_A, A, A_rows * A_cols * sizeof(float),cudaMemcpyHostToDevice);
+	// cudaMemcpy(gpu_B, B, B_rows * B_cols * sizeof(float),cudaMemcpyHostToDevice);
+
+	for (int i = 0; i < A_rows; i++) {
+		for (int j = 0; j < A_cols; j++) {
+			h_A[ci(i,j,A_cols)] = i+j;
+		}
+	}
+
+	for (int i = 0; i < B_rows; i++) {
+		for (int j = 0; j < B_cols; j++) {
+			h_A[ci(i,j,B_cols)] = i+j;
+		}
+	}
 
 	cudaMemcpy(h_A, gpu_A, A_rows * A_cols * sizeof(float),cudaMemcpyDeviceToHost);
 	cudaMemcpy(h_B, gpu_B, B_rows * B_cols * sizeof(float),cudaMemcpyDeviceToHost);
 	print_matrix(h_A, A_rows, A_cols);
 	print_matrix(h_B, B_rows, B_cols);
 
-	mmul(gpu_A, gpu_B, gpu_C, A_rows, A_cols, B_cols);
+	const float a = 1;
+	const float b = 0;
+	const float *alpha = &a;
+	const float *beta = &b;
+
+	cublasHandle_t handle;
+	cublasCreate(&handle);
+	cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, B_cols, A_rows, A_cols, alpha, gpu_A, B_cols, gpu_B, A_cols, beta, gpu_C, B_cols);
+	cublasDestroy(handle);
+
 	cudaMemcpy(C, gpu_C, C_rows * C_cols * sizeof(float), cudaMemcpyDeviceToHost);
 
 	cudaMemcpy(h_C, gpu_C, C_rows * C_cols * sizeof(float),cudaMemcpyDeviceToHost);
