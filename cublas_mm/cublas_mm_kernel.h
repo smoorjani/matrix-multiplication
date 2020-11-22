@@ -56,6 +56,8 @@ void mmul_wrapper(const float *A, const float *B, float *C,
 	cudaMalloc(&gpu_B, B_rows * B_cols * sizeof(float));
 	cudaMalloc(&gpu_C, C_rows * C_cols * sizeof(float));
 
+	print_matrix(A, A_rows, A_cols);
+	print_matrix(B, B_rows, B_cols);
 	// Fill the arrays A and B on GPU with random numbers
 	// fill_rand(gpu_A, A_rows, A_cols);
 	// fill_rand(gpu_B, B_rows, B_cols);

@@ -21,12 +21,16 @@ torch::Tensor torch_mmul(torch::Tensor A, torch::Tensor B) {
 
     int A_rows = A.size(0);
     int A_cols = A.size(1);
+    int B_rows = B.size(0)
     int B_cols = B.size(1);
 
     torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
+    int C_rows = C.size(0)
+    int C_cols = C.size(1);
+
     float* C_arr = C.data_ptr<float>();
 
-    mmul(A_arr, B_arr, C_arr, A_rows, A_cols, B_cols);
+    mmul_wrapper(A_arr, B_arr, C_arr, A_rows, A_cols, B_rows, B_cols, C_rows, C_cols);
     print_matrix(C_arr. C.size(0), C.size(1));
     // C = torch::from_blob(C_arr.ptr<float>(), {A_rows, B_cols});
     return C;
