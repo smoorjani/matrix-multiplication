@@ -16,12 +16,8 @@ class cublasMM(InplaceFunction):
     def forward(ctx, m1, m2):
         # swap around for col-major call
         # where row major is expected
-        temp = m1.t()
-        m1 = m2.t()
-        m2 = temp
-
         ctx.save_for_backward(m1, m2)
-        return cublas_mm.mmul(m1, m2)
+        return cublas_mm.mmul(m2.t(), m1.t()).t()
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -29,10 +25,11 @@ class cublasMM(InplaceFunction):
         grad_m1 = grad_m2 = None
 
         if ctx.needs_input_grad[0]:
-            grad_m1 = cublas_mm.mmul(grad_output, m2.t())
+            # m2 = m2.t().t()
+            grad_m1 = cublas_mm.mmul(m2, grad_output.t()).t()
         
         if ctx.needs_input_grad[1]:
-            grad_m2 = cublas_mm.mmul(m1.t(), grad_output)
+            grad_m2 = cublas_mm.mmul(grad_output.t(), m1).t()
         
         return grad_m1, grad_m2
 
@@ -65,7 +62,8 @@ class cublasLinear(nn.Module):
         if y != self.in_features:
             print('Invalid dimensions')
             return 0
-        output = cublasMM.apply(inp, self.weight.t())
+        t = cublasMM.apply(inp, self.weight.t())
+        output = t.clone()
 
         if self.bias is not None:
             output += self.bias
