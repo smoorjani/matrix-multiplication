@@ -14,6 +14,12 @@ class cublasMM(InplaceFunction):
 
     @staticmethod
     def forward(ctx, m1, m2):
+        # swap around for col-major call
+        # where row major is expected
+        temp = m1.t()
+        m1 = m2.t()
+        m2 = temp
+
         ctx.save_for_backward(m1, m2)
         return cublas_mm.mmul(m1, m2)
 
