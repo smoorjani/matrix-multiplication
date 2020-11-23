@@ -6,12 +6,12 @@
 #include <torch/extension.h>
 #include "cublas_mm_kernel.h"
 
-torch::Tensor torch_mmul(torch::Tensor A, torch::Tensor B, bool colMajor=true) {
-    if (colMajor) {
-      torch::tensor temp = A.transpose(0,1);
-      A = B.transpose(0,1);
-      B = A;
-    }
+torch::Tensor torch_mmul(torch::Tensor A, torch::Tensor B) {
+    // if (colMajor) {
+    //   torch::Tensor temp = A.transpose(0,1);
+    //   A = B.transpose(0,1);
+    //   B = A;
+    // }
 
     float* A_arr = A.data_ptr<float>();
     float* B_arr = B.data_ptr<float>();
