@@ -6,7 +6,8 @@ import cublas_mm
 class regLinear(nn.Module):
     def __init__(self, in_features, out_features, bias=True):
         super(regLinear, self).__init__()
-        
+        torch.manual_seed(0)
+
         self.in_features = in_features
         self.out_features = out_features
         self.bias = bias
@@ -46,6 +47,7 @@ class regLinear(nn.Module):
 class cublasLinear(nn.Module):
     def __init__(self, in_features, out_features, bias=True):
         super(cublasLinear, self).__init__()
+        torch.manual_seed(0)
         
         self.in_features = in_features
         self.out_features = out_features
