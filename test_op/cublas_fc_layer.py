@@ -59,7 +59,7 @@ class cublasLinear(nn.Module):
         if y != self.in_features:
             print('Invalid dimensions')
             return 0
-        output = cublasMM.apply(self.weight.t().t(), inp.t())
+        output = cublasMM.apply(inp, self.weight.t())
 
         if self.bias is not None:
             output += self.bias
