@@ -6,7 +6,7 @@
 #include <iostream>
 #include <assert.h>
 
-// #include "Utilities.cuh"
+#include "Utilities.cuh"
 
 #include <cuda_runtime.h>
 #include <cusparse_v2.h>
@@ -18,7 +18,7 @@
 
 // (m x n) * (n * p) = (m x p)
 
-int cusparse_mm_wrapper(double *h_A_val, int *h_A_colind, int *h_A_rowptr,
+void cusparse_mm_wrapper(double *h_A_val, int *h_A_colind, int *h_A_rowptr,
                         int nnzA, int h_A_rowptr_size,
                         double *h_B_dense, int h_B_rows, int h_B_cols)
 {
@@ -104,7 +104,7 @@ int cusparse_mm_wrapper(double *h_A_val, int *h_A_colind, int *h_A_rowptr,
     int *h_B_RowIndices = (int *)malloc((n + 1) * sizeof(*h_B_RowIndices));
     int *h_B_ColIndices = (int *)malloc(nnzB * sizeof(*h_B_ColIndices));
     int *h_C_RowIndices = (int *)malloc((m + 1) * sizeof(*h_C_RowIndices));
-    gpuErrchk(cudaMemcpy(h_A, d_A, nnzA * sizeof(*h_A), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(h_A_val, d_A, nnzA * sizeof(*h_A_val), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaMemcpy(h_A_RowIndices, d_A_RowIndices, (m + 1) * sizeof(*h_A_RowIndices), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaMemcpy(h_A_ColIndices, d_A_ColIndices, nnzA * sizeof(*h_A_ColIndices), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaMemcpy(h_B, d_B, nnzB * sizeof(*h_B), cudaMemcpyDeviceToHost));
@@ -139,7 +139,7 @@ int cusparse_mm_wrapper(double *h_A_val, int *h_A_colind, int *h_A_rowptr,
                                       d_B, d_B_RowIndices, d_B_ColIndices, descrA, nnzA, d_A, d_A_RowIndices, d_A_ColIndices, descrC,
                                       d_C, d_C_RowIndices, d_C_ColIndices));
 
-    cusparseSafeCall(cusparseDcsr2dense(handle, N, N, descrC, d_C, d_C_RowIndices, d_C_ColIndices, d_C_dense, N));
+    cusparseSafeCall(cusparseDcsr2dense(handle, m, p, descrC, d_C, d_C_RowIndices, d_C_ColIndices, d_C_dense, N));
 
     gpuErrchk(cudaMemcpy(h_C, d_C, nnzC * sizeof(*h_C), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaMemcpy(h_C_RowIndices, d_C_RowIndices, (m + 1) * sizeof(*h_C_RowIndices), cudaMemcpyDeviceToHost));
@@ -153,6 +153,8 @@ int cusparse_mm_wrapper(double *h_A_val, int *h_A_colind, int *h_A_rowptr,
             printf("%f \t", h_C_dense[i * m + j]);
         printf("\n");
     }
+
+    return;
 }
 
 void dense_to_csr(double *h_A_dense, const int Nrows, const int Ncols, double *h_A_val, int *h_A_colind, int *h_A_rowptr)
@@ -212,7 +214,7 @@ int main()
     // (3 x 4) x (4 x 2) = 3 x 2
     int h_A_rows = 3;
     int h_A_cols = 4;
-    double *h_A_dense = (double *)malloc(h_B_rows * h_B_cols * sizeof(*h_A_dense));
+    double *h_A_dense = (double *)malloc(h_A_rows * h_A_cols * sizeof(*h_A_dense));
 
     // --- Column-major ordering
     h_A_dense[0] = 1.0f;
