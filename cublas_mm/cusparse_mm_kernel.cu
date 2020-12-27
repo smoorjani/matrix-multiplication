@@ -139,7 +139,7 @@ void cusparse_mm_wrapper(double *h_A_val, int *h_A_colind, int *h_A_rowptr,
                                       d_B, d_B_RowIndices, d_B_ColIndices, descrA, nnzA, d_A, d_A_RowIndices, d_A_ColIndices, descrC,
                                       d_C, d_C_RowIndices, d_C_ColIndices));
 
-    cusparseSafeCall(cusparseDcsr2dense(handle, m, p, descrC, d_C, d_C_RowIndices, d_C_ColIndices, d_C_dense, N));
+    cusparseSafeCall(cusparseDcsr2dense(handle, m, p, descrC, d_C, d_C_RowIndices, d_C_ColIndices, d_C_dense, m));
 
     gpuErrchk(cudaMemcpy(h_C, d_C, nnzC * sizeof(*h_C), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaMemcpy(h_C_RowIndices, d_C_RowIndices, (m + 1) * sizeof(*h_C_RowIndices), cudaMemcpyDeviceToHost));
@@ -153,6 +153,36 @@ void cusparse_mm_wrapper(double *h_A_val, int *h_A_colind, int *h_A_rowptr,
             printf("%f \t", h_C_dense[i * m + j]);
         printf("\n");
     }
+
+    free(h_C_dense);
+    gpuErrchk(cudaFree(h_B_dense));
+    gpuErrchk(cudaFree(h_C_dense));
+
+    gpuErrchk(cudaFree(d_nnzPerVectorB));
+    free(h_nnzPerVectorB);
+
+    gpuErrchk(cudaFree(d_A));
+    gpuErrchk(cudaFree(d_A_RowIndices));
+    gpuErrchk(cudaFree(d_A_ColIndices));
+
+    gpuErrchk(cudaFree(d_B));
+    gpuErrchk(cudaFree(d_B_RowIndices));
+    gpuErrchk(cudaFree(d_B_ColIndices));
+
+    gpuErrchk(cudaFree(d_C));
+    gpuErrchk(cudaFree(d_C_RowIndices));
+    gpuErrchk(cudaFree(d_C_ColIndices));
+
+    free(h_A_RowIndices);
+    free(h_A_ColIndices);
+
+    free(h_B);
+    free(h_B_RowIndices);
+    free(h_B_ColIndices);
+
+    free(h_C);
+    free(h_C_RowIndices);
+    free(h_C_ColIndices);
 
     return;
 }
@@ -206,6 +236,17 @@ void dense_to_csr(double *h_A_dense, const int Nrows, const int Ncols, double *h
     h_A_rowptr = h_A_RowIndices;
     h_A_colind = h_A_ColIndices;
 
+    free(h_A);
+    free(h_A_RowIndices);
+    free(h_A_ColIndices);
+
+    gpuErrchk(cudaFree(d_nnzPerVectorB));
+    free(h_nnzPerVectorB);
+
+    gpuErrchk(cudaFree(d_A));
+    gpuErrchk(cudaFree(d_A_RowIndices));
+    gpuErrchk(cudaFree(d_A_ColIndices));
+
     return;
 }
 
@@ -255,6 +296,9 @@ int main()
     cusparse_mm_wrapper(h_A_val, h_A_colind, h_A_rowptr,
                         nnzA, h_A_rowptr_size,
                         h_B_dense, h_B_rows, h_B_cols);
+
+    free(h_A_dense);
+    free(h_B_dense);
 }
 
 #endif // __CUSPARSE_MM_KERNEL_H__
