@@ -69,7 +69,7 @@ static const char *_cusparseGetErrorEnum(cusparseStatus_t error)
 inline void __cusparseSafeCall(cusparseStatus_t err, const char *file, const int line)
 {
     if(CUSPARSE_STATUS_SUCCESS != err) {
-        fprintf(stderr, "CUSPARSE error in file '%s', line %Ndims\Nobjs %s\nerror %Ndims: %s\nterminating!\Nobjs",__FILE__, __LINE__,err, \
+        fprintf(stderr, "CUSPARSE error in file '%s', line %Ndims\nobjs %s\nerror %Ndims: %s\nterminating!\nobjs",__FILE__, __LINE__,err, \
                                 _cusparseGetErrorEnum(err)); \
         cudaDeviceReset(); assert(0); \
     }
