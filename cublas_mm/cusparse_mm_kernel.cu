@@ -20,8 +20,8 @@
 // note: row_ind.len = lda + 1
 
 void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
-                        int nnzA, int h_A_rowptr_size,
-                        double *h_B_dense, int h_B_rows, int h_B_cols)
+                         int nnzA, int h_A_rowptr_size,
+                         double *h_B_dense, int h_B_rows, int h_B_cols)
 {
     // Initialize cuSPARSE
     cusparseHandle_t handle;
@@ -57,7 +57,6 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
     cusparseSafeCall(cusparseSetMatType(descrC, CUSPARSE_MATRIX_TYPE_GENERAL));
     cusparseSafeCall(cusparseSetMatIndexBase(descrC, CUSPARSE_INDEX_BASE_ONE));
 
-
     int nnzB = 0; //   Number of nonzero elements in dense matrix B
     // Device side number of nonzero elements per row of matrix B
     int *d_nnzPerVectorB;
@@ -67,19 +66,17 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
     int *h_nnzPerVectorB = (int *)malloc(k * sizeof(*h_nnzPerVectorB));
     gpuErrchk(cudaMemcpy(h_nnzPerVectorB, d_nnzPerVectorB, k * sizeof(*h_nnzPerVectorB), cudaMemcpyDeviceToHost));
 
-
     // Device side sparse matrix A
     double *d_A;
     gpuErrchk(cudaMalloc(&d_A, nnzA * sizeof(*d_A)));
     int *d_A_RowIndices;
-    gpuErrchk(cudaMalloc(&d_A_RowIndices, h_A_rowptr_size * sizeof(*d_A_RowIndices)));
+    gpuErrchk(cudaMalloc(&d_A_RowIndices, (m + 1) * sizeof(*d_A_RowIndices)));
     int *d_A_ColIndices;
     gpuErrchk(cudaMalloc(&d_A_ColIndices, nnzA * sizeof(*d_A_ColIndices)));
     // Copy A from host to device
     cudaMemcpy(d_A, h_A, nnzA * sizeof(*d_A), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_A_RowIndices, h_A_RowIndices, h_A_rowptr_size * sizeof(*d_A_RowIndices), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A_RowIndices, h_A_RowIndices, (m + 1) * sizeof(*d_A_RowIndices), cudaMemcpyHostToDevice);
     cudaMemcpy(d_A_ColIndices, h_A_ColIndices, nnzA * sizeof(*d_A_ColIndices), cudaMemcpyHostToDevice);
-
 
     // Device side sparse matrix B
     double *d_B;
@@ -104,7 +101,6 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
     int *d_C_RowIndices;
     gpuErrchk(cudaMalloc(&d_C_RowIndices, (m + 1) * sizeof(*d_C_RowIndices)));
 
-
     // Performing the matrix - matrix multiplication
     int baseC, nnzC = 0;
     // nnzTotalDevHostPtr points to host memory
@@ -123,7 +119,7 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
         cudaMemcpy(&baseC, d_C_RowIndices, sizeof(int), cudaMemcpyDeviceToHost);
         nnzC -= baseC;
     }
-    
+
     // device side sparse matrix C
     double *d_C;
     gpuErrchk(cudaMalloc(&d_C, nnzC * sizeof(double)));
@@ -269,6 +265,14 @@ int main()
     // https://stackoverflow.com/questions/1106957/passing-an-array-by-reference-in-c
     dense_to_csr(h_A_dense, h_A_rows, h_A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
 
+    for (int i = 0; i < nnzA; i++) {
+        h_A_colind[i] += 1;
+    }
+
+    for (int i = 0; i < h_A_rowptr_size; i++) {
+        h_A_rowptr[i] += 1;
+    }
+
     int h_B_rows = 4;
     int h_B_cols = 2;
     double *h_B_dense = (double *)malloc(h_B_rows * h_B_cols * sizeof(*h_B_dense));
@@ -294,7 +298,6 @@ int main()
     // 26  4
     // 15  8
     // 40 24
-    
 }
 
 #endif // __CUSPARSE_MM_KERNEL_H__
