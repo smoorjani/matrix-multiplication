@@ -42,9 +42,9 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols, float *h_B, int h
 	float beta = 0.0;
 	status = cublasSgemm(
         handle, CUBLAS_OP_N, CUBLAS_OP_N,
-        m, n, k, alpha,
+        m, n, k, &alpha,
         d_A, m, 
-        d_B, n, beta,
+        d_B, k, &beta,
         d_C, m
     );
 
