@@ -7,10 +7,10 @@ python3 setup.py install
 '''
 
 setup(
-    name='cublas_mm',
+    name='custom_mm',
     ext_modules=[
-        CUDAExtension('cublas_mm', [
-            'cublas_mm.cpp',
+        CUDAExtension('custom_mm', [
+            'custom_mm.cpp',
 #            'cublas_mm_kernel.cu',
         ])
     ],
