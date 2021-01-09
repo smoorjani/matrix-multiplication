@@ -69,10 +69,10 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
   int B_cols = B.size(1);
 
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
-  int C_rows = C.size(0);
-  int C_cols = C.size(1);
+  // int C_rows = C.size(0);
+  // int C_cols = C.size(1);
 
-  float *C_arr = C.data_ptr<float>();
+  // float *C_arr = C.data_ptr<float>();
 
   cublas_mm_wrapper(A_arr, A_rows, A_cols, B_arr, B_rows, B_cols);
 
@@ -86,8 +86,8 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
   // the current
 
   // convert to double
-  float *A_arr = A.data_ptr<float>();
-  float *B_arr = B.data_ptr<float>();
+  double *A_arr = A.data_ptr<double>();
+  double *B_arr = B.data_ptr<double>();
 
   int A_rows = A.size(0);
   int A_cols = A.size(1);
@@ -95,10 +95,10 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
   int B_cols = B.size(1);
 
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
-  int C_rows = C.size(0);
-  int C_cols = C.size(1);
+  // int C_rows = C.size(0);
+  // int C_cols = C.size(1);
 
-  float *C_arr = C.data_ptr<float>();
+  // double *C_arr = C.data_ptr<double>();
 
   double *h_A_val = nullptr;
   int *h_A_colind = nullptr;
