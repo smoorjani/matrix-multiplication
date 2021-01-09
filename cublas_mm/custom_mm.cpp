@@ -85,7 +85,7 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
   // torch passes in with column major
   // the current
 
-  // convert to double
+  // convert to float
   float *A_arr = A.data_ptr<float>();
   float *B_arr = B.data_ptr<float>();
 
@@ -100,7 +100,7 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
 
   float *C_arr = C.data_ptr<float>();
 
-  double *h_A_val = nullptr;
+  float *h_A_val = nullptr;
   int *h_A_colind = nullptr;
   int *h_A_rowptr = nullptr;
   int nnzA = 0;
