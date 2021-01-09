@@ -1,11 +1,7 @@
 #ifndef __CUSPARSE_MM_KERNEL_H__
 #define __CUSPARSE_MM_KERNEL_H__
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
-#include <assert.h>
-
 #include "Utilities.cuh"
 
 #include <cuda_runtime.h>
@@ -235,6 +231,7 @@ void dense_to_csr(double *h_A_dense, const int Nrows, const int Ncols, double **
     return;
 }
 
+/*
 int main()
 {
     // (3 x 4) x (4 x 2) = 3 x 2
@@ -299,5 +296,6 @@ int main()
     // 15  8
     // 40 24
 }
+*/
 
 #endif // __CUSPARSE_MM_KERNEL_H__

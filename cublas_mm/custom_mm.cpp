@@ -5,8 +5,8 @@
 
 #include <torch/extension.h>
 #include "custom_mm_kernel.h"
-#include "cusparse_mm_kernel.cu"
-#include "cublas_mm_kernel.cu"
+#include "cusparse_mm_kernel.h"
+#include "cublas_mm_kernel.h"
 
 torch::Tensor row_major_mmul(torch::Tensor A, torch::Tensor B)
 {
@@ -85,6 +85,7 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
   // torch passes in with column major
   // the current
 
+  // convert to double
   float *A_arr = A.data_ptr<float>();
   float *B_arr = B.data_ptr<float>();
 
@@ -107,8 +108,8 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
 
   dense_to_csr(A_arr, A_rows, A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
 
-  cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
-                      int nnzA, int h_A_rowptr_size, B_arr, B_rows, B_cols);
+  cusparse_mm_wrapper(h_A_val, h_A_colind, h_A_rowptr,
+                      nnzA, h_A_rowptr_size, B_arr, B_rows, B_cols);
 
   // TODO: fill values of C in
   return C;
