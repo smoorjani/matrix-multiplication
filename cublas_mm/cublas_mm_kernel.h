@@ -7,7 +7,9 @@
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 
-void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols, float *h_B, int h_B_rows, int h_B_cols)
+void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
+                       float *h_B, int h_B_rows, int h_B_cols,
+                       float *h_C)
 {
     const int m = h_A_rows;
     const int k = h_A_cols;

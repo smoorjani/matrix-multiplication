@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-import cublas_mm
+import custom_mm
 
 from torch.autograd.function import InplaceFunction
 
@@ -17,7 +17,7 @@ class cublasMM(InplaceFunction):
         # swap around for col-major call
         # where row major is expected
         ctx.save_for_backward(m1, m2)
-        return cublas_mm.mmul(m2.t(), m1.t()).t()
+        return custom_mm.mmul(m2.t(), m1.t()).t()
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -26,10 +26,10 @@ class cublasMM(InplaceFunction):
 
         if ctx.needs_input_grad[0]:
             # m2 = m2.t().t()
-            grad_m1 = cublas_mm.mmul(m2, grad_output.t()).t()
+            grad_m1 = custom_mm.mmul(m2, grad_output.t()).t()
         
         if ctx.needs_input_grad[1]:
-            grad_m2 = cublas_mm.mmul(grad_output.t(), m1).t()
+            grad_m2 = custom_mm.mmul(grad_output.t(), m1).t()
         
         return grad_m1, grad_m2
 
@@ -74,4 +74,3 @@ class cublasLinear(nn.Module):
         return 'in_features={}, out_features={}, bias={}'.format(
             self.in_features, self.out_features, self.bias is not None
         )
-
