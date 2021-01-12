@@ -79,22 +79,15 @@ torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
   float *C_arr = C.data_ptr<float>();
 
   cublas_mm_wrapper(A_arr, A_rows, A_cols, B_arr, B_rows, B_cols, C_arr);
-  auto accessor = C.accessor<float,2>();
+  auto accessor = C.accessor<float, 2>();
 
-  for (int i = 0; i < C_rows; i++) {
-    for (int j = 0; j < C_cols; j++) {
-      accessor[i][j] = C_arr[i * C_rows + j];
-    }
-  }
-
-  /*
   for (int i = 0; i < C_rows; i++)
   {
     for (int j = 0; j < C_cols; j++)
-      printf("%f \t", C_arr[i * C_rows + j]);
-    printf("\n");
+    {
+      accessor[i][j] = C_arr[i * C_rows + j];
+    }
   }
-  */
 
   return C;
 }
@@ -114,10 +107,10 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
   int B_cols = B.size(1);
 
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
-  // int C_rows = C.size(0);
-  // int C_cols = C.size(1);
+  int C_rows = C.size(0);
+  int C_cols = C.size(1);
 
-  // double *C_arr = C.data_ptr<double>();
+  double *C_arr = C.data_ptr<double>();
 
   double *h_A_val = nullptr;
   int *h_A_colind = nullptr;
@@ -127,10 +120,28 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
 
   dense_to_csr(A_arr, A_rows, A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
 
-  cusparse_mm_wrapper(h_A_val, h_A_colind, h_A_rowptr,
-                      nnzA, h_A_rowptr_size, B_arr, B_rows, B_cols);
+  cusparse_mm_wrapper(h_A_val, h_A_colind, h_A_rowptr, nnzA,
+                      h_A_rowptr_size, B_arr, B_rows, B_cols, C_arr);
 
-  // TODO: fill values of C in
+  auto accessor = C.accessor<double, 2>();
+
+  for (int i = 0; i < C_rows; i++)
+  {
+    for (int j = 0; j < C_cols; j++)
+    {
+      accessor[i][j] = C_arr[i * C_rows + j];
+    }
+  }
+
+  /*
+  for (int i = 0; i < C_rows; i++)
+  {
+    for (int j = 0; j < C_cols; j++)
+      printf("%f \t", C_arr[i * C_rows + j]);
+    printf("\n");
+  }
+  */
+
   return C;
 }
 

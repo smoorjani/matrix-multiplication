@@ -17,7 +17,8 @@
 
 void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
                          int nnzA, int h_A_rowptr_size,
-                         double *h_B_dense, int h_B_rows, int h_B_cols)
+                         double *h_B_dense, int h_B_rows, int h_B_cols,
+                         double *h_C_dense)
 {
     // Initialize cuSPARSE
     cusparseHandle_t handle;
@@ -27,7 +28,7 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
     const int n = h_B_cols;
 
     // Host side dense matrices
-    double *h_C_dense = (double *)malloc(m * n * sizeof(*h_C_dense));
+    //double *h_C_dense = (double *)malloc(m * n * sizeof(*h_C_dense));
     // Create device arrays and copy host arrays to them
     double *d_B_dense;
     gpuErrchk(cudaMalloc(&d_B_dense, k * n * sizeof(*d_B_dense)));
@@ -145,7 +146,7 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
         printf("\n");
     }
 
-    free(h_C_dense);
+    // free(h_C_dense);
     cudaFree(h_B_dense);
     cudaFree(h_C_dense);
 
