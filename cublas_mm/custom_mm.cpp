@@ -55,7 +55,7 @@ torch::Tensor torch_mmul(torch::Tensor A, torch::Tensor B)
   return C;
 }
 
-torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
+torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
 {
   // torch passes in with column major
   // the current
@@ -78,17 +78,24 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
 
   float *C_arr = C.data_ptr<float>();
 
-  cublas_mm_wrapper(B_arr, B_rows, B_cols, A_arr, A_rows, A_cols, C_arr);
-  C = torch::transpose(C, 0, 1);
+  cublas_mm_wrapper(A_arr, A_rows, A_cols, B_arr, B_rows, B_cols, C_arr);
+  auto accessor = C.accessor<float,2>();
 
-  for (int j = 0; j < C_rows; j++)
-  {
-    for (int i = 0; i < C_cols; i++)
-      printf("%f \t", C_arr[i * m + j]);
-    printf("\n");
+  for (int i = 0; i < C_rows; i++) {
+    for (int j = 0; j < C_cols; j++) {
+      accessor[i][j] = C_arr[i * C_rows + j];
+    }
   }
 
-  // TODO: fill values of C in
+  /*
+  for (int i = 0; i < C_rows; i++)
+  {
+    for (int j = 0; j < C_cols; j++)
+      printf("%f \t", C_arr[i * C_rows + j]);
+    printf("\n");
+  }
+  */
+
   return C;
 }
 

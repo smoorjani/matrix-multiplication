@@ -5,7 +5,7 @@ a = torch.rand(4,4)
 b = torch.rand(4,4)
 print(a, b)
 
-c = custom_mm.mmul(a,b)
-print('output:', c)
 print('expected:', torch.matmul(a,b))
 
+#print('output:', custom_mm.cublas_mmul(b,a))
+print('output:', custom_mm.cublas_mmul(a,b))

@@ -17,7 +17,7 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
 
     int h_C_rows = h_A_rows;
     int h_C_cols = h_B_cols;
-    float *h_C = (float *)malloc(h_C_rows * h_C_cols * sizeof(*h_C));
+    //float *h_C = (float *)malloc(h_C_rows * h_C_cols * sizeof(*h_C));
 
     if (h_A_cols != h_B_rows)
     {
