@@ -72,7 +72,7 @@ torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
   int B_rows = B_tensor.size(0);
   int B_cols = B_tensor.size(1);
 
-  torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
+  torch::Tensor C = torch::zeros({B_cols, A_rows}, torch::kFloat32);
   int C_rows = C.size(0);
   int C_cols = C.size(1);
 
@@ -85,7 +85,7 @@ torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
   {
     for (int j = 0; j < C_cols; j++)
     {
-      accessor[i][j] = C_arr[i * C_rows + j];
+      accessor[i][j] = C_arr[i * C_cols + j];
     }
   }
 

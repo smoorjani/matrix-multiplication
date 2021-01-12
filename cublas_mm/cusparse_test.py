@@ -12,21 +12,6 @@ print('ours: ', custom_mm.cublas_mmul(a,b))
 
 n = 100
 n_vals = 10
-'''
-a_vals = torch.randn(n_vals)
-a_rowind = torch.randint(high=n, size=(n_vals,))
-a_colind = torch.randint(high=n, size=(n_vals,))
-
-
-b_vals = torch.randn(n_vals)
-b_rowind = torch.randint(high=n, size=(n_vals,))
-b_colind = torch.randint(high=n, size=(n_vals,))
-
-_a = torch.sparse.FloatTensor(a_ind.unsqueeze(0), a_vals, (n,n))
-a = _a.to_dense()
-_b = torch.sparse.FloatTensor(b_ind.unsqueeze(0), b_vals, (n,n))
-b = _b.to_dense()
-'''
 
 a = torch.zeros(n,n,dtype=torch.double)
 b = torch.zeros(n,n,dtype=torch.double)
@@ -57,7 +42,10 @@ b = sparsify(b, b_coords, n)
 exp = a@b
 our = custom_mm.cusparse_mmul(a,b)
 
-print(torch.nonzero(torch.subtract(exp, our)))
+diff = torch.nonzero(torch.subtract(exp, our))
+
+for x, y in diff:
+    print(exp[x][y], our[x][y])
 
 print('expected: ', a@b)
 print('ours(sparse): ', our) 
