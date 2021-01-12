@@ -106,7 +106,7 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
   int B_rows = B.size(0);
   int B_cols = B.size(1);
 
-  torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
+  torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kDouble);
   int C_rows = C.size(0);
   int C_cols = C.size(1);
 
