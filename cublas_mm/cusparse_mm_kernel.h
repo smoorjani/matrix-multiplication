@@ -139,12 +139,14 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
 
     gpuErrchk(cudaMemcpy(h_C_dense, d_C_dense, m * n * sizeof(double), cudaMemcpyDeviceToHost));
 
+    /*
     for (int j = 0; j < m; j++)
     {
         for (int i = 0; i < n; i++)
             printf("%f \t", h_C_dense[i * m + j]);
         printf("\n");
     }
+    */
 
     // free(h_C_dense);
     cudaFree(h_B_dense);

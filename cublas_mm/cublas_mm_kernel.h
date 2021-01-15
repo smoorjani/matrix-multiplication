@@ -60,12 +60,14 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
         std::cerr << "Shutdown error!";
     }
 
+    /*
     for (int j = 0; j < m; j++)
     {
         for (int i = 0; i < n; i++)
             printf("%f \t", h_C[i * m + j]);
         printf("\n");
     }
+    */
 
     cudaFree(d_A);
     cudaFree(d_B);
