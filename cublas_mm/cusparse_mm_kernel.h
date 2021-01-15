@@ -86,13 +86,31 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
     cusparseSafeCall(cusparseDdense2csr(handle, k, n, descrB, d_B_dense, k, d_nnzPerVectorB, d_B, d_B_RowIndices, d_B_ColIndices));
 
     // Move sparse B from device to host
-    // double *h_B = (double *)malloc(nnzB * sizeof(*h_B));
-    // int *h_B_ColIndices = (int *)malloc(nnzB * sizeof(*h_B_ColIndices));
-    // int *h_B_RowIndices = (int *)malloc((k + 1) * sizeof(*h_B_RowIndices));
+    double *h_B = (double *)malloc(nnzB * sizeof(*h_B));
+    int *h_B_ColIndices = (int *)malloc(nnzB * sizeof(*h_B_ColIndices));
+    int *h_B_RowIndices = (int *)malloc((k + 1) * sizeof(*h_B_RowIndices));
 
-    // gpuErrchk(cudaMemcpy(h_B, d_B, nnzB * sizeof(*h_B), cudaMemcpyDeviceToHost));
-    // gpuErrchk(cudaMemcpy(h_B_RowIndices, d_B_RowIndices, (k + 1) * sizeof(*h_B_RowIndices), cudaMemcpyDeviceToHost));
-    // gpuErrchk(cudaMemcpy(h_B_ColIndices, d_B_ColIndices, nnzB * sizeof(*h_B_ColIndices), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(h_B, d_B, nnzB * sizeof(*h_B), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(h_B_RowIndices, d_B_RowIndices, (k + 1) * sizeof(*h_B_RowIndices), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(h_B_ColIndices, d_B_ColIndices, nnzB * sizeof(*h_B_ColIndices), cudaMemcpyDeviceToHost));
+
+    /*
+    for (int i = 0; i < nnzB; i++) {
+	std::cout << h_B[i] << " ";
+    }
+    std::cout << std::endl;
+
+    
+    for (int i = 0; i < nnzB; i++) {
+	std::cout << h_B_ColIndices[i] << " ";
+    }
+    std::cout << std::endl;
+ 
+    for (int i = 0; i < k+1; i++) {
+	std::cout << h_B_RowIndices[i] << " ";
+    }
+    std::cout << std::endl;
+    */
 
     // Device side sparse matrix C
     int *d_C_RowIndices;

@@ -3,18 +3,8 @@ import random
 import custom_mm
 import numpy as np
 
-a = torch.randn(5,4)
-b = torch.randn(4,3)
-
-print('expected: ', a@b)
-print('ours: ', custom_mm.cublas_mmul(a,b))
-
-
-n = 100
+n = 10
 n_vals = 10
-
-a = torch.zeros(n,n,dtype=torch.double)
-b = torch.zeros(n,n,dtype=torch.double)
 
 def gen_coords(num_vals, dim):
     coords = set()
@@ -29,23 +19,40 @@ def gen_coords(num_vals, dim):
 a_coords = gen_coords(n_vals, n)
 b_coords = gen_coords(n_vals, n)
 
-def sparsify(mat, coords, dim):
+def sparsify(coords, dim):
+    mat = torch.zeros(n,n,dtype=torch.double)
     for x in range(0, dim):
         for y in range(0, dim):
             if (x,y) in coords:
                 mat[x][y] = random.random()
     return mat
 
-a = sparsify(a, a_coords, n)
-b = sparsify(b, b_coords, n)
+a = sparsify(a_coords, n)
+b = sparsify(b_coords, n)
+
+print('a: ', a)
+print('b: ', b)
 
 exp = a@b
 our = custom_mm.cusparse_mmul(a,b)
 
 diff = torch.nonzero(torch.subtract(exp, our))
 
+print('# nonzero in exp:', torch.nonzero(exp).shape)
+print('# nonzero in ours:', torch.nonzero(our).shape)
+
 for x, y in diff:
     print(exp[x][y], our[x][y])
 
-print('expected: ', a@b)
-print('ours(sparse): ', our) 
+print('expected: ', exp)
+print('ours(sparse): ', our)
+'''
+print('test: ', a.t() @ b)
+print('test2: ', a @ b.t())
+print('test3: ', a.t() @ b.t())
+print('test4: ', b @ a)
+
+print('test5: ', b.t() @ a)
+print('test6: ', b @ a.t())
+print('test7: ', b.t() @ a.t())
+'''
