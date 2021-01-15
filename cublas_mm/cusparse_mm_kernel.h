@@ -94,24 +94,6 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
     gpuErrchk(cudaMemcpy(h_B_RowIndices, d_B_RowIndices, (k + 1) * sizeof(*h_B_RowIndices), cudaMemcpyDeviceToHost));
     gpuErrchk(cudaMemcpy(h_B_ColIndices, d_B_ColIndices, nnzB * sizeof(*h_B_ColIndices), cudaMemcpyDeviceToHost));
 
-    /*
-    for (int i = 0; i < nnzB; i++) {
-	std::cout << h_B[i] << " ";
-    }
-    std::cout << std::endl;
-
-    
-    for (int i = 0; i < nnzB; i++) {
-	std::cout << h_B_ColIndices[i] << " ";
-    }
-    std::cout << std::endl;
- 
-    for (int i = 0; i < k+1; i++) {
-	std::cout << h_B_RowIndices[i] << " ";
-    }
-    std::cout << std::endl;
-    */
-
     // Device side sparse matrix C
     int *d_C_RowIndices;
     gpuErrchk(cudaMalloc(&d_C_RowIndices, (m + 1) * sizeof(*d_C_RowIndices)));
@@ -249,72 +231,5 @@ void dense_to_csr(double *h_A_dense, const int Nrows, const int Ncols, double **
 
     return;
 }
-
-/*
-int main()
-{
-    // (3 x 4) x (4 x 2) = 3 x 2
-    int h_A_rows = 3;
-    int h_A_cols = 4;
-    double *h_A_dense = (double *)malloc(h_A_rows * h_A_cols * sizeof(*h_A_dense));
-
-    // Column-major ordering
-    h_A_dense[0] = 1.0f;
-    h_A_dense[1] = 0.0f;
-    h_A_dense[2] = 5.0f;
-    h_A_dense[3] = 0.0f;
-    h_A_dense[4] = 4.0f;
-    h_A_dense[5] = 2.0f;
-    h_A_dense[6] = 5.0f;
-    h_A_dense[7] = 3.0f;
-    h_A_dense[8] = 7.0f;
-    h_A_dense[9] = 1.0f;
-    h_A_dense[10] = 2.0f;
-    h_A_dense[11] = 9.0f;
-
-    double *h_A_val = nullptr;
-    int *h_A_colind = nullptr;
-    int *h_A_rowptr = nullptr;
-    int nnzA = 0;
-    int h_A_rowptr_size = h_A_rows + 1;
-
-    // https://stackoverflow.com/questions/1106957/passing-an-array-by-reference-in-c
-    dense_to_csr(h_A_dense, h_A_rows, h_A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
-
-    for (int i = 0; i < nnzA; i++) {
-        h_A_colind[i] += 1;
-    }
-
-    for (int i = 0; i < h_A_rowptr_size; i++) {
-        h_A_rowptr[i] += 1;
-    }
-
-    int h_B_rows = 4;
-    int h_B_cols = 2;
-    double *h_B_dense = (double *)malloc(h_B_rows * h_B_cols * sizeof(*h_B_dense));
-
-    // Column-major ordering
-    h_B_dense[0] = 1.0f;
-    h_B_dense[1] = 0.0f;
-    h_B_dense[2] = 5.0f;
-    h_B_dense[3] = 0.0f;
-    h_B_dense[4] = 4.0f;
-    h_B_dense[5] = 2.0f;
-    h_B_dense[6] = 0.0f;
-    h_B_dense[7] = 0.0f;
-
-    cusparse_mm_wrapper(h_A_val, h_A_colind, h_A_rowptr,
-                        nnzA, h_A_rowptr_size,
-                        h_B_dense, h_B_rows, h_B_cols);
-
-    free(h_A_dense);
-    free(h_B_dense);
-
-    // expected
-    // 26  4
-    // 15  8
-    // 40 24
-}
-*/
 
 #endif // __CUSPARSE_MM_KERNEL_H__

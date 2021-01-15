@@ -99,7 +99,7 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
 
   auto A_tensor = torch::transpose(A, 0, 1);
   auto B_tensor = torch::transpose(B, 0, 1);
-  
+
   // convert to double
   double *A_arr = A_tensor.data_ptr<double>();
   double *B_arr = B_tensor.data_ptr<double>();
@@ -123,25 +123,15 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
 
   dense_to_csr(A_arr, A_rows, A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
 
-  /*
-  for (int i = 0; i < nnzA; i++) {
-    std::cout << h_A_val[i] << " ";
-  }
-  std::cout << std::endl;
-
-  */
-
-  for (int i = 0; i < nnzA; i++) {
-    //std::cout << h_A_colind[i] << " ";
+  for (int i = 0; i < nnzA; i++)
+  {
     h_A_colind[i] += 1;
   }
-  //std::cout << std::endl;
 
-  for (int i = 0; i < h_A_rowptr_size; i++) {
-    //std::cout << h_A_rowptr[i] << " ";
+  for (int i = 0; i < h_A_rowptr_size; i++)
+  {
     h_A_rowptr[i] += 1;
   }
-  //std::cout << std::endl;
 
   cusparse_mm_wrapper(h_A_val, h_A_colind, h_A_rowptr, nnzA,
                       h_A_rowptr_size, B_arr, B_rows, B_cols, C_arr);
@@ -155,15 +145,6 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
       accessor[i][j] = C_arr[i * C_rows + j];
     }
   }
-
-  /*
-  for (int i = 0; i < C_rows; i++)
-  {
-    for (int j = 0; j < C_cols; j++)
-      printf("%f \t", C_arr[i * C_rows + j]);
-    printf("\n");
-  }
-  */
 
   return C;
 }

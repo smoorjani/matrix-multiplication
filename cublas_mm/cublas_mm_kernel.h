@@ -17,7 +17,6 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
 
     int h_C_rows = h_A_rows;
     int h_C_cols = h_B_cols;
-    //float *h_C = (float *)malloc(h_C_rows * h_C_cols * sizeof(*h_C));
 
     if (h_A_cols != h_B_rows)
     {
@@ -72,54 +71,5 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
     cudaFree(d_B);
     cudaFree(d_C);
 }
-
-/*
-int main()
-{
-    // (3 x 4) x (4 x 2) = 3 x 2
-    int h_A_rows = 3;
-    int h_A_cols = 4;
-    float *h_A = (float *)malloc(h_A_rows * h_A_cols * sizeof(*h_A));
-
-    // Column-major ordering
-    h_A[0] = 1.0f;
-    h_A[1] = 0.0f;
-    h_A[2] = 5.0f;
-    h_A[3] = 0.0f;
-    h_A[4] = 4.0f;
-    h_A[5] = 2.0f;
-    h_A[6] = 5.0f;
-    h_A[7] = 3.0f;
-    h_A[8] = 7.0f;
-    h_A[9] = 1.0f;
-    h_A[10] = 2.0f;
-    h_A[11] = 9.0f;
-
-
-    int h_B_rows = 4;
-    int h_B_cols = 2;
-    float *h_B = (float *)malloc(h_B_rows * h_B_cols * sizeof(*h_B));
-
-    // Column-major ordering
-    h_B[0] = 1.0f;
-    h_B[1] = 0.0f;
-    h_B[2] = 5.0f;
-    h_B[3] = 0.0f;
-    h_B[4] = 4.0f;
-    h_B[5] = 2.0f;
-    h_B[6] = 0.0f;
-    h_B[7] = 0.0f;
-
-    cublas_mm_wrapper(h_A, h_A_rows, h_A_cols, h_B, h_B_rows, h_B_cols);
-
-    free(h_A);
-    free(h_B);
-
-    // expected
-    // 26  4
-    // 15  8
-    // 40 24
-}
-*/
 
 #endif // __CUBLAS_MM_KERNEL_H__
