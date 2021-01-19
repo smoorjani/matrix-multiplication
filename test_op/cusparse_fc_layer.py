@@ -10,7 +10,7 @@ https://cs231n.github.io/optimization-2/#mat
 https://gist.github.com/anonymous/49c10bc17ac4a97307d52c07d01a2870
 '''
 
-class cublasMM(InplaceFunction):
+class cusparseMM(InplaceFunction):
 
     @staticmethod
     def forward(ctx, m1, m2):
@@ -33,9 +33,9 @@ class cublasMM(InplaceFunction):
         
         return grad_m1, grad_m2
 
-class cublasLinear(nn.Module):
+class cusparseLinear(nn.Module):
     def __init__(self, in_features, out_features, bias=True):
-        super(cublasLinear, self).__init__()
+        super(cusparseLinear, self).__init__()
         torch.manual_seed(0)
         
         self.in_features = in_features
@@ -62,7 +62,7 @@ class cublasLinear(nn.Module):
         if y != self.in_features:
             print('Invalid dimensions')
             return 0
-        t = cublasMM.apply(inp, self.weight.t())
+        t = cusparseMM.apply(inp, self.weight.t())
         output = t.clone()
 
         if self.bias is not None:

@@ -17,6 +17,7 @@ from torchvision import datasets, transforms
 
 from cublas_fc_layer import cublasLinear
 from regular_fc_layer import regLinear
+from cusparse_fc_layer import cusparseLinear
 
 # Seed to reproduce results
 np.random.seed(0)
@@ -52,13 +53,24 @@ if random_test:
             x = self.fc1(x)
             return F.log_softmax(x)
 
+    # Cusparse MM operation
+    class cuspNet(nn.Module):
+        def __init__(self):
+            super(cuspNet, self).__init__()
+            self.fc1 = cusparseLinear(layer_size*layer_size,10)
+
+        def forward(self, x):
+            x = self.fc1(x)
+            return F.log_softmax(x)
+
     reg_net = regNet()
     cub_net = cubNet()
+    cusp_net = cuspNet()
 
     data = torch.rand(layer_size,layer_size).view(-1,layer_size*layer_size)
 
 
-    for net in [reg_net, cub_net]:
+    for net in [reg_net, cub_net, cusp_net]:
         # Load in MNIST data
 
         print('\n====Initial Parameters=====\n')
@@ -102,11 +114,23 @@ else:
         def forward(self, x):
             x = self.fc1(x)
             return F.log_softmax(x)
+    
+    # Cusparse MM operation
+    class cuspNet(nn.Module):
+        def __init__(self):
+            super(cuspNet, self).__init__()
+            self.fc1 = cusparseLinear(layer_size*layer_size,10)
+
+        def forward(self, x):
+            x = self.fc1(x)
+            return F.log_softmax(x)
+
 
     reg_net = regNet()
     cub_net = cubNet()
+    cusp_net = cuspNet()
 
-    for net in [reg_net, cub_net]:
+    for net in [reg_net, cub_net, cusp_net]:
         print('\n====Initial Parameters=====\n')
         for param in net.parameters():
             print(param)
