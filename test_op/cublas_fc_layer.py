@@ -1,37 +1,12 @@
 import math
 import torch
 import torch.nn as nn
-import custom_mm
-
-from torch.autograd.function import InplaceFunction
+from .matmuls import cublasMM
 
 '''
 https://cs231n.github.io/optimization-2/#mat
 https://gist.github.com/anonymous/49c10bc17ac4a97307d52c07d01a2870
 '''
-
-class cublasMM(InplaceFunction):
-
-    @staticmethod
-    def forward(ctx, m1, m2):
-        # swap around for col-major call
-        # where row major is expected
-        ctx.save_for_backward(m1, m2)
-        return custom_mm.cublas_mmul(m2.t(), m1.t()).t()
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        m1, m2 = ctx.saved_variables
-        grad_m1 = grad_m2 = None
-
-        if ctx.needs_input_grad[0]:
-            # m2 = m2.t().t()
-            grad_m1 = custom_mm.cublas_mmul(m2, grad_output.t()).t()
-        
-        if ctx.needs_input_grad[1]:
-            grad_m2 = custom_mm.cublas_mmul(grad_output.t(), m1).t()
-        
-        return grad_m1, grad_m2
 
 class cublasLinear(nn.Module):
     def __init__(self, in_features, out_features, bias=True):
