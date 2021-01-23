@@ -6,21 +6,29 @@ import custom_mm
 
 
 def cublas_matmul(a, b):
-    if len(a.shape) >= 3 and b.shape >= 2:
-        c = torch.zeros(a.shape[0], a.shape[1], b.shape[2])
-        for i in range(len(a.shape[0])):
-            c[i] = custom_mm.cublas_mmul(b.t(), a[i].t()).t()
-        return c
+    if len(a.shape) >= 3 and len(b.shape) >= 2:
+
+        return torch.stack([custom_mm.cublas_mmul(b.t(), a[i].t()).t()
+                            for i in range(a.shape[0])])
+
+        # c = torch.zeros(a.shape[0], a.shape[1], b.shape[1])
+        # for i in range(a.shape[0]):
+        #     c[i] = custom_mm.cublas_mmul(b.t(), a[i].t()).t()
+        # return c
 
     return custom_mm.cublas_mmul(b.t(), a.t()).t()
 
 
 def cusparse_matmul(a, b):
-    if len(a.shape) >= 3 and b.shape >= 2:
-        c = torch.zeros(a.shape[0], a.shape[1], b.shape[2])
-        for i in range(len(a.shape[0])):
-            c[i] = custom_mm.cusparse_mmul(b.t(), a[i].t()).t()
-        return c
+    if len(a.shape) >= 3 and len(b.shape) >= 2:
+
+        return torch.stack([custom_mm.cusparse_mmul(b.t(), a[i].t()).t()
+                            for i in range(a.shape[0])])
+
+        # c = torch.zeros(a.shape[0], a.shape[1], b.shape[1])
+        # for i in range(a.shape[0]):
+        #     c[i] = custom_mm.cusparse_mmul(b.t(), a[i].t()).t()
+        # return c
 
     return custom_mm.cusparse_mmul(b.t(), a.t()).t()
 
