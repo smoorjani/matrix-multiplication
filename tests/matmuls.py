@@ -5,20 +5,57 @@ from torch.autograd.function import InplaceFunction
 import custom_mm
 
 
-def cublas_matmul(a, b):
-    if len(a.shape) >= 3 and len(b.shape) >= 2:
+def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    '''
+    Uses cuBLAS kernel to perform matrix multiplication.
+
+    :param a:
+    :param b: 
+    :returns: Matrix multiplication output
+    '''
+    assert a.shape[-1] == b.shape[0]
+    if len(a.shape) == 1 or len(b.shape) == 1:
+        print('Matrix-vector multiplication is not implemented in cuBLAS')
+        return a @ b
+    # batched matmul (16,768,768) (768,768)
+    # (16*768, 768) (768, 768)
+
+    elif len(a.shape) == 3 and len(b.shape) == 2:
         return torch.stack([custom_mm.cublas_mmul(b.t(), a[i].t()).t()
                             for i in range(a.shape[0])]).cuda()
+    elif len(a.shape) == 2 and len(b.shape) == 3:
+        return torch.stack([custom_mm.cublas_mmul(b[i].t(), a.t()).t()
+                            for i in range(b.shape[0])]).cuda()
+    elif len(a.shape) == 2 and len(b.shape) == 2:
+        return custom_mm.cublas_mmul(b.t(), a.t()).t()
+    else:
+        print('Multiplication with matrix dimensions is not implemented in cuBLAS')
+        return a @ b
 
-    return custom_mm.cublas_mmul(b.t(), a.t()).t()
 
+def cusparse_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    '''
+    Uses cuSPARSE kernel to perform matrix multiplication.
 
-def cusparse_matmul(a, b):
-    if len(a.shape) >= 3 and len(b.shape) >= 2:
+    :param a:
+    :param b: 
+    :returns: Matrix multiplication output
+    '''
+    if len(a.shape) == 1 or len(b.shape) == 1:
+        print('Matrix-vector multiplication is not implemented in cuBLAS')
+        return a @ b
+    # batched matmul
+    elif len(a.shape) == 3 and len(b.shape) == 2:
         return torch.stack([custom_mm.cusparse_mmul(b.t(), a[i].t()).t()
                             for i in range(a.shape[0])]).cuda()
-
-    return custom_mm.cusparse_mmul(b.t(), a.t()).t()
+    elif len(a.shape) == 2 and len(b.shape) == 3:
+        return torch.stack([custom_mm.cusparse_mmul(b[i].t(), a.t()).t()
+                            for i in range(b.shape[0])]).cuda()
+    elif len(a.shape) == 2 and len(b.shape) == 2:
+        return custom_mm.cusparse_mmul(b.t(), a.t()).t()
+    else:
+        print('Multiplication with matrix dimensions is not implemented in cuBLAS')
+        return a @ b
 
 
 class cublasMM(InplaceFunction):
