@@ -7,7 +7,8 @@
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 
-void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
+void cublas_mm_wrapper(cublasHandle_t handle,
+                       float *h_A, int h_A_rows, int h_A_cols,
                        float *h_B, int h_B_rows, int h_B_cols,
                        float *h_C)
 {
@@ -23,12 +24,12 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
         std::cerr << "Invalid dimensions.";
     }
 
-    cublasHandle_t handle;
-    cublasStatus_t status = cublasCreate(&handle);
-    if (status != CUBLAS_STATUS_SUCCESS)
-    {
-        std::cerr << "cuBLAS initialization error.";
-    }
+    // cublasHandle_t handle;
+    // cublasStatus_t status = cublasCreate(&handle);
+    // if (status != CUBLAS_STATUS_SUCCESS)
+    // {
+    //     std::cerr << "cuBLAS initialization error.";
+    // }
 
     float *d_A, *d_B, *d_C;
     cudaMalloc(&d_A, h_A_rows * h_A_cols * sizeof(float));
@@ -40,7 +41,7 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
 
     float alpha = 1.0;
     float beta = 0.0;
-    status = cublasSgemm(
+    cublasStatus_t status = cublasSgemm(
         handle, CUBLAS_OP_N, CUBLAS_OP_N,
         m, n, k, &alpha,
         d_A, m,
@@ -54,20 +55,11 @@ void cublas_mm_wrapper(float *h_A, int h_A_rows, int h_A_cols,
 
     cudaMemcpy(h_C, d_C, h_C_rows * h_C_cols * sizeof(float), cudaMemcpyDeviceToHost);
 
-    status = cublasDestroy(handle);
-    if (status != CUBLAS_STATUS_SUCCESS)
-    {
-        std::cerr << "Shutdown error!";
-    }
-
-    /*
-    for (int j = 0; j < m; j++)
-    {
-        for (int i = 0; i < n; i++)
-            printf("%f \t", h_C[i * m + j]);
-        printf("\n");
-    }
-    */
+    // status = cublasDestroy(handle);
+    // if (status != CUBLAS_STATUS_SUCCESS)
+    // {
+    //     std::cerr << "Shutdown error!";
+    // }
 
     cudaFree(d_A);
     cudaFree(d_B);
