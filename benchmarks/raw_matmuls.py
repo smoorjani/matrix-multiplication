@@ -2,6 +2,7 @@ import torch_blocksparse
 from custom_mm import cublas_mmul, cusparse_mmul, init_cublas, destroy_cublas
 import time
 import numpy as np
+from scipy.sparse import random
 import torch
 
 
@@ -22,7 +23,11 @@ def generate_dataset(num_samples: int = 1000, dim: int = 1024,
         # - one idea is to generate
         # https://stackoverflow.com/questions/64553148/how-to-convert-a-pytorch-sparse-coo-tensor-into-a-pytorch-dense-tensor
         # - other idea is to delete
-        return None
+        a = torch.stack([torch.tensor(
+            random(dim, dim, density=1-sparsity).toarray()) for _ in range(num_samples)])
+        b = torch.stack([torch.tensor(
+            random(dim, dim, density=1-sparsity).toarray()) for _ in range(num_samples)])
+        return (a, b)
 
 
 def test_kernel(matmul, a, b):
@@ -35,6 +40,8 @@ def test_kernel(matmul, a, b):
 
     print('Execution time for {num_samples} multiplications: {time}'.format(
         num_samples=a.shape[0], time=t_final))
+    print('Average time for one multiplication: {time}'.format(
+        time=t_final/a.shape[0]))
     return c
 
 
