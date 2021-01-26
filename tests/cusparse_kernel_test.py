@@ -6,6 +6,8 @@ import numpy as np
 n = 10
 n_vals = 10
 
+custom_mm.init_cusparse()
+
 
 def gen_coords(num_vals, dim):
     coords = set()
@@ -50,3 +52,5 @@ for x, y in diff:
 
 print('expected: ', exp)
 print('ours(sparse): ', our)
+
+custom_mm.destroy_cusparse()

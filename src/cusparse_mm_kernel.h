@@ -15,14 +15,15 @@
 // (m x k) * (k * n) = (m x n)
 // note: row_ind.len = lda + 1
 
-void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
+void cusparse_mm_wrapper(cusparseHandle_t handle,
+                         double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
                          int nnzA, int h_A_rowptr_size,
                          double *h_B_dense, int h_B_rows, int h_B_cols,
                          double *h_C_dense)
 {
     // Initialize cuSPARSE
-    cusparseHandle_t handle;
-    cusparseSafeCall(cusparseCreate(&handle));
+    // cusparseHandle_t handle;
+    // cusparseSafeCall(cusparseCreate(&handle));
     const int m = h_A_rowptr_size - 1;
     const int k = h_B_rows;
     const int n = h_B_cols;
@@ -174,11 +175,13 @@ void cusparse_mm_wrapper(double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
     return;
 }
 
-void dense_to_csr(double *h_A_dense, const int Nrows, const int Ncols, double **h_A_val, int **h_A_colind, int **h_A_rowptr, int *nnzA)
+void dense_to_csr(cusparseHandle_t handle, 
+                  double *h_A_dense, const int Nrows, const int Ncols,
+                  double **h_A_val, int **h_A_colind, int **h_A_rowptr, int *nnzA)
 {
     // Initialize cuSPARSE
-    cusparseHandle_t handle;
-    cusparseSafeCall(cusparseCreate(&handle));
+    // cusparseHandle_t handle;
+    // cusparseSafeCall(cusparseCreate(&handle));
 
     //create device array and copy host to it
     double *d_A_dense;

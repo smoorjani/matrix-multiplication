@@ -5,12 +5,17 @@
 
 #include <torch/extension.h>
 #include <cuda_runtime.h>
+
+#include "Utilities.cuh"
 #include <cublas_v2.h>
+#include <cusparse_v2.h>
+
 #include "cusparse_mm_kernel.h"
 #include "cublas_mm_kernel.h"
 
 // TODO: add handle initialization for cusparse
 cublasHandle_t g_cublas_handle = nullptr;
+cusparseHandle_t g_cusparse_handle = nullptr;
 
 void init_cublas_handle() {
   cublasStatus_t status = cublasCreate(&g_cublas_handle);
@@ -26,6 +31,14 @@ void destroy_cublas_handle() {
   {
     std::cerr << "Shutdown error!";
   }
+}
+
+void init_cusparse_handle() {
+  cusparseSafeCall(cusparseCreate(&g_cusparse_handle));
+}
+
+void destroy_cusparse_handle() {
+  cusparseSafeCall(cusparseDestroy(&g_cusparse_handle));
 }
 
 torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
@@ -92,7 +105,7 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
   int nnzA = 0;
   int h_A_rowptr_size = A_rows + 1;
 
-  dense_to_csr(A_arr, A_rows, A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
+  dense_to_csr(g_cusparse_handle, A_arr, A_rows, A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
 
   for (int i = 0; i < nnzA; i++)
   {
@@ -104,7 +117,7 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
     h_A_rowptr[i] += 1;
   }
 
-  cusparse_mm_wrapper(h_A_val, h_A_colind, h_A_rowptr, nnzA,
+  cusparse_mm_wrapper(g_cusparse_handle, h_A_val, h_A_colind, h_A_rowptr, nnzA,
                       h_A_rowptr_size, B_arr, B_rows, B_cols, C_arr);
 
   auto accessor = C.accessor<double, 2>();
@@ -124,6 +137,8 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
   m.def("init_cublas", &init_cublas_handle, "Create cuBLAS handle.");
   m.def("destroy_cublas", &destroy_cublas_handle, "Destroy cuBLAS handle.");
+  m.def("init_cusparse", &init_cusparse_handle, "Create cuSPARSE handle.");
+  m.def("destroy_cusparse", &destroy_cusparse_handle, "Destroy cuSPARSE handle.");
   m.def("cublas_mmul", &cublas_mmul, "cuBLAS Torch Matrix Multiplication");
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
 }

@@ -19,8 +19,9 @@ from cublas_fc_layer import cublasLinear
 from regular_fc_layer import regLinear
 from cusparse_fc_layer import cusparseLinear
 
-from custom_mm import init_cublas, destroy_cublas
+from custom_mm import init_cublas, destroy_cublas, init_cusparse, destroy_cusparse
 init_cublas()
+init_cusparse()
 
 # Seed to reproduce results
 np.random.seed(0)
@@ -183,3 +184,4 @@ else:
             print(param)
 
 destroy_cublas()
+destroy_cusparse()
