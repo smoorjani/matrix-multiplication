@@ -9,13 +9,14 @@
 #include "cusparse_mm_kernel.h"
 #include "cublas_mm_kernel.h"
 
+// TODO: add handle initialization for cusparse
 cublasHandle_t g_cublas_handle = nullptr;
 
 void init_cublas_handle() {
   cublasStatus_t status = cublasCreate(&g_cublas_handle);
   if (status != CUBLAS_STATUS_SUCCESS)
   {
-      std::cerr << "cuBLAS initialization error.";
+    std::cerr << "cuBLAS initialization error.";
   }
 }
 
@@ -23,7 +24,7 @@ void destroy_cublas_handle() {
   cublasStatus_t status = cublasDestroy(g_cublas_handle);
   if (status != CUBLAS_STATUS_SUCCESS)
   {
-      std::cerr << "Shutdown error!";
+    std::cerr << "Shutdown error!";
   }
 }
 

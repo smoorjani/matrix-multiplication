@@ -1,5 +1,5 @@
 import torch_blocksparse
-from custom_mm import cublas_mmul, cusparse_mmul
+from custom_mm import cublas_mmul, cusparse_mmul, init_cublas, destroy_cublas
 import time
 import numpy as np
 import torch
@@ -43,7 +43,12 @@ dim = 1024
 
 a, b = generate_dataset(num_samples=num_samples, dim=dim, seed=0)
 test_kernel(torch.matmul, a, b)
+
+init_cublas()
 test_kernel(cublas_mmul, a, b)
+destroy_cublas()
+
+
 test_kernel(cusparse_mmul, a, b)
 
 H, M, N, K = num_samples, dim, dim, dim
