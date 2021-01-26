@@ -38,30 +38,42 @@ def test_kernel(matmul, a, b):
     c = torch.stack([matmul(a[i], b[i]) for i in range(a.shape[0])]).cuda()
     t_final = time.time() - t_init
 
-    print('Execution time for {num_samples} multiplications: {time}'.format(
+    print('Execution time for {num_samples} multiplications: {time}\n'.format(
         num_samples=a.shape[0], time=t_final))
-    print('Average time for one multiplication: {time}'.format(
+    print('Average time for one multiplication: {time}\n'.format(
         time=t_final/a.shape[0]))
     return c
 
 
 num_samples = 1000
-dim = 1024
 
-a, b = generate_dataset(num_samples=num_samples, dim=dim, seed=0)
-test_kernel(torch.matmul, a, b)
+dims = [1024, 4096, 8192, 12288, 16384]
+sparsity_levels = [0, 0.25, 0.5, 0.75, 0.9, 0.99]
 
-init_cublas()
-test_kernel(cublas_mmul, a, b)
-destroy_cublas()
+for sparsity in sparsity_levels:
+    for dim in dims:
+        a, b = generate_dataset(num_samples=num_samples,
+                                dim=dim, seed=0, sparsity=sparsity)
+        print("Testing {} by {} matrices with {} percent sparsity.\n".format(
+            dim, dim, sparsity*100))
 
+        print("Regular Torch Matmul: \n")
+        test_kernel(torch.matmul, a, b)
 
-test_kernel(cusparse_mmul, a, b)
+        print("cuBLAS Matmul: \n")
+        init_cublas()
+        test_kernel(cublas_mmul, a, b)
+        destroy_cublas()
 
-H, M, N, K = num_samples, dim, dim, dim
-block = 16
-layout = torch.randint(0, 2, (H, M//block, N//block))
-blocksparse_mmul = torch_blocksparse.MatMul(
-    layout, block, 'sdd', trans_a=True, trans_b=False)
+        print("cuSPARSE Matmul: \n")
+        test_kernel(cusparse_mmul, a, b)
 
-test_kernel(blocksparse_mmul, a, b)
+        # TODO: fix issue with "RuntimeError: operation does not have an identity."
+        print("BlockSparse Matmul: \n")
+        H, M, N, K = num_samples, dim, dim, dim
+        block = 16
+        layout = torch.randint(0, 2, (H, M//block, N//block))
+        blocksparse_mmul = torch_blocksparse.MatMul(
+            layout, block, 'sdd', trans_a=True, trans_b=False)
+
+        test_kernel(blocksparse_mmul, a, b)

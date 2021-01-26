@@ -21,11 +21,19 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     # (16*768, 768) (768, 768)
 
     elif len(a.shape) == 3 and len(b.shape) == 2:
-        return torch.stack([custom_mm.cublas_mmul(b.t(), a[i].t()).t()
-                            for i in range(a.shape[0])]).cuda()
+        lda, dim1, dim2 = a.shape
+        _a = a.view(lda*dim1, dim2)
+        _c = custom_mm.cublas_mmul(b.t(), _a.t()).t()
+        return _c.view(lda, dim1, dim2)
+        # return torch.stack([custom_mm.cublas_mmul(b.t(), a[i].t()).t()
+        #                     for i in range(a.shape[0])]).cuda()
     elif len(a.shape) == 2 and len(b.shape) == 3:
-        return torch.stack([custom_mm.cublas_mmul(b[i].t(), a.t()).t()
-                            for i in range(b.shape[0])]).cuda()
+        ldb, dim1, dim2 = b.shape
+        _b = b.view(ldb*dim1, dim2)
+        _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
+        return _c.view(ldb, dim1, dim2)
+        # return torch.stack([custom_mm.cublas_mmul(b[i].t(), a.t()).t()
+        #                     for i in range(b.shape[0])]).cuda()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         return custom_mm.cublas_mmul(b.t(), a.t()).t()
     else:
