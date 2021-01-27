@@ -66,7 +66,7 @@ for sparsity in sparsity_levels:
         destroy_cublas()
 
         print("cuSPARSE Matmul: \n")
-        test_kernel(cusparse_mmul, a, b)
+        test_kernel(cusparse_mmul, a.double(), b.double())
 
         # TODO: fix issue with "RuntimeError: operation does not have an identity."
         print("BlockSparse Matmul: \n")
