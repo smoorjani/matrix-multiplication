@@ -38,7 +38,7 @@ void init_cusparse_handle() {
 }
 
 void destroy_cusparse_handle() {
-  cusparseSafeCall(cusparseDestroy(&g_cusparse_handle));
+  cusparseSafeCall(cusparseDestroy(g_cusparse_handle));
 }
 
 torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)

@@ -1,9 +1,19 @@
-import torch_blocksparse
-from custom_mm import cublas_mmul, cusparse_mmul, init_cublas, destroy_cublas
-import time
-import numpy as np
-from scipy.sparse import random
 import torch
+from scipy.sparse import random
+import numpy as np
+import time
+import torch_blocksparse
+from custom_mm import (
+    cublas_mmul,
+    cusparse_mmul,
+    init_cublas,
+    destroy_cublas,
+    init_cusparse,
+    destroy_cusparse
+)
+
+init_cublas()
+init_cusparse()
 
 
 def generate_dataset(num_samples: int = 1000, dim: int = 1024,
@@ -61,9 +71,7 @@ for sparsity in sparsity_levels:
         test_kernel(torch.matmul, a, b)
 
         print("cuBLAS Matmul: \n")
-        init_cublas()
         test_kernel(cublas_mmul, a, b)
-        destroy_cublas()
 
         print("cuSPARSE Matmul: \n")
         test_kernel(cusparse_mmul, a.double(), b.double())
@@ -77,3 +85,6 @@ for sparsity in sparsity_levels:
             layout, block, 'sdd', trans_a=True, trans_b=False)
 
         test_kernel(blocksparse_mmul, a, b)
+
+destroy_cublas()
+destroy_cusparse()
