@@ -24,12 +24,12 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         lda, dim1, dim2 = a.shape
         _a = a.view(lda*dim1, dim2)
         _c = custom_mm.cublas_mmul(b.t(), _a.t()).t()
-        return _c.view(lda, dim1, dim2).cuda()
+        return _c.view(lda, dim1, -1).clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 3:
         ldb, dim1, dim2 = b.shape
         _b = b.view(ldb*dim1, dim2)
         _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
-        return _c.view(ldb, dim1, dim2).cuda()
+        return _c.view(ldb, dim1, -1).clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         return custom_mm.cublas_mmul(b.t(), a.t()).t()
     else:
@@ -53,12 +53,12 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         lda, dim1, dim2 = a.shape
         _a = a.view(lda*dim1, dim2)
         _c = custom_mm.cusparse_mmul(b.t(), _a.t()).t()
-        return _c.view(lda, dim1, dim2).cuda()
+        return _c.view(lda, dim1, -1).clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 3:
         ldb, dim1, dim2 = b.shape
         _b = b.view(ldb*dim1, dim2)
         _c = custom_mm.cusparse_mmul(_b.t(), a.t()).t()
-        return _c.view(ldb, dim1, dim2).cuda()
+        return _c.view(ldb, dim1, -1).clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         return custom_mm.cusparse_mmul(b.t(), a.t()).t()
     else:
