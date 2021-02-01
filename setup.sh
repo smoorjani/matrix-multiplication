@@ -1,7 +1,7 @@
 #!/bin/bash
 
-apt install update
-apt install upgrade -y
+apt update
+apt upgrade -y
 
 apt install python3.7 python3-pip python3-dev -y
 apt install libxml2-dev libxslt-dev python-dev -y
