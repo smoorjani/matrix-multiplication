@@ -36,7 +36,7 @@ learning_rate = 0.01
 epochs = 1
 log_interval = 10
 
-layer_size = 1024
+layer_size = 28
 
 
 class regNet(nn.Module):
@@ -77,7 +77,7 @@ cub_net = cubNet()
 cusp_net = cuspNet()
 
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('/files/', train=True, download=True,
+    datasets.MNIST('./files/', train=True, download=True,
                    transform=torchvision.transforms.Compose([
                        torchvision.transforms.ToTensor(),
                        torchvision.transforms.Normalize(
@@ -100,7 +100,7 @@ for net in [reg_net, cub_net, cusp_net]:
 
         for batch_idx, (data, target) in enumerate(train_loader):
             optimizer.zero_grad()
-            output = net(data)
+            output = net(data.view(batch_size, 1, -1).clone().detach())
             loss = F.nll_loss(output, target)
             loss.backward()
             optimizer.step()

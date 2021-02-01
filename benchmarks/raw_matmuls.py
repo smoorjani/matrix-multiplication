@@ -76,15 +76,15 @@ for sparsity in sparsity_levels:
         print("cuSPARSE Matmul: \n")
         test_kernel(cusparse_mmul, a.double(), b.double())
 
-        # TODO: fix issue with "RuntimeError: operation does not have an identity."
-        print("BlockSparse Matmul: \n")
-        H, M, N, K = num_samples, dim, dim, dim
-        block = 16
-        layout = torch.randint(0, 2, (H, M//block, N//block))
-        blocksparse_mmul = torch_blocksparse.MatMul(
-            layout, block, 'sdd', trans_a=True, trans_b=False)
+        # # TODO: fix issue with "RuntimeError: operation does not have an identity."
+        # print("BlockSparse Matmul: \n")
+        # H, M, N, K = num_samples, dim, dim, dim
+        # block = 16
+        # layout = torch.randint(0, 2, (H, M//block, N//block))
+        # blocksparse_mmul = torch_blocksparse.MatMul(
+        #     layout, block, 'sdd', trans_a=True, trans_b=False)
 
-        test_kernel(blocksparse_mmul, a, b)
+        # test_kernel(blocksparse_mmul, a, b)
 
 destroy_cublas()
 destroy_cusparse()
