@@ -4,7 +4,7 @@ Sparse Matrix Multiplication Kernels incorporated into Pytorch.
 ## Setup instructions
 
 All necessary steps are covered in the `setup.sh` script.
-Run the script using `sh setup.sh`.
+Run the script using `bash setup.sh`.
 
 ## Binding with PyTorch
 The following steps tell you how to take a CUDA kernel and bind it to PyTorch.

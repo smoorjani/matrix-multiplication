@@ -4,17 +4,22 @@ apt update
 apt upgrade -y
 
 apt install python3.7 python3-pip python3-dev -y
-apt install libxml2-dev libxslt-dev python-dev -y
+apt install libxml2-dev libxslt-dev -y
 apt install pkg-config libhdf5-100 libhdf5-dev -y
 apt install llvm-10 llvm-10-dev build-essential -y
 apt install libblas-dev liblapack-dev -y
+
+# alias for python3
+echo "alias python=python3" >> ~/.bashrc
+echo "alias pip=pip3" >> ~/.bashrc
+source ~/.bashrc
 
 pip install setuptools ninja
 
 # exit git repo directory
 cd ..
 
-python -c "import torch"                                                                                                          
+python -c "import torch"
 if [ $? -eq 1 ]
 then
     git clone --recursive https://github.com/pytorch/pytorch
@@ -31,7 +36,7 @@ then
     cd ..
 fi
 
-python -c "import torchvision"                                                                                                          
+python -c "import torchvision"
 if [ $? -eq 1 ]
 then
     # build torchvision for MNIST data
@@ -40,7 +45,3 @@ then
     python3 setup.py install
     cd ..
 fi
-
-# alias for python3
-echo "alias python=python3" >> ~/.bashrc
-source ~/.bashrc
