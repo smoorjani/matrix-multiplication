@@ -45,7 +45,7 @@ def test_kernel(matmul, a, b):
     assert a.shape[0] == b.shape[0]
     assert len(a.shape) == len(b.shape) == 3
 
-    c = torch.stack([matmul(a[i], b[i]) for i in range(a.shape[0])]).cuda()
+    c = torch.stack([matmul(a[i], b[i]) for i in range(a.shape[0])])
     t_final = time.time() - t_init
 
     print('Execution time for {num_samples} multiplications: {time}\n'.format(

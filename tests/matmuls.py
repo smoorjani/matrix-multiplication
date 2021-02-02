@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 from torch.autograd.function import InplaceFunction
 
 import custom_mm
@@ -13,24 +14,50 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     :param b: 
     :returns: Matrix multiplication output
     '''
-    assert a.shape[-1] == b.shape[0]
+
     if len(a.shape) == 1 or len(b.shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
     # batched matmul (16,768,768) (768,768)
     # (16*768, 768) (768, 768)
+    elif len(a.shape) == 3 and len(b.shape) == 3:
+        assert a.shape[0] == b.shape[0]
+        assert a.shape[-1] == b.shape[1]
 
+        lda, a_dim1, a_dim2 = a.shape
+        _a = a.view(lda*a_dim1, a_dim2)
+        ldb, b_dim1, b_dim2 = b.shape
+        _b = b.view(lda*b_dim1, b_dim2)
+
+        _c = custom_mm.cublas_mmul(_b.t(), _a.t()).t()
+        return _c.view(lda, a_dim1, -1).clone().detach()
     elif len(a.shape) == 3 and len(b.shape) == 2:
+        assert a.shape[-1] == b.shape[0]
         lda, dim1, dim2 = a.shape
         _a = a.view(lda*dim1, dim2)
         _c = custom_mm.cublas_mmul(b.t(), _a.t()).t()
         return _c.view(lda, dim1, -1).clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 3:
+        assert a.shape[-1] == b.shape[1]
         ldb, dim1, dim2 = b.shape
         _b = b.view(ldb*dim1, dim2)
         _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
         return _c.view(ldb, dim1, -1).clone().detach()
+    elif len(a.shape) > 3 and len(b.shape) > 3:
+        a_dim1, a_dim2 = a.shape[-2:]
+        b_dim1, b_dim2 = b.shape[-2:]
+        b_lda = np.prod(np.array(a.shape[:-2]))
+        b_ldb = np.prod(np.array(b.shape[:-2]))
+        assert b_lda == b_ldb
+        assert a_dim2 == b_dim1
+
+        _a = a.view(b_lda*a_dim1, a_dim2)
+        _b = b.view(b_ldb*b_dim1, b_dim2)
+
+        _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
+        return _c.view(*b_lda, a_dim1, -1).clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
+        assert a.shape[-1] == b.shape[0]
         return custom_mm.cublas_mmul(b.t(), a.t()).t()
     else:
         print('Multiplication with matrix dimensions is not implemented in cuBLAS')
