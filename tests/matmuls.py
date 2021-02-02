@@ -23,14 +23,10 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     elif len(a.shape) == 3 and len(b.shape) == 3:
         assert a.shape[0] == b.shape[0]
         assert a.shape[-1] == b.shape[1]
-
-        lda, a_dim1, a_dim2 = a.shape
-        _a = a.view(lda*a_dim1, a_dim2)
-        ldb, b_dim1, b_dim2 = b.shape
-        _b = b.view(lda*b_dim1, b_dim2)
-
-        _c = custom_mm.cublas_mmul(_b.t(), _a.t()).t()
-        return _c.view(lda, a_dim1, -1).clone().detach()
+        _c = torch.zeros(a.shape[0], a.shape[1], b.shape[2])
+        for i in range(a.shape[0]):
+            _c[i] = custom_mm.cublas_mmul(b[i].t(), a[i].t()).t()
+        return _c.clone().detach()
     elif len(a.shape) == 3 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
         lda, dim1, dim2 = a.shape
@@ -44,18 +40,13 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
         return _c.view(ldb, dim1, -1).clone().detach()
     elif len(a.shape) > 3 and len(b.shape) > 3:
-        a_dim1, a_dim2 = a.shape[-2:]
-        b_dim1, b_dim2 = b.shape[-2:]
-        b_lda = np.prod(np.array(a.shape[:-2]))
-        b_ldb = np.prod(np.array(b.shape[:-2]))
-        assert b_lda == b_ldb
+        _, a_dim2 = a.shape[-2:]
+        b_dim1, _ = b.shape[-2:]
+        lda, ldb = a.shape[0], b.shape[0]
+        assert lda == ldb
         assert a_dim2 == b_dim1
-
-        _a = a.view(b_lda*a_dim1, a_dim2)
-        _b = b.view(b_ldb*b_dim1, b_dim2)
-
-        _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
-        return _c.view(*b_lda, a_dim1, -1).clone().detach()
+        _c = torch.stack([cublas_matmul(a[i], b[i]) for i in range(lda)])
+        return _c.clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
         return custom_mm.cublas_mmul(b.t(), a.t()).t()
