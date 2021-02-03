@@ -45,7 +45,12 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         lda, ldb = a.shape[0], b.shape[0]
         assert lda == ldb
         assert a_dim2 == b_dim1
-        _c = torch.stack([cublas_matmul(a[i], b[i]) for i in range(lda)])
+        if len(a.shape) == 3 and len(b.shape) == 3:
+            _c = torch.stack([cublas_matmul(b[i].t(), a[i].t()).t()
+                              for i in range(lda)])
+        else:
+            _c = torch.stack([cublas_matmul(a[i], b[i]).t()
+                              for i in range(lda)])
         return _c.clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]

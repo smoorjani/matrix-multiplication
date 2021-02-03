@@ -2,7 +2,6 @@ import torch
 from scipy.sparse import random
 import numpy as np
 import time
-import torch_blocksparse
 from custom_mm import (
     cublas_mmul,
     cusparse_mmul,
@@ -74,17 +73,19 @@ for sparsity in sparsity_levels:
         test_kernel(cublas_mmul, a, b)
 
         print("cuSPARSE Matmul: \n")
-        test_kernel(cusparse_mmul, a.double(), b.double())
+        _a = a.type(torch.DoubleTensor)
+        _b = b.type(torch.DoubleTensor)
+        test_kernel(cusparse_mmul, _a, _b)
 
-        # # TODO: fix issue with "RuntimeError: operation does not have an identity."
-        # print("BlockSparse Matmul: \n")
-        # H, M, N, K = num_samples, dim, dim, dim
-        # block = 16
-        # layout = torch.randint(0, 2, (H, M//block, N//block))
-        # blocksparse_mmul = torch_blocksparse.MatMul(
-        #     layout, block, 'sdd', trans_a=True, trans_b=False)
+# # TODO: fix issue with "RuntimeError: operation does not have an identity."
+# print("BlockSparse Matmul: \n")
+# H, M, N, K = num_samples, dim, dim, dim
+# block = 16
+# layout = torch.randint(0, 2, (H, M//block, N//block))
+# blocksparse_mmul = torch_blocksparse.MatMul(
+#     layout, block, 'sdd', trans_a=True, trans_b=False)
 
-        # test_kernel(blocksparse_mmul, a, b)
+# test_kernel(blocksparse_mmul, a, b)
 
 destroy_cublas()
 destroy_cusparse()
