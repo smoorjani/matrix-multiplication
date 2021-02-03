@@ -6,6 +6,6 @@ setup(
     description='Wrapper for matrix multiplications implemented in custom_mm.',
     author='Samraj Moorjani',
     author_email='samrajm2@illinois.edu',
-    packages=['utils'],
+    packages=['matmuls'],
     install_requires=['custom_mm', 'torch', 'numpy'],
 )

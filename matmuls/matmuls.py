@@ -20,13 +20,13 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         return a @ b
     # batched matmul (16,768,768) (768,768)
     # (16*768, 768) (768, 768)
-    elif len(a.shape) == 3 and len(b.shape) == 3:
-        assert a.shape[0] == b.shape[0]
-        assert a.shape[-1] == b.shape[1]
-        _c = torch.zeros(a.shape[0], a.shape[1], b.shape[2])
-        for i in range(a.shape[0]):
-            _c[i] = custom_mm.cublas_mmul(b[i].t(), a[i].t()).t()
-        return _c.clone().detach()
+    # elif len(a.shape) == 3 and len(b.shape) == 3:
+    #     assert a.shape[0] == b.shape[0]
+    #     assert a.shape[-1] == b.shape[1]
+    #     _c = torch.zeros(a.shape[0], a.shape[1], b.shape[2])
+    #     for i in range(a.shape[0]):
+    #         _c[i] = custom_mm.cublas_mmul(b[i].t(), a[i].t()).t()
+    #     return _c.clone().detach()
     elif len(a.shape) == 3 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
         lda, dim1, dim2 = a.shape
@@ -39,7 +39,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         _b = b.replace(ldb*dim1, dim2)
         _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
         return _c.replace(ldb, dim1, -1).clone().detach()
-    elif len(a.shape) > 3 and len(b.shape) > 3:
+    elif len(a.shape) >= 3 and len(b.shape) >= 3:
         _, a_dim2 = a.shape[-2:]
         b_dim1, _ = b.shape[-2:]
         lda, ldb = a.shape[0], b.shape[0]
