@@ -6,7 +6,7 @@ from torch.autograd.function import InplaceFunction
 import custom_mm
 
 
-def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch: bool = False) -> torch.Tensor:
+def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> torch.Tensor:
     '''
     Uses cuBLAS kernel to perform matrix multiplication.
 
@@ -22,7 +22,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch: bool = False) -> torc
         assert a.shape[-1] == b.shape[0]
         lda, dim1, dim2 = a.shape
         _a = a.reshape(lda*dim1, dim2)
-        if not torch:
+        if not torch_:
             _c = custom_mm.cublas_mmul(_a, b)
         else:
             _c = custom_mm.cublas_mmul(b.t(), _a.t()).t()
@@ -31,7 +31,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch: bool = False) -> torc
         assert a.shape[-1] == b.shape[1]
         ldb, dim1, dim2 = b.shape
         _b = b.reshape(ldb*dim1, dim2)
-        if not torch:
+        if not torch_:
             _c = custom_mm.cublas_mmul(a, _b)
         else:
             _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
@@ -42,7 +42,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch: bool = False) -> torc
         lda, ldb = a.shape[0], b.shape[0]
         assert lda == ldb
         assert a_dim2 == b_dim1
-        if not torch:
+        if not torch_:
             if len(a.shape) == 3 and len(b.shape) == 3:
                 _c = torch.stack([cublas_matmul(a[i], b[i])
                                   for i in range(lda)])
@@ -59,7 +59,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch: bool = False) -> torc
         return _c.clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
-        if not torch:
+        if not torch_:
             return custom_mm.cublas_mmul(a, b)
         else:
             return custom_mm.cublas_mmul(b.t(), a.t()).t()
@@ -68,7 +68,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch: bool = False) -> torc
         return a @ b
 
 
-def cusparse_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> torch.Tensor:
     '''
     Uses cuSPARSE kernel to perform matrix multiplication.
 
@@ -83,7 +83,7 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         assert a.shape[-1] == b.shape[0]
         lda, dim1, dim2 = a.shape
         _a = a.reshape(lda*dim1, dim2)
-        if not torch:
+        if not torch_:
             _c = custom_mm.cusparse_mmul(_a, b)
         else:
             _c = custom_mm.cusparse_mmul(b.t(), _a.t()).t()
@@ -92,7 +92,7 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         assert a.shape[-1] == b.shape[1]
         ldb, dim1, dim2 = b.shape
         _b = b.reshape(ldb*dim1, dim2)
-        if not torch:
+        if not torch_:
             _c = custom_mm.cusparse_mmul(a, _b)
         else:
             _c = custom_mm.cusparse_mmul(_b.t(), a.t()).t()
@@ -103,7 +103,7 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         lda, ldb = a.shape[0], b.shape[0]
         assert lda == ldb
         assert a_dim2 == b_dim1
-        if not torch:
+        if not torch_:
             if len(a.shape) == 3 and len(b.shape) == 3:
                 _c = torch.stack([cusparse_matmul(a[i], b[i])
                                   for i in range(lda)])
@@ -120,7 +120,7 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         return _c.clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
-        if not torch:
+        if not torch_:
             return custom_mm.cusparse_mmul(a, b)
         else:
             return custom_mm.cusparse_mmul(b.t(), a.t()).t()
@@ -136,7 +136,7 @@ class cublasMM(InplaceFunction):
         # swap around for col-major call
         # where row major is expected
         ctx.save_for_backward(m1, m2)
-        return cublas_matmul(m1, m2, torch=True)
+        return cublas_matmul(m1, m2, torch_=True)
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -145,11 +145,11 @@ class cublasMM(InplaceFunction):
 
         if ctx.needs_input_grad[0]:
             grad_m1 = cublas_matmul(
-                grad_output, m2.transpose(-1, -2), torch=True)
+                grad_output, m2.transpose(-1, -2), torch_=True)
 
         if ctx.needs_input_grad[1]:
             grad_m2 = cublas_matmul(
-                m1.transpose(-1, -2), grad_output, torch=True)
+                m1.transpose(-1, -2), grad_output, torch_=True)
 
         return grad_m1, grad_m2
 
@@ -161,7 +161,7 @@ class cusparseMM(InplaceFunction):
         # swap around for col-major call
         # where row major is expected
         ctx.save_for_backward(m1, m2)
-        return cusparse_matmul(m1, m2, torch=True)
+        return cusparse_matmul(m1, m2, torch_=True)
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -170,10 +170,10 @@ class cusparseMM(InplaceFunction):
 
         if ctx.needs_input_grad[0]:
             grad_m1 = cusparse_matmul(
-                grad_output, m2.transpose(-1, -2), torch=True)
+                grad_output, m2.transpose(-1, -2), torch_=True)
 
         if ctx.needs_input_grad[1]:
             grad_m2 = cusparse_matmul(
-                m1.transpose(-1, -2), grad_output, torch=True)
+                m1.transpose(-1, -2), grad_output, torch_=True)
 
         return grad_m1, grad_m2
