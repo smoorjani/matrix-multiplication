@@ -98,6 +98,7 @@ train_loader = torch.utils.data.DataLoader(
 for net in [reg_net, cub_net, cusp_net]:
     # Load in MNIST data
     logger.debug(type(net))
+    print(type(net))
     optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
     criterion = nn.NLLLoss()
 
@@ -112,7 +113,7 @@ for net in [reg_net, cub_net, cusp_net]:
 
             if type(net) == cubNet:
                 data = data.type(torch.FloatTensor)
-            if type(net) == cusp_net:
+            if type(net) == cuspNet:
                 data = data.type(torch.DoubleTensor)
 
             output = net(data.view(batch_size, 1, -1).clone().detach())
@@ -126,9 +127,15 @@ for net in [reg_net, cub_net, cusp_net]:
                     epoch, batch_idx * len(data), len(train_loader.dataset),
                     100. * batch_idx / len(train_loader), loss.item()))
 
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch, batch_idx * len(data), len(train_loader.dataset),
+                    100. * batch_idx / len(train_loader), loss.item()))
+
             train_losses.append(loss.item())
 
         logger.debug('Epoch took {} with training loss of {}'.format(
+            time.time() - epoch_t0, np.average(train_losses)))
+        print('Epoch took {} with training loss of {}'.format(
             time.time() - epoch_t0, np.average(train_losses)))
 
 
