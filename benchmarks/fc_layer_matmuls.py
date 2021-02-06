@@ -2,7 +2,7 @@ import torch
 from scipy.sparse import random
 import numpy as np
 import time
-import torch_blocksparse
+import logging
 from custom_mm import (
     cublas_mmul,
     cusparse_mmul,
@@ -21,6 +21,15 @@ from ..tests.cusparse_fc_layer import cusparseLinear
 
 import torchvision.transforms
 from torchvision import datasets, transforms
+
+LOG = "./fc_layer_benchmark.log"
+logging.basicConfig(filename=LOG, filemode="w", level=logging.DEBUG)
+
+console = logging.StreamHandler()
+console.setLevel(logging.ERROR)
+logging.getLogger("").addHandler(console)
+
+logger = logging.getLogger(__name__)
 
 # Seed to reproduce results
 np.random.seed(0)
@@ -88,7 +97,7 @@ train_loader = torch.utils.data.DataLoader(
 
 for net in [reg_net, cub_net, cusp_net]:
     # Load in MNIST data
-
+    logger.debug(type(net))
     optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9)
     criterion = nn.NLLLoss()
 
@@ -100,22 +109,26 @@ for net in [reg_net, cub_net, cusp_net]:
 
         for batch_idx, (data, target) in enumerate(train_loader):
             optimizer.zero_grad()
+
             if type(net) == cubNet:
+                data = data.type(torch.FloatTensor)
+            if type(net) == cusp_net:
                 data = data.type(torch.DoubleTensor)
-                target = target.type(torch.DoubleTensor)
+
             output = net(data.view(batch_size, 1, -1).clone().detach())
-            loss = F.nll_loss(output, target)
+            output = output.reshape(batch_size, -1)
+            loss = criterion(output, target)
             loss.backward()
             optimizer.step()
 
             if batch_idx % log_interval == 0:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                logger.debug('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(data), len(train_loader.dataset),
                     100. * batch_idx / len(train_loader), loss.item()))
 
             train_losses.append(loss.item())
 
-        print('Epoch took {} with training loss of {}'.format(
+        logger.debug('Epoch took {} with training loss of {}'.format(
             time.time() - epoch_t0, np.average(train_losses)))
 
 

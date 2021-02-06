@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from .matmuls import cublasMM
+from matmuls.matmuls import cublasMM
 
 '''
 https://cs231n.github.io/optimization-2/#mat
@@ -34,7 +34,7 @@ class cublasLinear(nn.Module):
             nn.init.uniform_(self.bias, -bound, bound)
 
     def forward(self, inp):
-        x, y = inp.shape
+        y = inp.shape[-1]
         if y != self.in_features:
             print('Invalid dimensions')
             return 0

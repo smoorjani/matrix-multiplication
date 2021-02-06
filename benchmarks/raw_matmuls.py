@@ -2,6 +2,7 @@ import torch
 from scipy.sparse import random
 import numpy as np
 import time
+import logging
 from custom_mm import (
     cublas_mmul,
     cusparse_mmul,
@@ -13,6 +14,15 @@ from custom_mm import (
 
 init_cublas()
 init_cusparse()
+
+LOG = "./random_tensor_benchmark.log"
+logging.basicConfig(filename=LOG, filemode="w", level=logging.DEBUG)
+
+console = logging.StreamHandler()
+console.setLevel(logging.ERROR)
+logging.getLogger("").addHandler(console)
+
+logger = logging.getLogger(__name__)
 
 
 def generate_dataset(num_samples: int = 1000, dim: int = 1024,
@@ -47,9 +57,9 @@ def test_kernel(matmul, a, b):
     c = torch.stack([matmul(a[i], b[i]) for i in range(a.shape[0])])
     t_final = time.time() - t_init
 
-    print('Execution time for {num_samples} multiplications: {time}\n'.format(
+    logger.debug('Execution time for {num_samples} multiplications: {time}\n'.format(
         num_samples=a.shape[0], time=t_final))
-    print('Average time for one multiplication: {time}\n'.format(
+    logger.debug('Average time for one multiplication: {time}\n'.format(
         time=t_final/a.shape[0]))
     return c
 
@@ -63,16 +73,16 @@ for sparsity in sparsity_levels:
     for dim in dims:
         a, b = generate_dataset(num_samples=num_samples,
                                 dim=dim, seed=0, sparsity=sparsity)
-        print("Testing {} by {} matrices with {} percent sparsity.\n".format(
+        logger.debug("Testing {} by {} matrices with {} percent sparsity.\n".format(
             dim, dim, sparsity*100))
 
-        print("Regular Torch Matmul: \n")
+        logger.debug("Regular Torch Matmul: \n")
         test_kernel(torch.matmul, a, b)
 
-        print("cuBLAS Matmul: \n")
+        logger.debug("cuBLAS Matmul: \n")
         test_kernel(cublas_mmul, a, b)
 
-        print("cuSPARSE Matmul: \n")
+        logger.debug("cuSPARSE Matmul: \n")
         _a = a.type(torch.DoubleTensor)
         _b = b.type(torch.DoubleTensor)
         test_kernel(cusparse_mmul, _a, _b)
