@@ -18,15 +18,50 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     if len(a.shape) == 1 or len(b.shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
-    # batched matmul (16,768,768) (768,768)
-    # (16*768, 768) (768, 768)
-    # elif len(a.shape) == 3 and len(b.shape) == 3:
-    #     assert a.shape[0] == b.shape[0]
-    #     assert a.shape[-1] == b.shape[1]
-    #     _c = torch.zeros(a.shape[0], a.shape[1], b.shape[2])
-    #     for i in range(a.shape[0]):
-    #         _c[i] = custom_mm.cublas_mmul(b[i].t(), a[i].t()).t()
-    #     return _c.clone().detach()
+    elif len(a.shape) == 3 and len(b.shape) == 2:
+        assert a.shape[-1] == b.shape[0]
+        lda, dim1, dim2 = a.shape
+        _a = a.replace(lda*dim1, dim2)
+        _c = custom_mm.cublas_mmul(_a, b)
+        return _c.replace(lda, dim1, -1).clone().detach()
+    elif len(a.shape) == 2 and len(b.shape) == 3:
+        assert a.shape[-1] == b.shape[1]
+        ldb, dim1, dim2 = b.shape
+        _b = b.replace(ldb*dim1, dim2)
+        _c = custom_mm.cublas_mmul(a, _b)
+        return _c.replace(ldb, dim1, -1).clone().detach()
+    elif len(a.shape) >= 3 and len(b.shape) >= 3:
+        _, a_dim2 = a.shape[-2:]
+        b_dim1, _ = b.shape[-2:]
+        lda, ldb = a.shape[0], b.shape[0]
+        assert lda == ldb
+        assert a_dim2 == b_dim1
+        if len(a.shape) == 3 and len(b.shape) == 3:
+            _c = torch.stack([cublas_matmul(a[i], b[i]) for i in range(lda)])
+        else:
+            _c = torch.stack([cublas_matmul(a[i], b[i]) for i in range(lda)])
+        return _c.clone().detach()
+    elif len(a.shape) == 2 and len(b.shape) == 2:
+        assert a.shape[-1] == b.shape[0]
+        return custom_mm.cublas_mmul(a, b)
+    else:
+        print('Multiplication with matrix dimensions is not implemented in cuBLAS')
+        return a @ b
+
+
+def _cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    '''
+    Uses cuBLAS kernel to perform matrix multiplication specifically
+    with the torch API.
+
+    :param a:
+    :param b: 
+    :returns: Matrix multiplication output
+    '''
+
+    if len(a.shape) == 1 or len(b.shape) == 1:
+        print('Matrix-vector multiplication is not implemented in cuBLAS')
+        return a @ b
     elif len(a.shape) == 3 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
         lda, dim1, dim2 = a.shape
@@ -49,8 +84,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
             _c = torch.stack([cublas_matmul(b[i].t(), a[i].t()).t()
                               for i in range(lda)])
         else:
-            _c = torch.stack([cublas_matmul(a[i], b[i]).t()
-                              for i in range(lda)])
+            _c = torch.stack([cublas_matmul(a[i], b[i]) for i in range(lda)])
         return _c.clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]

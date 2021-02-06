@@ -100,6 +100,9 @@ for net in [reg_net, cub_net, cusp_net]:
 
         for batch_idx, (data, target) in enumerate(train_loader):
             optimizer.zero_grad()
+            if type(net) == cubNet:
+                data = data.type(torch.DoubleTensor)
+                target = target.type(torch.DoubleTensor)
             output = net(data.view(batch_size, 1, -1).clone().detach())
             loss = F.nll_loss(output, target)
             loss.backward()
