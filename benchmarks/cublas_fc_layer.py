@@ -1,8 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from matmuls.matmuls import cusparseMM
-
+from matmuls import cublasMM
 
 '''
 https://cs231n.github.io/optimization-2/#mat
@@ -10,9 +9,9 @@ https://gist.github.com/anonymous/49c10bc17ac4a97307d52c07d01a2870
 '''
 
 
-class cusparseLinear(nn.Module):
+class cublasLinear(nn.Module):
     def __init__(self, in_features, out_features, bias=True):
-        super(cusparseLinear, self).__init__()
+        super(cublasLinear, self).__init__()
         torch.manual_seed(0)
 
         self.in_features = in_features
@@ -39,7 +38,7 @@ class cusparseLinear(nn.Module):
         if y != self.in_features:
             print('Invalid dimensions')
             return 0
-        t = cusparseMM.apply(inp, self.weight.t())
+        t = cublasMM.apply(inp, self.weight.t())
         output = t.clone()
 
         if self.bias is not None:

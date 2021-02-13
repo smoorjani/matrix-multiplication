@@ -4,8 +4,6 @@ import numpy as np
 import time
 import logging
 from custom_mm import (
-    cublas_mmul,
-    cusparse_mmul,
     init_cublas,
     destroy_cublas,
     init_cusparse,
@@ -16,8 +14,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from ..tests.cublas_fc_layer import cublasLinear
-from ..tests.cusparse_fc_layer import cusparseLinear
+from cublas_fc_layer import cublasLinear
+from cusparse_fc_layer import cusparseLinear
 
 import torchvision.transforms
 from torchvision import datasets, transforms
