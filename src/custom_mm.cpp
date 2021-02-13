@@ -84,7 +84,7 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
 
   auto A_tensor = torch::transpose(A, 0, 1);
   auto B_tensor = torch::transpose(B, 0, 1);
-
+  
   double *A_arr = A_tensor.data_ptr<double>();
   double *B_arr = B_tensor.data_ptr<double>();
 
