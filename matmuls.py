@@ -9,6 +9,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
 
     :param a:
     :param b:
+    :param torch_: Set to true if data is passed in in col-major (expected row-major)
     :returns: Matrix multiplication output
     '''
     a = a.contiguous()
@@ -65,9 +66,10 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> t
 
     :param a:
     :param b:
+    :param torch_: Set to true if data is passed in in col-major (expected row-major)
     :returns: Matrix multiplication output
     '''
-   a = a.contiguous()
+    a = a.contiguous()
     b = b.contiguous()
 
     if len(a.shape) == 1 or len(b.shape) == 1:
@@ -122,7 +124,7 @@ class cublasMM(InplaceFunction):
         # swap around for col-major call
         # where row major is expected
         ctx.save_for_backward(m1, m2)
-        return cublas_matmul(m1, m2, torch_=True)
+        return cublas_matmul(m1, m2)
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -131,11 +133,11 @@ class cublasMM(InplaceFunction):
 
         if ctx.needs_input_grad[0]:
             grad_m1 = cublas_matmul(
-                grad_output, m2.transpose(-1, -2), torch_=True)
+                grad_output, m2.transpose(-1, -2))
 
         if ctx.needs_input_grad[1]:
             grad_m2 = cublas_matmul(
-                m1.transpose(-1, -2), grad_output, torch_=True)
+                m1.transpose(-1, -2), grad_output)
 
         return grad_m1, grad_m2
 
@@ -147,7 +149,7 @@ class cusparseMM(InplaceFunction):
         # swap around for col-major call
         # where row major is expected
         ctx.save_for_backward(m1, m2)
-        return cusparse_matmul(m1, m2, torch_=True)
+        return cusparse_matmul(m1, m2)
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -156,10 +158,10 @@ class cusparseMM(InplaceFunction):
 
         if ctx.needs_input_grad[0]:
             grad_m1 = cusparse_matmul(
-                grad_output, m2.transpose(-1, -2), torch_=True)
+                grad_output, m2.transpose(-1, -2))
 
         if ctx.needs_input_grad[1]:
             grad_m2 = cusparse_matmul(
-                m1.transpose(-1, -2), grad_output, torch_=True)
+                m1.transpose(-1, -2), grad_output)
 
         return grad_m1, grad_m2

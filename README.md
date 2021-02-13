@@ -3,8 +3,33 @@ Sparse Matrix Multiplication Kernels incorporated into Pytorch.
 
 ## Setup instructions
 
-All necessary steps are covered in the `setup.sh` script.
-Run the script using `bash setup.sh`.
+All necessary steps are covered in the `install_deps.sh` script.
+Run the script using `bash install_deps.sh`.
+
+## How to use
+*Refer to `tests/` for examples with both cuBLAS and cuSPARSE.*
+
+```python
+import torch
+from matmuls import cublas_matmul, cublasMM
+from custom_mm import init_cublas, destroy_cublas
+
+# create cublas handle (one-time overhead)
+init_cublas()
+
+a = torch.rand(8, 64)
+b = torch.rand(64, 8)
+
+# cublasMM is a torch.InplaceFunction with a forward and backward pass
+# You should use this when the gradient needs to be calculate
+c = cublasMM.apply(a, b)
+
+# cublas_matmul is a helper that can be used as is
+c = cublas_matmul(a, b, torch_=False)
+
+# destroy cublas handle
+destroy_cublas()
+```
 
 ## Binding with PyTorch
 The following steps tell you how to take a CUDA kernel and bind it to PyTorch.
@@ -14,7 +39,7 @@ The following steps tell you how to take a CUDA kernel and bind it to PyTorch.
 
 You can write separate helpers to initialize the handles and use a global variable to store them. This variable persists after you import your module.
 
-Note that torch passes in tensors by column major which may require some transposing. You can get a raw data pointer to the tensor by calling `tensor.data_ptr<dtype>()`.
+Note that torch passes in tensors by column major which may require some transposing. You can get a raw data pointer to the tensor by calling `tensor.data_ptr<dtype>()`. However, it is important to know that this operation does not guarantee a tensor stored in contiguous memory. In order to ensure it is stored contiguously, you may call `tensor.contiguous()`.
 
 When finished implementing the C++ wrapper, make sure to include it in the Pybind macro for the Python interpreter. The first argument is the method name, the second is the address of the C++ method, and the third is the description.
 
@@ -23,7 +48,7 @@ Reconfigure the `setup.py` to point to your `.cpp` API and rename the module to 
 Run `python setup.py install` to install your module.
 
 ### Using the Module With PyTorch
-*Refer to `tests/matmuls.py` for an examples.*
+*Refer to `matmuls.py` for an examples.*
 
 You will need to write a PyTorch InplaceFunction. For this you need to define a forward and backward pass and you will need to implement the gradient for the backward pass. You can simple copy the example for this and replace whatever `matmul` with the name of your function defined in the Pybind entrypoint.
 
