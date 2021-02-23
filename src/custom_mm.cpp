@@ -43,6 +43,20 @@ void destroy_cusparse_handle() {
   cusparseSafeCall(cusparseDestroy(g_cusparse_handle));
 }
 
+float **unflatten(float *arr, int batch_dim, int rows, int cols) {
+  // note that the array must be contiguous for this hack to work
+  float **new_arr = malloc(sizeof(float *) * batch_dim);
+  float *arr_ptr = arr;
+  int batch_count = 0;
+
+  while (batch_count < batch_dim) {
+    new_arr[batch_count] = arr + (batch_count * rows * cols * sizeof(float));
+    batch_count++;
+  }
+
+  return new_arr;
+}
+
 torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
 {
   // torch passes in with column major
@@ -96,6 +110,7 @@ torch::Tensor cublas_bmm(torch::Tensor B, torch::Tensor A, int dim)
   int batch_dim;
 
   if (dim == 3) {
+    // B^T A^T for row major to col major
     A_tensor = torch::transpose(A, 1, 2);
     B_tensor = torch::transpose(B, 1, 2);
 
@@ -108,22 +123,28 @@ torch::Tensor cublas_bmm(torch::Tensor B, torch::Tensor A, int dim)
     assert(batch_dim == B_tensor.size(0));
 
     torch::Tensor C = torch::zeros({batch_dim, B_cols, A_rows}, torch::kFloat32);
-    int C_rows = C.size(0);
-    int C_cols = C.size(1);
+    int C_rows = C.size(1);
+    int C_cols = C.size(2);
 
-    float *A_arr = A_tensor.data_ptr<float>();
-    float *B_arr = B_tensor.data_ptr<float>();
-    float *C_arr = C.data_ptr<float>();
+    float *_A_arr = A_tensor.data_ptr<float>();
+    float *_B_arr = B_tensor.data_ptr<float>();
+    float *_C_arr = C.data_ptr<float>();
+
+    // expand out arrays to fit batched operation
+    float **A_arr = unflatten(_A_arr, batch_dim, A_rows, A_cols);
+    float **B_arr = unflatten(_B_arr, batch_dim, B_rows, B_cols);
+    float **C_arr = unflatten(_C_arr, batch_dim, C_rows, C_cols);
 
     cublas_bmm_wrapper(g_cublas_handle, A_arr, A_rows, A_cols, B_arr, B_rows, B_cols, C_arr, batch_dim);
-    auto accessor = C.accessor<float, 3>();
+    // no need to reshape because of unflatten hack
+    auto accessor = _C_arr.accessor<float, 3>();
 
     for (int b = 0; b < batch_dim; b++) {
       for (int i = 0; i < C_rows; i++)
       {
         for (int j = 0; j < C_cols; j++)
         {
-          accessor[b][i][j] = C_arr[i * C_cols + j];
+          accessor[b][i][j] = _C_arr[i * C_cols + j];
         }
       }
     }

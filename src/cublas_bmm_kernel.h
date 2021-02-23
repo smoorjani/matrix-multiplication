@@ -81,47 +81,6 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     cudaCheckErrors("cudaMemcpy D2H fail");
 }
 
-int main(){
-
-  float h_M1[ROWM][COLM], h_M2[ROWM][COLM];
-  float h_N1[COLM][COLN], h_N2[COLM][COLN];
-  float h_P1[ROWM][COLN], h_P2[ROWM][COLN];
-  float *h_Marray[2], *h_Narray[2], *h_Parray[2];
-  for (int i = 0; i < ROWM; i++)
-    for (int j = 0; j < COLM; j++){
-      h_M1[i][j] = 1.0f; h_M2[i][j] = 2.0f;}
-  for (int i = 0; i < COLM; i++)
-    for (int j = 0; j < COLN; j++){
-      h_N1[i][j] = 1.0f; h_N2[i][j] = 1.0f;}
-  for (int i = 0; i < ROWM; i++)
-    for (int j = 0; j < COLN; j++){
-      h_P1[i][j] = 0.0f; h_P2[i][j] = 0.0f;}
-
-  h_Marray[0] = &(h_M1[0][0]);
-  h_Marray[1] = &(h_M2[0][0]);
-  h_Narray[0] = &(h_N1[0][0]);
-  h_Narray[1] = &(h_N2[0][0]);
-  h_Parray[0] = &(h_P1[0][0]);
-  h_Parray[1] = &(h_P2[0][0]);
-
-  GPU_Multi(h_Marray, h_Narray, h_Parray, ROWM, COLN, COLM, 2, 1.0f, 0.0f);
-  for (int i = 0; i < ROWM; i++)
-    for (int j = 0; j < COLN; j++){
-      if (h_P1[i][j] != COLM*1.0f)
-      {
-        printf("h_P1 mismatch at %d,%d was: %f should be: %f\n"
-          , i, j, h_P1[i][j], COLM*1.0f); return 1;
-      }
-      if (h_P2[i][j] != COLM*2.0f)
-      {
-        printf("h_P2 mismatch at %d,%d was: %f should be: %f\n"
-          , i, j, h_P2[i][j], COLM*2.0f); return 1;
-      }
-    }
-  printf("Success!\n");
-  return 0;
-}
-
 // void cublas_bmm_wrapper(cublasHandle_t handle,
 //                        float *h_A, int h_A_rows, int h_A_cols,
 //                        float *h_B, int h_B_rows, int h_B_cols,
