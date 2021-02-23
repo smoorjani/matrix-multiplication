@@ -13,6 +13,7 @@
 
 #include "cusparse_mm_kernel.h"
 #include "cublas_mm_kernel.h"
+#include "cublas_bmm_kernel.h"
 
 // TODO: add handle initialization for cusparse
 cublasHandle_t g_cublas_handle = nullptr;
@@ -197,3 +198,39 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("cublas_bmm", &cublas_bmm, "cuBLAS Batched Torch Matrix Multiplication");
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
 }
+
+// else if (dim == 4) {
+  //   A_tensor = torch::transpose(A, 2, 3);
+  //   B_tensor = torch::transpose(B, 2, 3);
+
+  //   A_rows = A_tensor.size(2);
+  //   A_cols = A_tensor.size(3);
+  //   B_rows = B_tensor.size(2);
+  //   B_cols = B_tensor.size(3);
+
+  //   batch_dim = A_tensor.size(1);
+  //   assert(batch_dim == B_tensor.size(1));
+
+  //   torch::Tensor C = torch::zeros({batch_dim, B_cols, A_rows}, torch::kFloat32);
+  //   int C_rows = C.size(2);
+  //   int C_cols = C.size(3);
+
+  //   float *A_arr = A_tensor.data_ptr<float>();
+  //   float *B_arr = B_tensor.data_ptr<float>();
+  //   float *C_arr = C.data_ptr<float>();
+
+  //   cublas_bmm_wrapper(g_cublas_handle, A_arr, A_rows, A_cols, B_arr, B_rows, B_cols, C_arr, batch_dim);
+  //   auto accessor = C.accessor<float, 3>();
+
+  //   for (int b = 0; b < batch_dim; b++) {
+  //     for (int i = 0; i < C_rows; i++)
+  //     {
+  //       for (int j = 0; j < C_cols; j++)
+  //       {
+  //         accessor[b][i][j] = C_arr[i * C_cols + j];
+  //       }
+  //     }
+  //   }
+    
+  //   return C;
+  // }
