@@ -43,18 +43,26 @@ void destroy_cusparse_handle() {
   cusparseSafeCall(cusparseDestroy(g_cusparse_handle));
 }
 
-float **unflatten(float *arr, int batch_dim, int rows, int cols) {
-  // note that the array must be contiguous for this hack to work
-  float **new_arr = malloc(sizeof(float *) * batch_dim);
-  float *arr_ptr = arr;
-  int batch_count = 0;
+float **raw_data(torch::Tensor tensor, int batch_dim, int rows, int cols) {
+  float **data_ptr = (float**) malloc(batch_dim * sizeof(float*));
+  auto accessor = tensor.accessor<float, 3>();
 
-  while (batch_count < batch_dim) {
-    new_arr[batch_count] = arr + (batch_count * rows * cols * sizeof(float));
-    batch_count++;
+  for (int b = 0; b < batch_dim; b++) {
+    data_ptr[b] = (float*) malloc(rows * cols * sizeof(float));
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        data_ptr[b][i * cols + j] = accessor[b][i][j];
+      }
+    }
   }
 
-  return new_arr;
+  return data_ptr;
+}
+void free_raw_data(float **ptr, int batch_dim) {
+	for (int b = 0; b < batch_dim; b++) {
+		free(ptr[b]);
+	}
+	free(ptr);
 }
 
 torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
@@ -122,32 +130,32 @@ torch::Tensor cublas_bmm(torch::Tensor B, torch::Tensor A, int dim)
     batch_dim = A_tensor.size(0);
     assert(batch_dim == B_tensor.size(0));
 
-    torch::Tensor C = torch::zeros({batch_dim, B_cols, A_rows}, torch::kFloat32);
+    torch::Tensor C = torch::zeros({batch_dim, B_cols, A_rows}, torch::kFloat32).contiguous();
     int C_rows = C.size(1);
     int C_cols = C.size(2);
 
-    float *_A_arr = A_tensor.data_ptr<float>();
-    float *_B_arr = B_tensor.data_ptr<float>();
-    float *_C_arr = C.data_ptr<float>();
-
     // expand out arrays to fit batched operation
-    float **A_arr = unflatten(_A_arr, batch_dim, A_rows, A_cols);
-    float **B_arr = unflatten(_B_arr, batch_dim, B_rows, B_cols);
-    float **C_arr = unflatten(_C_arr, batch_dim, C_rows, C_cols);
+    float **A_arr = raw_data(A_tensor, batch_dim, A_rows, A_cols);
+    float **B_arr = raw_data(B_tensor, batch_dim, B_rows, B_cols);
+    float **C_arr = raw_data(C, batch_dim, C_rows, C_cols);
 
-    cublas_bmm_wrapper(g_cublas_handle, A_arr, A_rows, A_cols, B_arr, B_rows, B_cols, C_arr, batch_dim);
+    cublas_bmm_wrapper(g_cublas_handle, A_arr, B_arr, C_arr, A_rows, B_rows, B_cols, batch_dim);
     // no need to reshape because of unflatten hack
-    auto accessor = _C_arr.accessor<float, 3>();
+    auto accessor = C.accessor<float, 3>();
 
     for (int b = 0; b < batch_dim; b++) {
       for (int i = 0; i < C_rows; i++)
       {
         for (int j = 0; j < C_cols; j++)
         {
-          accessor[b][i][j] = _C_arr[i * C_cols + j];
+          accessor[b][i][j] = C_arr[b][i * C_cols + j];
         }
       }
     }
+
+    free_raw_data(A_arr, batch_dim);
+    free_raw_data(B_arr, batch_dim);
+    free_raw_data(C_arr, batch_dim);
     
     return C;
   } 
