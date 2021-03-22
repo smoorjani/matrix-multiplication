@@ -101,45 +101,31 @@ torch::Tensor cublas_mmul(torch::Tensor B, torch::Tensor A)
   return C;
 }
 
-torch::Tensor cublas_bmm(torch::Tensor B, torch::Tensor A, int dim)
+torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 {
   // torch passes in with column major
   // the current
-  torch::Tensor A_tensor;
-  torch::Tensor B_tensor;
-  torch::Tensor C;
-
-  int A_rows;
-  int A_cols;
-  int B_rows;
-  int B_cols;
-  int C_rows;
-  int C_cols;
-  int batch_dim;
 
   if (dim == 3) {
-    // B^T A^T for row major to col major
-    A_tensor = torch::transpose(A, 1, 2);
-    B_tensor = torch::transpose(B, 1, 2);
 
-    A_rows = A_tensor.size(1);
-    A_cols = A_tensor.size(2);
-    B_rows = B_tensor.size(1);
-    B_cols = B_tensor.size(2);
+    int A_rows = A.size(1);
+    int A_cols = A.size(2);
+    int B_rows = B.size(1);
+    int B_cols = B.size(2);
 
-    batch_dim = A_tensor.size(0);
-    assert(batch_dim == B_tensor.size(0));
+    int batch_dim = A.size(0);
+    assert(batch_dim == B.size(0));
 
-    torch::Tensor C = torch::zeros({batch_dim, B_cols, A_rows}, torch::kFloat32).contiguous();
+    torch::Tensor C = torch::zeros({batch_dim, A_rows, B_cols}, torch::kFloat32).contiguous();
     int C_rows = C.size(1);
     int C_cols = C.size(2);
 
-    // expand out arrays to fit batched operation
-    float **A_arr = raw_data(A_tensor, batch_dim, A_rows, A_cols);
-    float **B_arr = raw_data(B_tensor, batch_dim, B_rows, B_cols);
+    float **A_arr = raw_data(A, batch_dim, A_rows, A_cols);
+    float **B_arr = raw_data(B, batch_dim, B_rows, B_cols);
     float **C_arr = raw_data(C, batch_dim, C_rows, C_cols);
 
-    cublas_bmm_wrapper(g_cublas_handle, A_arr, B_arr, C_arr, A_rows, B_rows, B_cols, batch_dim);
+    GPU_Multi(A_arr, B_arr, C_arr, A_rows, B_cols, B_rows, batch_dim, 1.0, 0.0);
+
     // no need to reshape because of unflatten hack
     auto accessor = C.accessor<float, 3>();
 
@@ -148,7 +134,7 @@ torch::Tensor cublas_bmm(torch::Tensor B, torch::Tensor A, int dim)
       {
         for (int j = 0; j < C_cols; j++)
         {
-          accessor[b][i][j] = C_arr[b][i * C_cols + j];
+           accessor[b][i][j] = C_arr[b][i * C_cols + j];
         }
       }
     }
@@ -156,9 +142,8 @@ torch::Tensor cublas_bmm(torch::Tensor B, torch::Tensor A, int dim)
     free_raw_data(A_arr, batch_dim);
     free_raw_data(B_arr, batch_dim);
     free_raw_data(C_arr, batch_dim);
-    
     return C;
-  } 
+  }
 }
 
 torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
