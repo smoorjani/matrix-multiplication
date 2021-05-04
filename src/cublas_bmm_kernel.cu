@@ -40,12 +40,24 @@ void printArrayS(float *ptr, int rows, int cols, char mode, char *name) {
     }
 }
 
+/*
 __global__ void packed_accessor_kernel(
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace) {
-  int i=threadIdx.x
+  int i=threadIdx.x;
   // should access row i
-  cudaMemcpy(trace[i], accessor[i])
+  cudaMemcpy(trace[i], accessor[i]);
+}
+*/
+__global__ void packed_accessor_kernel(
+    torch::PackedTensorAccessor32<float, 3> accessor,
+    float** trace, int size) {
+  int i=threadIdx.x;
+  // should access row i
+  for (int j = 0; j < size; j++) {
+    //cudaMemcpy(trace[i] + (j * sizeof(float)), accessor[i][j], sizeof(float), cudaMemcpyDeviceToDevice);
+    trace[i][j] = accessor[i][j];
+  }
 }
 
 void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
@@ -58,7 +70,7 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
 
-    const float **d_A_arr, **d_B_arr;
+    float **d_A_arr, **d_B_arr;
     float **d_C_arr;
 
     gpuErrchk(cudaMalloc((void **)&d_A_arr, batch_dim * sizeof(float *)));
@@ -68,7 +80,7 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     auto A_accessor = d_A.packed_accessor32<float,3>();
     float **trace = d_A_arr;
     // execute 1 time with a_rows threads
-    packed_accessor_kernel<<<1, a_rows>>>(A_accessor, (float**) (d_A_arr));
+    packed_accessor_kernel<<<1, a_rows>>>(A_accessor, (float**) (d_A_arr), a_size);
 
     const float alpha = 1.0f, beta = 0.0f;
     cublasStatus_t cublas_result = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
@@ -94,7 +106,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
 
-    const float **d_A_arr, **d_B_arr;
+    float **d_A_arr, **d_B_arr;
     float **d_C_arr;
 
     gpuErrchk(cudaMalloc((void **)&d_A_arr, batch_dim * sizeof(float *)));

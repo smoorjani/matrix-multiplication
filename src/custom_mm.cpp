@@ -28,6 +28,10 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
                          int nnzA, int h_A_rowptr_size,
                          double *h_B_dense, int h_B_rows, int h_B_cols,
                          double *h_C_dense);
+void dense_to_csr(cusparseHandle_t handle, 
+                  double *h_A_dense, const int Nrows, const int Ncols,
+                  double **h_A_val, int **h_A_colind, int **h_A_rowptr, int *nnzA);
+
 
 cublasHandle_t g_cublas_handle = nullptr;
 cusparseHandle_t g_cusparse_handle = nullptr;
@@ -117,13 +121,18 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
     int C_rows = C.size(1);
     int C_cols = C.size(2);
 
-    float **A_arr = raw_data(A, batch_dim, A_rows, B_rows);
-    float **B_arr = raw_data(B, batch_dim, B_rows, B_cols);
-    float **C_arr = raw_data(C, batch_dim, C_rows, C_cols);
+    //float **A_arr = raw_data(A, batch_dim, A_rows, B_rows);
+    //float **B_arr = raw_data(B, batch_dim, B_rows, B_cols);
+    //float **C_arr = raw_data(C, batch_dim, C_rows, C_cols);
+
+    float *A_arr = A.data_ptr<float>();
+    float *B_arr = B.data_ptr<float>();
+    float *C_arr = C.data_ptr<float>();
 
     cublas_bmm_wrapper(g_cublas_handle, A_arr, B_arr, C_arr, A_rows, B_cols, B_rows, batch_dim);
 
     // no need to reshape because of unflatten hack
+    /*
     auto accessor = C.accessor<float, 3>();
 
     for (int b = 0; b < batch_dim; b++) {
@@ -135,10 +144,11 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
         }
       }
     }
-
-    free_raw_data(A_arr, batch_dim);
-    free_raw_data(B_arr, batch_dim);
-    free_raw_data(C_arr, batch_dim);
+    */
+    
+    //free_raw_data(A_arr, batch_dim);
+    //free_raw_data(B_arr, batch_dim);
+    //free_raw_data(C_arr, batch_dim);
     return C;
   } else if (dim == 2) {
     return cublas_mmul(A, B);
