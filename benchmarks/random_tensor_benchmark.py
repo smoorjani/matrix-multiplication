@@ -1,15 +1,16 @@
 import torch
-from scipy.sparse import random
 import numpy as np
 import time
 import logging
 from custom_mm import (
-    cublas_mmul,
-    cusparse_mmul,
     init_cublas,
     destroy_cublas,
     init_cusparse,
     destroy_cusparse
+)
+from matmuls import (
+    cublas_matmul,
+    cusparse_matmul
 )
 
 init_cublas()
@@ -32,21 +33,23 @@ def generate_dataset(num_samples: int = 1000, dim: int = 1024,
         torch.manual_seed(seed)
         np.random.seed(seed)
 
-    if not sparsity:
-        a = torch.randn(num_samples, dim, dim)
-        b = torch.randn(num_samples, dim, dim)
+    a = np.random.rand((num_samples * dim * dim))
+    b = np.random.rand((num_samples * dim * dim))
 
-        return (a, b)
-    else:
-        # TODO: generate sparse matrices
-        # - one idea is to generate
-        # https://stackoverflow.com/questions/64553148/how-to-convert-a-pytorch-sparse-coo-tensor-into-a-pytorch-dense-tensor
-        # - other idea is to delete
-        a = torch.stack([torch.tensor(
-            random(dim, dim, density=1-sparsity).toarray()) for _ in range(num_samples)])
-        b = torch.stack([torch.tensor(
-            random(dim, dim, density=1-sparsity).toarray()) for _ in range(num_samples)])
-        return (a, b)
+    if sparsity:
+        # nnz = sparsity * num_samples * dim * dim
+        indices = a.flatten()
+        to_replace = np.random.permutation(
+            indices)[:int(indices.size * sparsity)]
+
+        a[np.unravel_index(to_replace, a.shape)] = 0
+
+    a = a.reshape((num_samples, dim, dim))
+    b = b.reshape((num_samples, dim, dim))
+    a = torch.tensor(a)
+    b = torch.tensor(b)
+
+    return (a, b)
 
 
 def test_kernel(matmul, a, b):
@@ -54,7 +57,7 @@ def test_kernel(matmul, a, b):
     assert a.shape[0] == b.shape[0]
     assert len(a.shape) == len(b.shape) == 3
 
-    c = torch.stack([matmul(a[i], b[i]) for i in range(a.shape[0])])
+    c = matmul(a, b)
     t_final = time.time() - t_init
 
     logger.debug('Execution time for {num_samples} multiplications: {time}\n'.format(
@@ -80,12 +83,12 @@ for sparsity in sparsity_levels:
         test_kernel(torch.matmul, a, b)
 
         logger.debug("cuBLAS Matmul: \n")
-        test_kernel(cublas_mmul, a, b)
+        test_kernel(cublas_matmul, a, b)
 
         logger.debug("cuSPARSE Matmul: \n")
         _a = a.type(torch.DoubleTensor)
         _b = b.type(torch.DoubleTensor)
-        test_kernel(cusparse_mmul, _a, _b)
+        test_kernel(cusparse_matmul, _a, _b)
 
 # # TODO: fix issue with "RuntimeError: operation does not have an identity."
 # print("BlockSparse Matmul: \n")

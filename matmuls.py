@@ -12,8 +12,6 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
     :param torch_: Set to true if data is passed in in col-major (expected row-major)
     :returns: Matrix multiplication output
     '''
-    a = a.contiguous()
-    b = b.contiguous()
 
     if len(a.shape) == 1 or len(b.shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuBLAS')
@@ -74,9 +72,6 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> t
         init_type = torch.float
         a = a.to(torch.double)
         b = b.to(torch.double)
-
-    a = a.contiguous()
-    b = b.contiguous()
 
     if len(a.shape) == 1 or len(b.shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuSPARSE')
