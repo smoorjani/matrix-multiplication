@@ -11,11 +11,24 @@
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
 
-#include "cusparse_mm_kernel.h"
-#include "cublas_mm_kernel.h"
-#include "cublas_bmm_kernel.h"
+// cublas mm forward declaration
+void cublas_mm_wrapper(cublasHandle_t handle,
+                       float *d_A, float *d_B, float *d_C,
+                       int m, int k, int n);
+        
+// cublas bmm forward declaration
+void cublas_bmm_wrapper(cublasHandle_t handle,
+               float *d_A, float *d_B, float *d_C,
+               size_t a_rows, size_t b_cols, size_t b_rows,
+               size_t batch_dim);
+            
+// cusparse mm forward declaration
+void cusparse_mm_wrapper(cusparseHandle_t handle,
+                         double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
+                         int nnzA, int h_A_rowptr_size,
+                         double *h_B_dense, int h_B_rows, int h_B_cols,
+                         double *h_C_dense);
 
-// TODO: add handle initialization for cusparse
 cublasHandle_t g_cublas_handle = nullptr;
 cusparseHandle_t g_cusparse_handle = nullptr;
 
