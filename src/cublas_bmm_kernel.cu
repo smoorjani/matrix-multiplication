@@ -9,7 +9,7 @@
 
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
-
+/*
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -19,6 +19,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
       if (abort) exit(code);
    }
 }
+*/
 
 void printArrayS(float *ptr, int rows, int cols, char mode, char *name) {
     printf("%s\n", name);
@@ -55,8 +56,9 @@ __global__ void packed_accessor_kernel(
   int i=threadIdx.x;
   // should access row i
   for (int j = 0; j < size; j++) {
-    //cudaMemcpy(trace[i] + (j * sizeof(float)), accessor[i][j], sizeof(float), cudaMemcpyDeviceToDevice);
-    trace[i][j] = accessor[i][j];
+    //cudaMemcpy(&trace[i][j], accessor[i][j].data(), sizeof(float), cudaMemcpyDeviceToDevice);
+    trace[i][j] = *(accessor[i][j].data());
+    
   }
 }
 

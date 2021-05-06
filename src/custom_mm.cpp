@@ -7,7 +7,6 @@
 #include <torch/extension.h>
 #include <cuda_runtime.h>
 
-#include "Utilities.cuh"
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
 
@@ -52,12 +51,13 @@ void destroy_cublas_handle() {
   }
 }
 
+// TODO: wrap calls in an error checking function
 void init_cusparse_handle() {
-  cusparseSafeCall(cusparseCreate(&g_cusparse_handle));
+  cusparseCreate(&g_cusparse_handle);
 }
 
 void destroy_cusparse_handle() {
-  cusparseSafeCall(cusparseDestroy(g_cusparse_handle));
+  cusparseDestroy(g_cusparse_handle);
 }
 
 float **raw_data(torch::Tensor tensor, int batch_dim, int rows, int cols) {
