@@ -92,7 +92,7 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
   float *B_arr = B.data_ptr<float>();
 
   int A_rows = A.size(0);
-  int A_cols = B.size(1);
+  int A_cols = A.size(1);
   int B_cols = B.size(1);
 
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
@@ -212,6 +212,7 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
 
   return C;
 }
+
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {

@@ -1,4 +1,5 @@
 import torch
+import time
 from torch.autograd.function import InplaceFunction
 import custom_mm
 
@@ -12,9 +13,11 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
     :param torch_: Set to true if data is passed in in col-major (expected row-major)
     :returns: Matrix multiplication output
     '''
-    a = a.cuda()
-    b = b.cuda()
-
+    a = a.cuda(0)
+    b = b.cuda(0)
+    print(a.shape, b.shape)
+    c = None
+    t0 = time.time()
     if len(a.shape) == 1 or len(b.shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
@@ -26,7 +29,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
             _c = custom_mm.cublas_mmul(_a, b)
         else:
             _c = custom_mm.cublas_mmul(b.t(), _a.t()).t()
-        return _c.reshape(lda, dim1, -1)
+        c = _c.reshape(lda, dim1, -1)
     elif len(a.shape) == 2 and len(b.shape) == 3:
         assert a.shape[-1] == b.shape[1]
         ldb, dim1, dim2 = b.shape
@@ -35,7 +38,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
             _c = custom_mm.cublas_mmul(a, _b)
         else:
             _c = custom_mm.cublas_mmul(_b.t(), a.t()).t()
-        return _c.reshape(ldb, dim1, -1)
+        c = _c.reshape(ldb, dim1, -1)
     elif len(a.shape) >= 3 and len(b.shape) >= 3:
         _, a_dim2 = a.shape[-2:]
         b_dim1, _ = b.shape[-2:]
@@ -43,21 +46,24 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
         assert lda == ldb
         assert a_dim2 == b_dim1
         if len(a.shape) == 3 and len(b.shape) == 3:
-            _c = torch.stack([cublas_matmul(a[i], b[i], torch_)
-                              for i in range(lda)])
+            _c = custom_mm.cublas_bmm(a, b, 3)
+            #_c = torch.stack([cublas_matmul(a[i], b[i], torch_)
+            #                  for i in range(lda)])
         else:
             _c = torch.stack([cublas_matmul(a[i], b[i], torch_)
                               for i in range(lda)])
-        return _c
+        c = _c
     elif len(a.shape) == 2 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
         if not torch_:
-            return custom_mm.cublas_mmul(a, b)
+            c = custom_mm.cublas_mmul(a, b)
         else:
-            return custom_mm.cublas_mmul(b.t(), a.t()).t()
+            c = custom_mm.cublas_mmul(b.t(), a.t()).t()
     else:
         print('Multiplication with matrix dimensions is not implemented in cuBLAS')
         return a @ b
+    print('Matmul time: ', time.time() - t0)
+    return c
 
 
 def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> torch.Tensor:
@@ -69,15 +75,10 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> t
     :param torch_: Set to true if data is passed in in col-major (expected row-major)
     :returns: Matrix multiplication output
     '''
-    init_type = torch.double
-    if (a.dtype == torch.float or b.dtype == torch.float):
-        init_type = torch.float
-        a = a.to(torch.double)
-        b = b.to(torch.double)
 
     if len(a.shape) == 1 or len(b.shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuSPARSE')
-        return torch.matmul(a, b).to(init_type)
+        return a @ b
     elif len(a.shape) == 3 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
         lda, dim1, dim2 = a.shape
@@ -86,7 +87,7 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> t
             _c = custom_mm.cusparse_mmul(_a, b)
         else:
             _c = custom_mm.cusparse_mmul(b.t(), _a.t()).t()
-        return _c.reshape(lda, dim1, -1).to(init_type)
+        return _c.reshape(lda, dim1, -1).clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 3:
         assert a.shape[-1] == b.shape[1]
         ldb, dim1, dim2 = b.shape
@@ -95,7 +96,7 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> t
             _c = custom_mm.cusparse_mmul(a, _b)
         else:
             _c = custom_mm.cusparse_mmul(_b.t(), a.t()).t()
-        return _c.reshape(ldb, dim1, -1).to(init_type)
+        return _c.reshape(ldb, dim1, -1).clone().detach()
     elif len(a.shape) >= 3 and len(b.shape) >= 3:
         _, a_dim2 = a.shape[-2:]
         b_dim1, _ = b.shape[-2:]
@@ -108,16 +109,16 @@ def cusparse_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> t
         else:
             _c = torch.stack([cusparse_matmul(a[i], b[i], torch_)
                               for i in range(lda)])
-        return _c.to(init_type)
+        return _c.clone().detach()
     elif len(a.shape) == 2 and len(b.shape) == 2:
         assert a.shape[-1] == b.shape[0]
         if not torch_:
-            return custom_mm.cusparse_mmul(a, b).to(init_type)
+            return custom_mm.cusparse_mmul(a, b)
         else:
-            return custom_mm.cusparse_mmul(b.t(), a.t()).t().to(init_type)
+            return custom_mm.cusparse_mmul(b.t(), a.t()).t()
     else:
         print('Multiplication with matrix dimensions is not implemented in cuSPARSE')
-        return torch.matmul(a, b).to(init_type)
+        return a @ b
 
 
 class cublasMM(InplaceFunction):

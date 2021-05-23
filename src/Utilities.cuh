@@ -9,6 +9,16 @@
 #include <cuda_runtime.h>
 #include <cusparse_v2.h>
 
+
+void print_arr(float *arr, int m, int n) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%.4f ", arr[i * n + j]);
+        }
+        printf("\n");
+    }
+}
+
 /********************/
 /* CUDA ERROR CHECK */
 /********************/
