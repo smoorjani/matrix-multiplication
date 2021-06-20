@@ -28,19 +28,6 @@ void cublas_mm_wrapper(cublasHandle_t handle,
                        int m, int k, int n) {
     cudaMemset(d_C, 0, m * n * sizeof(float));
  
-
-    /* 
-    printf("m: %d, k: %d, n: %d\n", m, k, n);
- 
-    float *h_A = (float *) malloc(sizeof(float) * m * k);
-    float *h_B = (float *) malloc(sizeof(float) * k * n);
-    gpuErrchk(cudaMemcpy(h_A, d_A, sizeof(float) * m * k, cudaMemcpyDeviceToHost));
-    gpuErrchk(cudaMemcpy(h_B, d_B, sizeof(float) * k * n, cudaMemcpyDeviceToHost));
-
-    print_arr(h_A, m, k);
-    print_arr(h_B, k, n);
-    */
-
     float alpha = 1.0;
     float beta = 0.0;
     cublasStatus_t status = cublasSgemm(
@@ -78,24 +65,33 @@ void printArrayS(float *ptr, int rows, int cols, char mode, char *name) {
     }
 }
 
-/*
-__global__ void packed_accessor_kernel(
+__global__ void packed_accessor_kernel(    
     torch::PackedTensorAccessor32<float, 3> accessor,
-    float** trace) {
-  int i=threadIdx.x;
-  // should access row i
-  cudaMemcpy(trace[i], accessor[i]);
-}
-*/
-__global__ void packed_accessor_kernel(
-    torch::PackedTensorAccessor32<float, 3> accessor,
-    float** trace, int size) {
-  int i=threadIdx.x;
-  // should access row i
-  for (int j = 0; j < size; j++) {
-    //cudaMemcpy(&trace[i][j], accessor[i][j].data(), sizeof(float), cudaMemcpyDeviceToDevice);
-    trace[i][j] = *(accessor[i][j].data());
-    
+    float** trace,
+    int to_access
+) {
+  int row=threadIdx.x;
+  int col=threadIdx.y;
+  //printf("Thread: %d %d\n", i, j);
+
+  int batch_size = accessor.size(0);
+  int n_rows = accessor.size(1);
+  int n_cols = accessor.size(2);
+
+  if (row > n_rows || col > n_cols) {
+      return;
+  }
+ 
+  for (int i = 0; i < batch_size; i++) {
+    //printf("Accessor: %d %d %d = %f\n", batch_size, row, col, accessor[i][row][col]);
+    if (!to_access) {
+        trace[i][row * n_cols + col] = accessor[i][row][col];
+        //trace[i][col * n_rows + row] = accessor[i][row][col];
+    } else {
+        accessor[i][row][col] = trace[i][row * n_cols + col];
+        //accessor[i][row][col] = trace[i][col * n_rows + row];
+    }
+    //printf("Trace val: %f\n", trace[i][row * n_cols + col]);
   }
 }
 
@@ -105,30 +101,77 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
                size_t batch_dim) {
 
 
-    size_t c_size = sizeof(float) * a_rows * b_cols;
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
+    size_t c_size = sizeof(float) * a_rows * b_cols;
 
-    float **d_A_arr, **d_B_arr;
-    float **d_C_arr;
+    float **d_A_arr, **d_B_arr, **d_C_arr;
+    float **h_A_arr = (float **) malloc(batch_dim * sizeof(float*));
+    float **h_B_arr = (float **) malloc(batch_dim * sizeof(float*));
+    float **h_C_arr = (float **) malloc(batch_dim * sizeof(float*));
 
     gpuErrchk(cudaMalloc((void **)&d_A_arr, batch_dim * sizeof(float *)));
     gpuErrchk(cudaMalloc((void **)&d_B_arr, batch_dim * sizeof(float *)));
     gpuErrchk(cudaMalloc((void **)&d_C_arr, batch_dim * sizeof(float *)));
 
+    for (int i = 0; i < batch_dim; i++) {
+        gpuErrchk(cudaMalloc(&h_A_arr[i], a_size));
+        gpuErrchk(cudaMalloc(&h_B_arr[i], b_size));
+        gpuErrchk(cudaMalloc(&h_C_arr[i], c_size));
+    }
+
+    gpuErrchk(cudaMemcpy(d_A_arr, h_A_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(d_B_arr, h_B_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(d_C_arr, h_C_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
+
     auto A_accessor = d_A.packed_accessor32<float,3>();
-    float **trace = d_A_arr;
+    auto B_accessor = d_B.packed_accessor32<float,3>();
+    auto C_accessor = d_C.packed_accessor32<float,3>();
+    
+    printf("chkpt1\n");
+
     // execute 1 time with a_rows threads
-    packed_accessor_kernel<<<1, a_rows>>>(A_accessor, (float**) (d_A_arr), a_size);
+    dim3 a_block(a_rows, b_rows);
+    dim3 b_block(b_rows, b_cols);
+    dim3 c_block(a_rows, b_cols);
+
+    packed_accessor_kernel<<<1, a_block>>>(A_accessor, d_A_arr, 0);
+    packed_accessor_kernel<<<1, b_block>>>(B_accessor, d_B_arr, 0);
+    cudaDeviceSynchronize();
+
 
     const float alpha = 1.0f, beta = 0.0f;
-    cublasStatus_t cublas_result = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
+       
+    cublasStatus_t status = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
                                        , b_cols, a_rows, b_rows
                                        , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
                                        , &beta, d_C_arr, b_cols
                                        , batch_dim);
-    assert(cublas_result == CUBLAS_STATUS_SUCCESS);
+    /*
+    cublasStatus_t status = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
+                                       , a_rows, b_cols, b_rows
+                                       , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
+                                       , &beta, d_C_arr, b_cols
+                                       , batch_dim);
+    */
 
+    /*
+    // B * A
+    cublasStatus_t status = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
+                                       , b_cols, a_rows, b_rows
+                                       , &alpha, d_B_arr, b_rows, d_A_arr, a_rows
+                                       , &beta, d_C_arr, b_rows
+                                       , batch_dim);
+    */
+
+    if (status != CUBLAS_STATUS_SUCCESS)
+    {
+        std::cerr << "Kernel execution error.";
+    }
+
+    packed_accessor_kernel<<<1, c_block>>>(C_accessor, d_C_arr, 1);
+    cudaDeviceSynchronize();
+    
     gpuErrchk(cudaFree(d_A_arr));
     gpuErrchk(cudaFree(d_B_arr));
     gpuErrchk(cudaFree(d_C_arr));

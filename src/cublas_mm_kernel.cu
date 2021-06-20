@@ -27,4 +27,5 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     }
 
 }
+
 #endif // __CUBLAS_MM_KERNEL_H__
