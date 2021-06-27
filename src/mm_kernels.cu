@@ -1,8 +1,6 @@
 #ifndef __MM_KERNEL_H__
 #define __MM_KERNEL_H__
 
-
-
 #include <iostream>
 #include <torch/extension.h>
 #include "Utilities.cuh"
@@ -34,8 +32,7 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
 __global__ void packed_accessor_kernel(    
     torch::PackedTensorAccessor32<float, 3> accessor,
-    float** trace,
-    int to_access
+    float** trace
 ) {
   int row = threadIdx.x + blockDim.x * blockIdx.x;
   int col = threadIdx.y + blockDim.y * blockIdx.y;
@@ -46,21 +43,35 @@ __global__ void packed_accessor_kernel(
   int n_cols = accessor.size(2);
 
   if (row > n_rows || col > n_cols) {
-      return;
+    return;
   }
  
   for (int i = 0; i < batch_size; i++) {
-    //printf("Accessor: %d %d %d = %f\n", batch_size, row, col, accessor[i][row][col]);
-    if (!to_access) {
-        trace[i][row * n_cols + col] = accessor[i][row][col];
-        //trace[i][col * n_rows + row] = accessor[i][row][col];
-    } else {
-        accessor[i][row][col] = trace[i][row * n_cols + col];
-        //accessor[i][row][col] = trace[i][col * n_rows + row];
-    }
-    //printf("Trace val: %f\n", trace[i][row * n_cols + col]);
+    trace[i][row * n_cols + col] = accessor[i][row][col];
   }
 }
+
+__global__ void packed_setter_kernel(    
+    torch::PackedTensorAccessor32<float, 3> accessor,
+    float** trace
+) {
+  int row = threadIdx.x + blockDim.x * blockIdx.x;
+  int col = threadIdx.y + blockDim.y * blockIdx.y;
+  printf("Thread: %d %d\n", row, col);
+
+  int batch_size = accessor.size(0);
+  int n_rows = accessor.size(1);
+  int n_cols = accessor.size(2);
+
+  if (row > n_rows || col > n_cols) {
+    return;
+  }
+ 
+  for (int i = 0; i < batch_size; i++) {
+    accessor[i][row][col] = trace[i][row * n_cols + col];
+  }
+}
+
 
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
 
@@ -96,8 +107,6 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     auto A_accessor = d_A.packed_accessor32<float,3>();
     auto B_accessor = d_B.packed_accessor32<float,3>();
     auto C_accessor = d_C.packed_accessor32<float,3>();
-    
-    printf("chkpt1\n");
 
     // execute 1 time with a_rows threads
     dim3 thread_per_block(64);
@@ -105,8 +114,8 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     dim3 B_blocks_per_grid((b_rows * b_cols)/64)
     dim3 C_blocks_per_grid((a_rows * b_cols)/64)
 
-    packed_accessor_kernel<<<1, thread_per_block>>>(A_accessor, d_A_arr, 0);
-    packed_accessor_kernel<<<1, thread_per_block>>>(B_accessor, d_B_arr, 0);
+    packed_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
+    packed_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
     cudaDeviceSynchronize();
 
 
@@ -139,7 +148,7 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
         std::cerr << "Kernel execution error.";
     }
 
-    packed_accessor_kernel<<<1, c_block>>>(C_accessor, d_C_arr, 1);
+    packed_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
     cudaDeviceSynchronize();
     
     gpuErrchk(cudaFree(d_A_arr));
@@ -186,7 +195,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
 }
 
 
-'''
+/*
 cuSPARSE Kernels
 https://stackoverflow.com/questions/29688627/sparse-matrix-matrix-multiplication-in-cuda-using-cusparse
 
@@ -195,7 +204,7 @@ A * B = C
 
 (m x k) * (k * n) = (m x n)
 note: row_ind.len = lda + 1
-'''
+*/
 void cusparse_mm_wrapper(cusparseHandle_t handle,
                          double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
                          int nnzA, int h_A_rowptr_size,
