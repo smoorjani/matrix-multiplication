@@ -1,7 +1,7 @@
-#ifndef __CUBLAS_BMM_KERNEL_H__
-#define __CUBLAS_BMM_KERNEL_H__
+#ifndef __MM_KERNEL_H__
+#define __MM_KERNEL_H__
 
-// https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
+
 
 #include <iostream>
 #include <torch/extension.h>
@@ -10,18 +10,6 @@
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
-/*
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
-{
-   if (code != cudaSuccess) 
-   {
-      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-      if (abort) exit(code);
-   }
-}
-*/
-
 
 void cublas_mm_wrapper(cublasHandle_t handle,
                        float *d_A, float *d_B, float *d_C,
@@ -44,35 +32,14 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
 }
 
-
-void printArrayS(float *ptr, int rows, int cols, char mode, char *name) {
-    printf("%s\n", name);
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (mode == 'B') /* Normal mode */ {
-                if (ptr[i * cols + j] >= 0)
-                    printf(" %3.6f ", ptr[i * cols + j]);
-                else
-                    printf("%3.6f ", ptr[i * cols + j]);
-            } else /* Transpose mode */ {
-                if (ptr[j * rows + i] >= 0)
-                    printf("%3.6f ", ptr[j * rows + i]);
-                else
-                    printf("%3.6f ", ptr[j * rows + i]);
-            }
-        }
-        printf("\n");
-    }
-}
-
 __global__ void packed_accessor_kernel(    
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace,
     int to_access
 ) {
-  int row=threadIdx.x;
-  int col=threadIdx.y;
-  //printf("Thread: %d %d\n", i, j);
+  int row = threadIdx.x + blockDim.x * blockIdx.x;
+  int col = threadIdx.y + blockDim.y * blockIdx.y;
+  printf("Thread: %d %d\n", row, col);
 
   int batch_size = accessor.size(0);
   int n_rows = accessor.size(1);
@@ -94,6 +61,8 @@ __global__ void packed_accessor_kernel(
     //printf("Trace val: %f\n", trace[i][row * n_cols + col]);
   }
 }
+
+// https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
 
 void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
@@ -131,12 +100,13 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     printf("chkpt1\n");
 
     // execute 1 time with a_rows threads
-    dim3 a_block(a_rows, b_rows);
-    dim3 b_block(b_rows, b_cols);
-    dim3 c_block(a_rows, b_cols);
+    dim3 thread_per_block(64);
+    dim3 A_blocks_per_grid((a_rows * b_rows)/64)
+    dim3 B_blocks_per_grid((b_rows * b_cols)/64)
+    dim3 C_blocks_per_grid((a_rows * b_cols)/64)
 
-    packed_accessor_kernel<<<1, a_block>>>(A_accessor, d_A_arr, 0);
-    packed_accessor_kernel<<<1, b_block>>>(B_accessor, d_B_arr, 0);
+    packed_accessor_kernel<<<1, thread_per_block>>>(A_accessor, d_A_arr, 0);
+    packed_accessor_kernel<<<1, thread_per_block>>>(B_accessor, d_B_arr, 0);
     cudaDeviceSynchronize();
 
 
@@ -215,14 +185,17 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     gpuErrchk(cudaFree(d_C_arr));
 }
 
-// https://stackoverflow.com/questions/29688627/sparse-matrix-matrix-multiplication-in-cuda-using-cusparse
 
-// Sparse (CSR) * Dense matmul
-// A * B = C
+'''
+cuSPARSE Kernels
+https://stackoverflow.com/questions/29688627/sparse-matrix-matrix-multiplication-in-cuda-using-cusparse
 
-// (m x k) * (k * n) = (m x n)
-// note: row_ind.len = lda + 1
+Sparse (CSR) * Dense matmul
+A * B = C
 
+(m x k) * (k * n) = (m x n)
+note: row_ind.len = lda + 1
+'''
 void cusparse_mm_wrapper(cusparseHandle_t handle,
                          double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
                          int nnzA, int h_A_rowptr_size,
@@ -445,65 +418,4 @@ void dense_to_csr(cusparseHandle_t handle,
     return;
 }
 
-
-
-
-
-
-// void cublas_bmm_wrapper(cublasHandle_t handle,
-//                float **A, float **B, float **C,
-//                size_t a_rows, size_t b_cols, size_t b_rows,
-//                size_t batch_dim) {
-
-//     float *d_A[batch_dim];
-//     float *d_B[batch_dim];
-//     float *d_C[batch_dim];
-
-//     size_t c_size = sizeof(float) * a_rows * b_cols;
-//     size_t a_size = sizeof(float) * a_rows * b_rows;
-//     size_t b_size = sizeof(float) * b_rows * b_cols;
-
-//     const float **d_A_arr, **d_B_arr;
-//     float **d_C_arr;
-
-//     for (int i = 0; i < batch_dim; i++) {
-//         gpuErrchk(cudaMalloc((void **)&d_A[i], a_size));
-//         gpuErrchk(cudaMalloc((void **)&d_B[i], b_size));
-//         gpuErrchk(cudaMalloc((void **)&d_C[i], c_size));
-//     }
-
-//     gpuErrchk(cudaMalloc((void **)&d_A_arr, batch_dim * sizeof(float *)));
-//     gpuErrchk(cudaMalloc((void **)&d_B_arr, batch_dim * sizeof(float *)));
-//     gpuErrchk(cudaMalloc((void **)&d_C_arr, batch_dim * sizeof(float *)));
-
-//     for (int i = 0; i < batch_dim; i++) {
-//         gpuErrchk(cudaMemcpy(d_A[i], A[i], a_size, cudaMemcpyHostToDevice));
-//         gpuErrchk(cudaMemcpy(d_B[i], B[i], b_size, cudaMemcpyHostToDevice));
-//         gpuErrchk(cudaMemcpy(d_C[i], C[i], c_size, cudaMemcpyHostToDevice));
-//     }
-
-//     gpuErrchk(cudaMemcpy(d_A_arr, d_A, batch_dim * sizeof(float *), cudaMemcpyHostToDevice));
-//     gpuErrchk(cudaMemcpy(d_B_arr, d_B, batch_dim * sizeof(float *), cudaMemcpyHostToDevice));
-//     gpuErrchk(cudaMemcpy(d_C_arr, d_C, batch_dim * sizeof(float *), cudaMemcpyHostToDevice));
-
-//     const float alpha = 1.0f, beta = 0.0f;
-//     cublasStatus_t cublas_result = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
-//                                        , b_cols, a_rows, b_rows
-//                                        , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
-//                                        , &beta, d_C_arr, b_cols
-//                                        , batch_dim);
-//     assert(cublas_result == CUBLAS_STATUS_SUCCESS);
-
-//     for (int i = 0; i < batch_dim; i++)
-//     {
-//         gpuErrchk(cudaMemcpy(C[i], d_C[i], c_size, cudaMemcpyDeviceToHost));
-//         gpuErrchk(cudaFree(d_A[i]));
-//         gpuErrchk(cudaFree(d_B[i]));
-//         gpuErrchk(cudaFree(d_C[i]));
-//     }
-//     gpuErrchk(cudaFree(d_A_arr));
-//     gpuErrchk(cudaFree(d_B_arr));
-//     gpuErrchk(cudaFree(d_C_arr));
-// }
-
-#endif // __CUBLAS_BMM_KERNEL_H__
+#endif // __MM_KERNEL_H__

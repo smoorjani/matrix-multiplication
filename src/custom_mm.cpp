@@ -65,29 +65,6 @@ void destroy_cusparse_handle() {
   cusparseDestroy(g_cusparse_handle);
 }
 
-float **raw_data(torch::Tensor tensor, int batch_dim, int rows, int cols) {
-  float **data_ptr = (float**) malloc(batch_dim * sizeof(float*));
-  auto accessor = tensor.accessor<float, 3>();
-
-  for (int b = 0; b < batch_dim; b++) {
-    data_ptr[b] = (float*) malloc(rows * cols * sizeof(float));
-    for (int i = 0; i < rows; i++) {
-      for (int j = 0; j < cols; j++) {
-        data_ptr[b][i * cols + j] = accessor[b][i][j];
-      }
-    }
-  }
-
-  return data_ptr;
-}
-
-void free_raw_data(float **ptr, int batch_dim) {
-	for (int b = 0; b < batch_dim; b++) {
-		free(ptr[b]);
-	}
-	free(ptr);
-}
-
 torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
 {
   // torch passes in with column major
@@ -113,6 +90,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
   // torch passes in with column major
   // the current
 
+  // TODO: dim = 4
   if (dim == 3) {
 
     int A_rows = A.size(1);
@@ -126,35 +104,11 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
     int C_rows = C.size(1);
     int C_cols = C.size(2);
 
-    //float **A_arr = raw_data(A, batch_dim, A_rows, B_rows);
-    //float **B_arr = raw_data(B, batch_dim, B_rows, B_cols);
-    //float **C_arr = raw_data(C, batch_dim, C_rows, C_cols);
-
     float *A_arr = A.data_ptr<float>();
     float *B_arr = B.data_ptr<float>();
     float *C_arr = C.data_ptr<float>();
 
     cublas_bmm_wrapper_accessor(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim);
-    //cublas_bmm_wrapper(g_cublas_handle, A_arr, B_arr, C_arr, A_rows, B_cols, B_rows, batch_dim);
-
-    // no need to reshape because of unflatten hack
-    /*
-    auto accessor = C.accessor<float, 3>();
-
-    for (int b = 0; b < batch_dim; b++) {
-      for (int i = 0; i < C_rows; i++)
-      {
-        for (int j = 0; j < C_cols; j++)
-        {
-           accessor[b][i][j] = C_arr[b][i * C_cols + j];
-        }
-      }
-    }
-    */
-    
-    //free_raw_data(A_arr, batch_dim);
-    //free_raw_data(B_arr, batch_dim);
-    //free_raw_data(C_arr, batch_dim);
     return C;
   } else if (dim == 2) {
     return cublas_mmul(A, B);

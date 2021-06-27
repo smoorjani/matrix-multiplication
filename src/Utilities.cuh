@@ -28,6 +28,27 @@ void print_arr_ptr(float **arr, int m, int n) {
     }
 }
 
+
+void printArrayS(float *ptr, int rows, int cols, char mode, char *name) {
+    printf("%s\n", name);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (mode == 'B') /* Normal mode */ {
+                if (ptr[i * cols + j] >= 0)
+                    printf(" %3.6f ", ptr[i * cols + j]);
+                else
+                    printf("%3.6f ", ptr[i * cols + j]);
+            } else /* Transpose mode */ {
+                if (ptr[j * rows + i] >= 0)
+                    printf("%3.6f ", ptr[j * rows + i]);
+                else
+                    printf("%3.6f ", ptr[j * rows + i]);
+            }
+        }
+        printf("\n");
+    }
+}
+
 /********************/
 /* CUDA ERROR CHECK */
 /********************/
