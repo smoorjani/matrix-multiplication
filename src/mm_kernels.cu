@@ -110,9 +110,9 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
 
     // execute 1 time with a_rows threads
     dim3 thread_per_block(64);
-    dim3 A_blocks_per_grid((a_rows * b_rows)/64)
-    dim3 B_blocks_per_grid((b_rows * b_cols)/64)
-    dim3 C_blocks_per_grid((a_rows * b_cols)/64)
+    dim3 A_blocks_per_grid((a_rows * b_rows)/64);
+    dim3 B_blocks_per_grid((b_rows * b_cols)/64);
+    dim3 C_blocks_per_grid((a_rows * b_cols)/64);
 
     packed_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
     packed_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
