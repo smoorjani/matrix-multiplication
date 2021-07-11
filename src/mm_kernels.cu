@@ -9,6 +9,8 @@
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
 
+#define NUM_THREADS 64;
+
 void cublas_mm_wrapper(cublasHandle_t handle,
                        float *d_A, float *d_B, float *d_C,
                        int m, int k, int n) {
@@ -30,48 +32,81 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
 }
 
-__global__ void packed_accessor_kernel(    
+__global__ void packed_accessor_kernel(
+    // figure out if this is coalesced
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace
 ) {
-  int row = threadIdx.x + blockDim.x * blockIdx.x;
-  int col = threadIdx.y + blockDim.y * blockIdx.y;
-  printf("Thread: %d %d\n", row, col);
-
+  int NUM_THREADS = 64 ;
   int batch_size = accessor.size(0);
   int n_rows = accessor.size(1);
   int n_cols = accessor.size(2);
 
-  if (row > n_rows || col > n_cols) {
+  // todo: note that col is bounded by 64, but tensor col doesn't have to be 64
+  //       fix this in indexing. Then remove the i (for loop)
+  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int row = 0, col = 0;
+
+  if (n_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
+
+    row = idx / idx_per_row;
+    col = (idx % idx_per_row) * NUM_THREADS + off;
+  } else {
+    row = threadId / n_cols;
+    col = threadId % n_cols;
+  }
+
+  if (row >= n_rows || col >= n_cols) {
     return;
   }
- 
+
+  //printf("Thread: %d %d\n", row, col);
   for (int i = 0; i < batch_size; i++) {
+    //printf("Value %f\n", accessor[i][row][col]);
     trace[i][row * n_cols + col] = accessor[i][row][col];
   }
 }
 
-__global__ void packed_setter_kernel(    
+
+__global__ void packed_setter_kernel(
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace
 ) {
-  int row = threadIdx.x + blockDim.x * blockIdx.x;
-  int col = threadIdx.y + blockDim.y * blockIdx.y;
-  printf("Thread: %d %d\n", row, col);
-
+  int NUM_THREADS = 64;
   int batch_size = accessor.size(0);
   int n_rows = accessor.size(1);
   int n_cols = accessor.size(2);
+  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
 
-  if (row > n_rows || col > n_cols) {
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int row = 0, col = 0;
+
+  if (n_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
+
+    row = idx / idx_per_row;
+    col = (idx % idx_per_row) * NUM_THREADS + off;
+  } else {
+    row = threadId / n_cols;
+    col = threadId % n_cols;
+  }
+
+  //printf("Thread: %d %d\n", row, col);
+
+  if (row >= n_rows || col >= n_cols) {
     return;
   }
- 
+
   for (int i = 0; i < batch_size; i++) {
     accessor[i][row][col] = trace[i][row * n_cols + col];
   }
 }
-
 
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
 
@@ -109,11 +144,12 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     auto C_accessor = d_C.packed_accessor32<float,3>();
 
     // execute 1 time with a_rows threads
-    dim3 thread_per_block(64);
-    dim3 A_blocks_per_grid((a_rows * b_rows)/64);
-    dim3 B_blocks_per_grid((b_rows * b_cols)/64);
-    dim3 C_blocks_per_grid((a_rows * b_cols)/64);
+    dim3 thread_per_block(NUM_THREADS);
+    dim3 A_blocks_per_grid((a_rows * b_rows)/NUM_THREADS);
+    dim3 B_blocks_per_grid((b_rows * b_cols)/NUM_THREADS);
+    dim3 C_blocks_per_grid((a_rows * b_cols)/NUM_THREADS);
 
+    // <<<total threads/64 ,64>>>>
     packed_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
     packed_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
     cudaDeviceSynchronize();
