@@ -56,13 +56,20 @@ void destroy_cublas_handle() {
   }
 }
 
-// TODO: wrap calls in an error checking function
 void init_cusparse_handle() {
-  cusparseCreate(&g_cusparse_handle);
+  cusparseStatus_t status = cusparseCreate(&g_cusparse_handle);
+  if (status != CUSPARSE_STATUS_SUCCESS)
+  {
+    std::cerr << "cuSPARSE initialization error.";
+  }
 }
 
 void destroy_cusparse_handle() {
-  cusparseDestroy(g_cusparse_handle);
+  cusparseStatus_t status = cusparseDestroy(g_cusparse_handle);
+  if (status != CUSPARSE_STATUS_SUCCESS)
+  {
+    std::cerr << "Shutdown error!";
+  }
 }
 
 torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
