@@ -51,7 +51,7 @@ def custom_matmul(a: torch.Tensor,
             'Multiplication with matrix dimensions is not implemented in cuBLAS'
         )
         return a @ b
-    print('Matmul time: ', time.time() - t0)
+    #print('Matmul time: ', time.time() - t0)
     return c
 
 
