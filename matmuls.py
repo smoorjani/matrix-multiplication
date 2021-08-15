@@ -42,7 +42,11 @@ def custom_matmul(a: torch.Tensor,
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
         assert a_dim2 == b_dim1
-        c = bmm_op(a, b, 3)
+        if len(a_shape) == 3 and len(b_shape) == 3:
+            c = bmm_op(a, b, 3)
+        else:
+            c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
+                             for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
         assert a_shape[-1] == b_shape[0]
         c = mm_op(a, b)
