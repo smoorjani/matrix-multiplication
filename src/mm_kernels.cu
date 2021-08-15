@@ -9,6 +9,8 @@
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
 
+int NUM_THREADS =  64;
+
 void cublas_mm_wrapper(cublasHandle_t handle,
                        float *d_A, float *d_B, float *d_C,
                        int m, int k, int n) {
@@ -34,44 +36,86 @@ __global__ void packed_accessor_kernel(
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace
 ) {
-  int row = threadIdx.x + blockDim.x * blockIdx.x;
-  int col = threadIdx.y + blockDim.y * blockIdx.y;
-  printf("Thread: %d %d\n", row, col);
-
+  int NUM_THREADS = 64 ;
   int batch_size = accessor.size(0);
   int n_rows = accessor.size(1);
   int n_cols = accessor.size(2);
+    
+  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int batch=0, row = 0, col = 0;
 
-  if (row > n_rows || col > n_cols) {
+  if (n_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
+
+    batch = idx / (idx_per_row * n_rows);
+    row = (idx / idx_per_row) % n_rows;
+    col = (idx % idx_per_row) * NUM_THREADS + off;
+  } else {
+    batch = threadId / (n_rows * n_cols);
+    row = (threadId % (n_rows * n_cols))/ n_cols;
+    col = threadId % n_cols;
+  }
+
+  if (batch >= batch_size || row >= n_rows || col >= n_cols) {
     return;
   }
- 
-  for (int i = 0; i < batch_size; i++) {
-    trace[i][row * n_cols + col] = accessor[i][row][col];
-  }
+  
+  //printf("Thread: %d %d %d\n", batch, row, col);
+    //printf("Value %f\n", accessor[i][row][col]);
+  trace[batch][row * n_cols + col] = accessor[batch][row][col];
 }
 
 __global__ void packed_setter_kernel(    
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace
 ) {
-  int row = threadIdx.x + blockDim.x * blockIdx.x;
-  int col = threadIdx.y + blockDim.y * blockIdx.y;
-  printf("Thread: %d %d\n", row, col);
-
+  int NUM_THREADS = 64;
   int batch_size = accessor.size(0);
   int n_rows = accessor.size(1);
   int n_cols = accessor.size(2);
+  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
+    
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int batch= 0, row = 0, col = 0;
 
-  if (row > n_rows || col > n_cols) {
+  if (n_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
+
+    batch = idx / (idx_per_row * n_rows);
+    row = (idx / idx_per_row) % n_rows;
+    col = (idx % idx_per_row) * NUM_THREADS + off;
+  } else {
+    batch = threadId / (n_rows * n_cols);
+    row = (threadId % (n_rows * n_cols))/ n_cols;
+    col = threadId % n_cols;
+  }
+
+  if (batch >= batch_size || row >= n_rows || col >= n_cols) {
     return;
   }
- 
-  for (int i = 0; i < batch_size; i++) {
-    accessor[i][row][col] = trace[i][row * n_cols + col];
-  }
+
+  //printf("Thread: %d %d\n", row, col);
+
+  accessor[batch][row][col] = trace[batch][row * n_cols + col];
 }
 
+__global__ void test_kernel() {
+    
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int idx = threadId / 2;
+  int off = threadId % 2;
+
+  int idx_per_row = (int) 4 / 2;
+  int row = idx / idx_per_row;
+  int col = (idx % idx_per_row) * 2  + off;
+  printf("Thread: %d %d %d %d %d\n", threadIdx.x, blockIdx.x, threadId, row, col);
+}
 
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
 
@@ -80,6 +124,12 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
                size_t a_rows, size_t b_cols, size_t b_rows,
                size_t batch_dim) {
 
+    //auto A_accessory = d_A.packed_accessor32<float,3>();
+    //float **d_A_arry = NULL;
+    //test_kernel<<<4,2>>>();
+    //packed_accessor_kernel<<<(a_rows * b_rows + NUM_THREADS)/NUM_THREADS, NUM_THREADS>>>(A_accessory, d_A_arry);
+    //cudaDeviceSynchronize();
+    //return;
 
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
@@ -109,16 +159,16 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     auto C_accessor = d_C.packed_accessor32<float,3>();
 
     // execute 1 time with a_rows threads
-    dim3 thread_per_block(64);
-    dim3 A_blocks_per_grid((a_rows * b_rows)/64);
-    dim3 B_blocks_per_grid((b_rows * b_cols)/64);
-    dim3 C_blocks_per_grid((a_rows * b_cols)/64);
+    dim3 thread_per_block(NUM_THREADS);
+    dim3 A_blocks_per_grid((batch_dim * a_rows * b_rows + NUM_THREADS - 1)/NUM_THREADS);
+    dim3 B_blocks_per_grid((batch_dim * b_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
+    dim3 C_blocks_per_grid((batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
 
     packed_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
+    cudaDeviceSynchronize();
     packed_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
     cudaDeviceSynchronize();
-
-
+  
     const float alpha = 1.0f, beta = 0.0f;
        
     cublasStatus_t status = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
@@ -126,23 +176,7 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
                                        , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
                                        , &beta, d_C_arr, b_cols
                                        , batch_dim);
-    /*
-    cublasStatus_t status = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
-                                       , a_rows, b_cols, b_rows
-                                       , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
-                                       , &beta, d_C_arr, b_cols
-                                       , batch_dim);
-    */
-
-    /*
-    // B * A
-    cublasStatus_t status = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
-                                       , b_cols, a_rows, b_rows
-                                       , &alpha, d_B_arr, b_rows, d_A_arr, a_rows
-                                       , &beta, d_C_arr, b_rows
-                                       , batch_dim);
-    */
-
+    
     if (status != CUBLAS_STATUS_SUCCESS)
     {
         std::cerr << "Kernel execution error.";
@@ -151,9 +185,18 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     packed_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
     cudaDeviceSynchronize();
     
+    for (int i = 0; i < batch_dim; i++) {
+        gpuErrchk(cudaFree(h_A_arr[i]));
+        gpuErrchk(cudaFree(h_B_arr[i]));
+        gpuErrchk(cudaFree(h_C_arr[i]));
+    }
     gpuErrchk(cudaFree(d_A_arr));
     gpuErrchk(cudaFree(d_B_arr));
     gpuErrchk(cudaFree(d_C_arr));
+    
+    free(h_A_arr);
+    free(h_B_arr);
+    free(h_C_arr);
 }
 
 

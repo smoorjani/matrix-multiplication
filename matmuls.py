@@ -13,9 +13,9 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
     :param torch_: Set to true if data is passed in in col-major (expected row-major)
     :returns: Matrix multiplication output
     '''
-    a = a.cuda(0)
-    b = b.cuda(0)
-    print(a.shape, b.shape)
+    a = a.cuda(2)
+    b = b.cuda(2)
+    #print(a.shape, b.shape)
     c = None
     t0 = time.time()
     if len(a.shape) == 1 or len(b.shape) == 1:
@@ -62,7 +62,7 @@ def cublas_matmul(a: torch.Tensor, b: torch.Tensor, torch_: bool = False) -> tor
     else:
         print('Multiplication with matrix dimensions is not implemented in cuBLAS')
         return a @ b
-    print('Matmul time: ', time.time() - t0)
+    #print('Matmul time: ', time.time() - t0)
     return c
 
 

@@ -1,12 +1,14 @@
 import torch
 import custom_mm
 import matmuls
-
+import time
 custom_mm.init_cublas()
 
 
 def test_result(function, a: torch.Tensor, b: torch.Tensor):
+    t0 = time.time()
     expected = torch.matmul(a, b)
+    print(f'PyTorch time: {time.time() - t0}')
     output = function(a, b).cpu()
    
     ''' 
@@ -22,6 +24,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
             print('B @ A: ', b @ a)
         print('B.T @ A.T: ', b.transpose(1,2) @ a.transpose(1,2))
     '''
+
     assert(expected.shape == output.shape)
     assert(torch.allclose(expected, output))
     return True
