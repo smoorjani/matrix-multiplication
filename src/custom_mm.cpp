@@ -9,6 +9,7 @@
 
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
+#include <cublasLt.h>
 
 // cublas mm forward declaration
 void cublas_mm_wrapper(cublasHandle_t handle,
@@ -36,9 +37,16 @@ void dense_to_csr(cusparseHandle_t handle,
                   double *h_A_dense, const int Nrows, const int Ncols,
                   double **h_A_val, int **h_A_colind, int **h_A_rowptr, int *nnzA);
 
+// cublasLT forward declaration
+void LtIgemmTensor(cublasLtHandle_t ltHandle,
+                   int m, int n, int k,
+                   const float *A, int lda,
+                   const float *B, int ldb,
+                   float *C, int ldc);
 
 cublasHandle_t g_cublas_handle = nullptr;
 cusparseHandle_t g_cusparse_handle = nullptr;
+cublasLtHandle_t g_cublaslt_handle = nullptr;
 
 void init_cublas_handle() {
   cublasStatus_t status = cublasCreate(&g_cublas_handle);
@@ -67,6 +75,22 @@ void init_cusparse_handle() {
 void destroy_cusparse_handle() {
   cusparseStatus_t status = cusparseDestroy(g_cusparse_handle);
   if (status != CUSPARSE_STATUS_SUCCESS)
+  {
+    std::cerr << "Shutdown error!";
+  }
+}
+
+void init_cublaslt_handle() {
+  cublasStatus_t status = cublasLtCreate(&g_cublaslt_handle);
+  if (status != CUBLAS_STATUS_SUCCESS)
+  {
+    std::cerr << "cuBLASLt initialization error.";
+  }
+}
+
+void destroy_cublaslt_handle() {
+  cublasStatus_t status = cublasLtDestroy(g_cublaslt_handle);
+  if (status != CUBLAS_STATUS_SUCCESS)
   {
     std::cerr << "Shutdown error!";
   }
@@ -180,16 +204,43 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
   return C;
 }
 
+torch::Tensor cublaslt_mmul(torch::Tensor A, torch::Tensor B)
+{
+  // torch passes in with column major
+  // the current
+
+  float *A_arr = A.data_ptr<float>();
+  float *B_arr = B.data_ptr<float>();
+
+  int A_dim = A.dim();
+  int B_dim = B.dim();
+  int lda = A.size(0);
+  int ldb = B.size(0);
+  int ldc = B.size(0);
+  int m = A.size(A_dim - 2);
+  int k = A.size(A_dim - 1);
+  int n = B.size(B_dim - 1);   
+
+  torch::Tensor C = torch::zeros({m,n}, torch::kFloat32);
+  float *C_arr = C.data_ptr<float>();
+
+  LtIgemmTensor(g_cublaslt_handle, m, n, k, A_arr, lda, B_arr, ldb, C_arr, ldc);
+
+  return C;
+}
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
   m.def("init_cublas", &init_cublas_handle, "Create cuBLAS handle.");
   m.def("destroy_cublas", &destroy_cublas_handle, "Destroy cuBLAS handle.");
+  m.def("init_cublaslt", &init_cublaslt_handle, "Create cuBLASLt handle.");
+  m.def("destroy_cublaslt", &destroy_cublaslt_handle, "Destroy cuBLASLt handle.");
   m.def("init_cusparse", &init_cusparse_handle, "Create cuSPARSE handle.");
   m.def("destroy_cusparse", &destroy_cusparse_handle, "Destroy cuSPARSE handle.");
   m.def("cublas_mmul", &cublas_mmul, "cuBLAS Torch Matrix Multiplication");
   m.def("cublas_bmm", &cublas_bmm, "cuBLAS Batched Torch Matrix Multiplication");
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
+  m.def("cublaslt_mmul", &cublaslt_mmul, "cuBLASLt Torch Matrix Multiplication");
 }
 
 // else if (dim == 4) {

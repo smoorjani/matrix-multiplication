@@ -4,7 +4,7 @@ import matmuls
 import time
 
 custom_mm.init_cublas()
-
+custom_mm.init_cublaslt()
 
 def test_result(function, a: torch.Tensor, b: torch.Tensor):
     t0 = time.time()
@@ -32,7 +32,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
 def test_matmuls(a_dim, b_dim):
     a = torch.rand(a_dim)
     b = torch.rand(b_dim)
-    assert test_result(matmuls.cublasMM.apply, a, b)
+    assert test_result(matmuls.cublasltMM.apply, a, b)
     print(a_dim, b_dim, " passed!")
 
 

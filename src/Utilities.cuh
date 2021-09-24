@@ -8,7 +8,7 @@
 
 #include <cuda_runtime.h>
 #include <cusparse_v2.h>
-
+#include <cublas_v2.h>
 
 void print_arr(float *arr, int m, int n) {
     for (int i = 0; i < m; i++) {
@@ -63,6 +63,40 @@ void gpuAssert(cudaError_t code, char *file, int line, bool abort=true)
 }
 
 extern "C" void gpuErrchk(cudaError_t ans) { gpuAssert((ans), __FILE__, __LINE__); }
+
+inline void checkCudaStatus(cudaError_t status) {
+    if (status != cudaSuccess) {
+        printf("cuda API failed with status %d: %s\n", status, cudaGetErrorString(status));
+        throw std::logic_error("cuda API failed");
+    }
+}
+
+const char* cublasGetErrorString(cublasStatus_t status)
+{
+    switch(status)
+    {
+        case CUBLAS_STATUS_SUCCESS: return "CUBLAS_STATUS_SUCCESS";
+        case CUBLAS_STATUS_NOT_INITIALIZED: return "CUBLAS_STATUS_NOT_INITIALIZED";
+        case CUBLAS_STATUS_ALLOC_FAILED: return "CUBLAS_STATUS_ALLOC_FAILED";
+        case CUBLAS_STATUS_INVALID_VALUE: return "CUBLAS_STATUS_INVALID_VALUE"; 
+        case CUBLAS_STATUS_ARCH_MISMATCH: return "CUBLAS_STATUS_ARCH_MISMATCH"; 
+        case CUBLAS_STATUS_MAPPING_ERROR: return "CUBLAS_STATUS_MAPPING_ERROR";
+        case CUBLAS_STATUS_EXECUTION_FAILED: return "CUBLAS_STATUS_EXECUTION_FAILED"; 
+        case CUBLAS_STATUS_INTERNAL_ERROR: return "CUBLAS_STATUS_INTERNAL_ERROR"; 
+        case CUBLAS_STATUS_NOT_SUPPORTED: return "CUBLAS_STATUS_NOT_SUPPORTED"; 
+        case CUBLAS_STATUS_LICENSE_ERROR: return "CUBLAS_STATUS_LICENSE_ERROR"; 
+    }
+    return "unknown error";
+}
+
+inline void checkCublasStatus(cublasStatus_t status) {
+    if (status != CUBLAS_STATUS_SUCCESS) {
+        printf("cuBLAS API failed with status %d\n", status);
+        printf("%s\n", cublasGetErrorString(status));
+        throw std::logic_error("cuBLAS API failed");
+    }
+}
+
 
 /***************************/
 /* CUSPARSE ERROR CHECKING */
