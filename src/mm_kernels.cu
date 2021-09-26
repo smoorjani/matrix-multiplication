@@ -34,7 +34,40 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
 }
 
-__global__ void packed_accessor_kernel(
+__global__ void packed_1d_accessor_kernel(
+    // figure out if this is coalesced
+    torch::PackedTensorAccessor32<float, 2> accessor,
+    float* trace
+) {
+  int NUM_THREADS = 64;
+  int n_rows = accessor.size(0);
+  int n_cols = accessor.size(1);
+    
+  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int row = 0, col = 0;
+
+  if (n_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
+
+    row = idx / n_cols;
+    col = row * NUM_THREADS + off
+  } else {
+    row = threadId / n_cols
+    col = threadId % n_cols;
+  }
+
+  if (row >= n_rows || col >= n_cols) {
+    return;
+  }
+  
+  trace[row * n_cols + col] = accessor[row][col];
+}
+
+
+__global__ void packed_2d_accessor_kernel(
     // figure out if this is coalesced
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace
@@ -70,7 +103,7 @@ __global__ void packed_accessor_kernel(
 }
 
 
-__global__ void packed_setter_kernel(
+__global__ void packed_2d_setter_kernel(
     torch::PackedTensorAccessor32<float, 3> accessor,
     float** trace
 ) {
@@ -105,17 +138,10 @@ __global__ void packed_setter_kernel(
 
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
 
-void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
+void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t b_cols, size_t b_rows,
                size_t batch_dim) {
-
-    //auto A_accessory = d_A.packed_accessor32<float,3>();
-    //float **d_A_arry = NULL;
-    //test_kernel<<<4,2>>>();
-    //packed_accessor_kernel<<<(a_rows * b_rows + NUM_THREADS)/NUM_THREADS, NUM_THREADS>>>(A_accessory, d_A_arry);
-    //cudaDeviceSynchronize();
-    //return;
 
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
@@ -151,9 +177,9 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     dim3 C_blocks_per_grid((batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
 
     // <<<total threads/64 ,64>>>>
-    packed_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
+    packed_2d_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
     cudaDeviceSynchronize();
-    packed_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
+    packed_2d_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
     cudaDeviceSynchronize();
   
     const float alpha = 1.0f, beta = 0.0f;
@@ -169,7 +195,7 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
         std::cerr << "Kernel execution error.";
     }
 
-    packed_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
+    packed_2d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
     cudaDeviceSynchronize();
     
     for (int i = 0; i < batch_dim; i++) {
@@ -185,45 +211,6 @@ void cublas_bmm_wrapper_accessor(cublasHandle_t handle,
     free(h_B_arr);
     free(h_C_arr);
 }
-
-
-void cublas_bmm_wrapper(cublasHandle_t handle,
-               float *d_A, float *d_B, float *d_C,
-               size_t a_rows, size_t b_cols, size_t b_rows,
-               size_t batch_dim) {
-
-
-    size_t c_size = sizeof(float) * a_rows * b_cols;
-    size_t a_size = sizeof(float) * a_rows * b_rows;
-    size_t b_size = sizeof(float) * b_rows * b_cols;
-
-    float **d_A_arr, **d_B_arr;
-    float **d_C_arr;
-
-    gpuErrchk(cudaMalloc((void **)&d_A_arr, batch_dim * sizeof(float *)));
-    gpuErrchk(cudaMalloc((void **)&d_B_arr, batch_dim * sizeof(float *)));
-    gpuErrchk(cudaMalloc((void **)&d_C_arr, batch_dim * sizeof(float *)));
-
-    // assumes contiguous memory
-    for (int i = 0; i < batch_dim; i++) {
-        gpuErrchk(cudaMemcpy(d_A_arr[i], d_A + (batch_dim * a_size * i), (batch_dim * a_size), cudaMemcpyDeviceToDevice));
-        gpuErrchk(cudaMemcpy(d_B_arr[i], d_B + (batch_dim * b_size * i), (batch_dim * b_size), cudaMemcpyDeviceToDevice));
-        gpuErrchk(cudaMemcpy(d_C_arr[i], d_C + (batch_dim * c_size * i), (batch_dim * c_size), cudaMemcpyDeviceToDevice));
-    }
-
-    const float alpha = 1.0f, beta = 0.0f;
-    cublasStatus_t cublas_result = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
-                                       , b_cols, a_rows, b_rows
-                                       , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
-                                       , &beta, d_C_arr, b_cols
-                                       , batch_dim);
-    assert(cublas_result == CUBLAS_STATUS_SUCCESS);
-
-    gpuErrchk(cudaFree(d_A_arr));
-    gpuErrchk(cudaFree(d_B_arr));
-    gpuErrchk(cudaFree(d_C_arr));
-}
-
 
 /*
 cuSPARSE Kernels
