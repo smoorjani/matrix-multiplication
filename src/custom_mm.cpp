@@ -11,12 +11,8 @@
 #include <cusparse_v2.h>
 #include <cublasLt.h>
 
-// cublas mm forward declaration
+// cublas mm forward declaration   
 void cublas_mm_wrapper(cublasHandle_t handle,
-                       float *d_A, float *d_B, float *d_C,
-                       int m, int k, int n);
-        
-void cublas_mm_wrapper_accessor(cublasHandle_t handle,
                        torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                        int m, int k, int n);
 
@@ -110,7 +106,7 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
   float *C_arr = C.data_ptr<float>();
 
-  cublas_mm_wrapper_accessor(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols);
+  cublas_mm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols);
 
   return C;
 }
