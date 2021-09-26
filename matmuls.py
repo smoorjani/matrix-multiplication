@@ -53,10 +53,10 @@ def custom_matmul(a: torch.Tensor,
             print('Pytorch BMM time: ', pbmm0, 'Our BMM time: ', bmm0)
         elif len(a_shape) == 4 and len(b_shape) == 4:
             bmm0 = time.time()
-            a = a.reshape(-1, a_dim1, a_dim2)
-            b = b.reshape(-1, b_dim1, b_dim2)
-            c = bmm_op(a, b, 3)
-            c = c.reshape(lda, -1, a_dim1, b_dim2)
+            # a = a.reshape(-1, a_dim1, a_dim2)
+            # b = b.reshape(-1, b_dim1, b_dim2)
+            c = bmm_op(a, b, 4)
+            # c = c.reshape(lda, -1, a_dim1, b_dim2)
             bmm0 = time.time() - bmm0
             pbmm0 = time.time()
             _c = a @ b
