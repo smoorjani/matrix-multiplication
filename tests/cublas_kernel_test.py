@@ -11,7 +11,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
     expected = torch.matmul(a, b)
     print(f'PyTorch time: {time.time() - t0}')
     output = function(a, b).cpu()
-    ''' 
+    '''     
     print('A: ', a)
     print('B: ', b)
     print('Expected: ', expected)
@@ -32,7 +32,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
 def test_matmuls(a_dim, b_dim):
     a = torch.rand(a_dim)
     b = torch.rand(b_dim)
-    assert test_result(matmuls.cublasltMM.apply, a, b)
+    assert test_result(matmuls.cublasMM.apply, a, b)
     print(a_dim, b_dim, " passed!")
 
 
@@ -42,6 +42,8 @@ test_matmuls((2, 3, 2), (2, 2, 4))
 test_matmuls((8, 64, 16), (8, 16, 8))
 test_matmuls((1, 8, 64, 16), (1, 8, 16, 8))
 test_matmuls((2, 8, 64, 16), (2, 8, 16, 8))
+test_matmuls((64, 16, 512, 64), (64, 16, 64, 512))
+test_matmuls((64, 16, 512, 512), (64, 16, 512, 64))
 test_matmuls((1, 16, 512, 64), (1, 16, 64, 512))
 
 custom_mm.destroy_cublas()

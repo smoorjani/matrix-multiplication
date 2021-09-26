@@ -34,6 +34,7 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
 }
 
+
 __global__ void packed_1d_accessor_kernel(
     // figure out if this is coalesced
     torch::PackedTensorAccessor32<float, 2> accessor,
@@ -52,10 +53,41 @@ __global__ void packed_1d_accessor_kernel(
     int idx = threadId / NUM_THREADS;
     int off = threadId % NUM_THREADS;
 
-    row = idx / n_cols;
-    col = row * NUM_THREADS + off
+    row = idx;
+    col = row * (idx_per_row - 1) + off;
   } else {
-    row = threadId / n_cols
+    row = threadId / n_cols;
+    col = threadId % n_cols;
+  }
+
+  if (row >= n_rows || col >= n_cols) {
+    return;
+  }
+  trace[row * n_cols + col] = accessor[row][col];
+}
+
+__global__ void packed_1d_setter_kernel(
+    // figure out if this is coalesced
+    torch::PackedTensorAccessor32<float, 2> accessor,
+    float* trace
+) {
+  int NUM_THREADS = 64;
+  int n_rows = accessor.size(0);
+  int n_cols = accessor.size(1);
+    
+  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int row = 0, col = 0;
+
+  if (n_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
+
+    row = idx;
+    col = row * (idx_per_row - 1) + off;
+  } else {
+    row = threadId / n_cols;
     col = threadId % n_cols;
   }
 
@@ -63,9 +95,79 @@ __global__ void packed_1d_accessor_kernel(
     return;
   }
   
-  trace[row * n_cols + col] = accessor[row][col];
+  accessor[row][col] = trace[row * n_cols + col];
 }
 
+void cublas_mm_wrapper_accessor(cublasHandle_t handle,
+                       torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
+                       int a_rows, int b_rows, int b_cols) {
+
+    size_t a_size = sizeof(float) * a_rows * b_rows;
+    size_t b_size = sizeof(float) * b_rows * b_cols;
+    size_t c_size = sizeof(float) * a_rows * b_cols;
+
+    float *d_A_arr, *d_B_arr, *d_C_arr;
+    gpuErrchk(cudaMalloc((void **)&d_A_arr, a_size));
+    gpuErrchk(cudaMalloc((void **)&d_B_arr, b_size));
+    gpuErrchk(cudaMalloc((void **)&d_C_arr, c_size));
+
+    auto A_accessor = d_A.packed_accessor32<float,2>();
+    auto B_accessor = d_B.packed_accessor32<float,2>();
+    auto C_accessor = d_C.packed_accessor32<float,2>();
+ 
+    dim3 thread_per_block(NUM_THREADS);
+    dim3 A_blocks_per_grid((a_rows * b_rows + NUM_THREADS - 1)/NUM_THREADS);
+    dim3 B_blocks_per_grid((b_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
+    dim3 C_blocks_per_grid((a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
+
+    packed_1d_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
+    cudaDeviceSynchronize();
+    
+    float *h_arr = (float *) malloc(a_size);
+    gpuErrchk(cudaMemcpy(h_arr, d_A_arr, a_size, cudaMemcpyDeviceToHost));
+    for (int i = 0; i < a_rows; i++) {
+        for (int j = 0; j < b_rows; j++) {
+            printf("%.4f ", h_arr[i * b_rows + j]);
+        }
+        printf("\n");
+    } 
+    
+    
+    packed_1d_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
+    cudaDeviceSynchronize();
+    
+    float *h_B_arr = (float *) malloc(b_size);
+    gpuErrchk(cudaMemcpy(h_B_arr, d_B_arr, b_size, cudaMemcpyDeviceToHost));
+    for (int i = 0; i < b_rows; i++) {
+        for (int j = 0; j < b_cols; j++) {
+            printf("%.4f ", h_B_arr[i * b_cols + j]);
+        }
+        printf("\n");
+    } 
+    
+
+    float alpha = 1.0;
+    float beta = 0.0;
+    cublasStatus_t status = cublasSgemm(
+        handle, CUBLAS_OP_N, CUBLAS_OP_N,
+        b_cols, a_rows, b_rows, &alpha,
+        d_B_arr, b_cols,
+        d_A_arr, b_rows, &beta,
+        d_C_arr, b_cols);
+
+    if (status != CUBLAS_STATUS_SUCCESS)
+    {
+        std::cerr << "Kernel execution error.";
+    }
+
+    packed_1d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
+    cudaDeviceSynchronize();
+    
+    gpuErrchk(cudaFree(d_A_arr));
+    gpuErrchk(cudaFree(d_B_arr));
+    gpuErrchk(cudaFree(d_C_arr));
+
+}
 
 __global__ void packed_2d_accessor_kernel(
     // figure out if this is coalesced

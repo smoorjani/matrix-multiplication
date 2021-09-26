@@ -16,6 +16,9 @@ void cublas_mm_wrapper(cublasHandle_t handle,
                        float *d_A, float *d_B, float *d_C,
                        int m, int k, int n);
         
+void cublas_mm_wrapper_accessor(cublasHandle_t handle,
+                       torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
+                       int m, int k, int n);
 
 // cublas bmm forward declaration
 void cublas_bmm_wrapper(cublasHandle_t handle,
@@ -107,7 +110,7 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
   float *C_arr = C.data_ptr<float>();
 
-  cublas_mm_wrapper(g_cublas_handle, A_arr, B_arr, C_arr, A_rows, A_cols , B_cols);
+  cublas_mm_wrapper_accessor(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols);
 
   return C;
 }
@@ -130,10 +133,6 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
     torch::Tensor C = torch::zeros({batch_dim, A_rows, B_cols}, torch::kFloat32).contiguous();
     int C_rows = C.size(1);
     int C_cols = C.size(2);
-
-    float *A_arr = A.data_ptr<float>();
-    float *B_arr = B.data_ptr<float>();
-    float *C_arr = C.data_ptr<float>();
 
     cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim);
     return C;

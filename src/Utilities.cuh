@@ -10,44 +10,6 @@
 #include <cusparse_v2.h>
 #include <cublas_v2.h>
 
-void print_arr(float *arr, int m, int n) {
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%.4f ", arr[i * n + j]);
-        }
-        printf("\n");
-    }
-}
-
-void print_arr_ptr(float **arr, int m, int n) {
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%.4f ", arr[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-
-void printArrayS(float *ptr, int rows, int cols, char mode, char *name) {
-    printf("%s\n", name);
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (mode == 'B') /* Normal mode */ {
-                if (ptr[i * cols + j] >= 0)
-                    printf(" %3.6f ", ptr[i * cols + j]);
-                else
-                    printf("%3.6f ", ptr[i * cols + j]);
-            } else /* Transpose mode */ {
-                if (ptr[j * rows + i] >= 0)
-                    printf("%3.6f ", ptr[j * rows + i]);
-                else
-                    printf("%3.6f ", ptr[j * rows + i]);
-            }
-        }
-        printf("\n");
-    }
-}
 
 /********************/
 /* CUDA ERROR CHECK */
@@ -70,6 +32,44 @@ inline void checkCudaStatus(cudaError_t status) {
         throw std::logic_error("cuda API failed");
     }
 }
+
+/******************/
+/* ARRAY PRINTING */
+/******************/
+
+void print_arr(float *arr, int m, int n) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%.4f ", arr[i * n + j]);
+        }
+        printf("\n");
+    }
+}
+
+void print_arr_ptr(float **arr, int m, int n) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%.4f ", arr[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+
+void cuda_print_arr(float *d_arr, int m, int n) {
+    float *h_arr = (float *) malloc(m * n * sizeof(float));
+    gpuErrchk(cudaMemcpy(h_arr, d_arr, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%.4f ", h_arr[i * n + j]);
+        }
+        printf("\n");
+    }
+}
+
+/**********************/
+/* CUBLAS ERROR CHECK */
+/**********************/
 
 const char* cublasGetErrorString(cublasStatus_t status)
 {
