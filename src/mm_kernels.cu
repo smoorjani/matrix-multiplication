@@ -162,6 +162,55 @@ __global__ void packed_2d_accessor_kernel(
   trace[batch * n_rows * n_cols + row * n_cols + col] = accessor[batch][row][col];
 }
 
+__global__ void packed_2d_accessor_kernel_combined(
+    // figure out if this is coalesced
+    torch::PackedTensorAccessor32<float, 3> a_accessor,
+    torch::PackedTensorAccessor32<float, 3> b_accessor,
+    float* a_trace,
+    float* b_trace
+) {
+  int batch_size = a_accessor.size(0);
+  int a_rows = a_accessor.size(1);
+  int a_cols = a_accessor.size(2);
+  int b_cols = b_accessor.size(2);
+    
+  int a_idx_per_row = (int) ((float) (a_cols + NUM_THREADS - 1) / NUM_THREADS);
+  int b_idx_per_row = (int) ((float) (b_cols + NUM_THREADS - 1) / NUM_THREADS);
+  // find thread id, row = threadid/64, col = threadid%64
+  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
+  int a_batch = 0, a_row = 0, a_col = 0;
+  int b_batch = 0, b_row = 0, b_col = 0;
+
+  if (n_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
+
+    a_batch = idx / (a_idx_per_row * a_rows);
+    a_row = (idx / a_idx_per_row) % a_rows;
+    a_col = (idx % a_idx_per_row) * NUM_THREADS + off;
+
+    b_batch = idx / (b_idx_per_row * b_rows);
+    b_row = (idx / b_idx_per_row) % b_rows;
+    b_col = (idx % b_idx_per_row) * NUM_THREADS + off;
+  } else {
+    a_batch = threadId / (a_rows * a_cols);
+    a_row = (threadId % (a_rows * a_cols))/ a_cols;
+    a_col = threadId % a_cols;
+
+    b_batch = threadId / (b_rows * b_cols);
+    b_row = (threadId % (b_rows * b_cols))/ b_cols;
+    b_col = threadId % b_cols;
+  }
+
+  if (a_batch >= batch_size || a_row >= a_rows || a_col >= a_cols ||
+      b_batch >= batch_size || b_row >= b_rows || b_col >= b_cols) {
+    return;
+  }
+  
+  a_trace[a_batch * a_rows * a_cols + a_row * a_cols + a_col] = a_accessor[a_batch][a_row][a_col];
+  b_trace[b_batch * b_rows * b_cols + b_row * b_cols + b_col] = b_accessor[b_batch][b_row][b_col];
+}
+
 
 __global__ void packed_2d_setter_kernel(
     torch::PackedTensorAccessor32<float, 3> accessor,
@@ -252,13 +301,14 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
 
     // execute 1 time with a_rows threads
     dim3 thread_per_block(NUM_THREADS);
-    dim3 A_blocks_per_grid((batch_dim * a_rows * b_rows + NUM_THREADS - 1)/NUM_THREADS);
-    dim3 B_blocks_per_grid((batch_dim * b_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
+    // dim3 A_blocks_per_grid((batch_dim * a_rows * b_rows + NUM_THREADS - 1)/NUM_THREADS);
+    // dim3 B_blocks_per_grid((batch_dim * b_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
     dim3 C_blocks_per_grid((batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-
+    dim3 AB_blocks_per_grid((batch_dim * a_rows * b_rows + batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
     // <<<total threads/64 ,64>>>>
-    packed_2d_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
-    packed_2d_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
+    // packed_2d_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
+    // packed_2d_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
+    packed_2d_accessor_kernel_combined<<<AB_blocks_per_grid, thread_per_block>>>(A_accessor, B_accessor, d_A_arr, d_B_arr);
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Accessor Kernel: %f\n", secs);
