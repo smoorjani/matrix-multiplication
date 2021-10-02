@@ -10,15 +10,22 @@
 #include <cusparse_v2.h>
 #include <cublasLt.h>
 
-//#define NUM_THREADS 64;
-int NUM_THREADS = 64;
+#include <sys/time.h>
+typedef unsigned long long timestamp_t;
+
+static timestamp_t get_timestamp () {
+    struct timeval now;
+    gettimeofday (&now, NULL);
+    return  now.tv_usec + (timestamp_t)now.tv_sec * 1000000;
+}
+
+#define NUM_THREADS (64)
 
 __global__ void packed_1d_accessor_kernel(
     // figure out if this is coalesced
     torch::PackedTensorAccessor32<float, 2> accessor,
     float* trace
 ) {
-  int NUM_THREADS = 64;
   int n_rows = accessor.size(0);
   int n_cols = accessor.size(1);
     
@@ -49,7 +56,6 @@ __global__ void packed_1d_setter_kernel(
     torch::PackedTensorAccessor32<float, 2> accessor,
     float* trace
 ) {
-  int NUM_THREADS = 64;
   int n_rows = accessor.size(0);
   int n_cols = accessor.size(1);
     
@@ -125,9 +131,8 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 __global__ void packed_2d_accessor_kernel(
     // figure out if this is coalesced
     torch::PackedTensorAccessor32<float, 3> accessor,
-    float** trace
+    float* trace
 ) {
-  int NUM_THREADS = 64;
   int batch_size = accessor.size(0);
   int n_rows = accessor.size(1);
   int n_cols = accessor.size(2);
@@ -154,15 +159,14 @@ __global__ void packed_2d_accessor_kernel(
     return;
   }
   
-  trace[batch][row * n_cols + col] = accessor[batch][row][col];
+  trace[batch * n_rows * n_cols + row * n_cols + col] = accessor[batch][row][col];
 }
 
 
 __global__ void packed_2d_setter_kernel(
     torch::PackedTensorAccessor32<float, 3> accessor,
-    float** trace
+    float* trace
 ) {
-  int NUM_THREADS = 64;
   int batch_size = accessor.size(0);
   int n_rows = accessor.size(1);
   int n_cols = accessor.size(2);
@@ -188,7 +192,7 @@ __global__ void packed_2d_setter_kernel(
     return;
   }
 
-  accessor[batch][row][col] = trace[batch][row * n_cols + col];
+  accessor[batch][row][col] = trace[batch * n_rows * n_cols + row * n_cols + col];
 }
 
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
@@ -202,6 +206,20 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     size_t b_size = sizeof(float) * b_rows * b_cols;
     size_t c_size = sizeof(float) * a_rows * b_cols;
 
+    timestamp_t t0 = get_timestamp();
+    
+    /*
+    float *a_devPtr, *b_devPtr, *c_devPtr;
+    size_t a_pitch, b_pitch, c_pitch;
+    cudaMallocPitch((void**)&a_devPtr, &a_pitch, batch_dim * sizeof(float), a_size);
+    cudaMallocPitch((void**)&b_devPtr, &b_pitch, batch_dim * sizeof(float), b_size);
+    cudaMallocPitch((void**)&c_devPtr, &c_pitch, batch_dim * sizeof(float), c_size);
+    */
+    float *d_A_arr, *d_B_arr, *d_C_arr;
+    gpuErrchk(cudaMalloc(&d_A_arr, batch_dim * a_size));
+    gpuErrchk(cudaMalloc(&d_B_arr, batch_dim * b_size));
+    gpuErrchk(cudaMalloc(&d_C_arr, batch_dim * c_size));
+    /*
     // setting up device arrays for bmm
     float **d_A_arr, **d_B_arr, **d_C_arr;
     float **h_A_arr = (float **) malloc(batch_dim * sizeof(float*));
@@ -221,7 +239,12 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     gpuErrchk(cudaMemcpy(d_A_arr, h_A_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
     gpuErrchk(cudaMemcpy(d_B_arr, h_B_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
     gpuErrchk(cudaMemcpy(d_C_arr, h_C_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
+    */
 
+    timestamp_t t1 = get_timestamp();
+    double secs = (t1 - t0) / 1000000.0L;
+    printf("2d array declaration: %f\n", secs);
+    t0 = get_timestamp();
     // creating accessors for tensors
     auto A_accessor = d_A.packed_accessor32<float,3>();
     auto B_accessor = d_B.packed_accessor32<float,3>();
@@ -236,22 +259,45 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     // <<<total threads/64 ,64>>>>
     packed_2d_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
     packed_2d_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
-  
+    t1 = get_timestamp();
+    secs = (t1 - t0) / 1000000.0L;
+    printf("Accessor Kernel: %f\n", secs);
+
+    gpuErrchk(cudaDeviceSynchronize());
+
+    t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
-       
+    /*
     cublasStatus_t status = cublasSgemmBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
                                        , b_cols, a_rows, b_rows
                                        , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
                                        , &beta, d_C_arr, b_cols
                                        , batch_dim);
-    
+    */
+    cublasStatus_t status = cublasSgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
+                                       , b_cols, a_rows, b_rows
+                                       , &alpha, d_B_arr, b_cols, b_rows * b_cols
+                                       , d_A_arr, b_rows, a_rows * b_rows
+                                       , &beta, d_C_arr, b_cols, a_rows * b_cols
+                                       , batch_dim);
     if (status != CUBLAS_STATUS_SUCCESS)
     {
         std::cerr << "Kernel execution error.";
     }
 
+    t1 = get_timestamp();
+    secs = (t1 - t0) / 1000000.0L;
+    printf("Batch GEMM: %f\n", secs);
+
+    gpuErrchk(cudaDeviceSynchronize());
+    t0 = get_timestamp();
     packed_2d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
-    
+    t1 = get_timestamp();
+    secs = (t1 - t0) / 1000000.0L;
+    printf("Setter: %f\n", secs);
+
+    t0 = get_timestamp();
+    /*
     for (int i = 0; i < batch_dim; i++) {
         gpuErrchk(cudaFree(h_A_arr[i]));
         gpuErrchk(cudaFree(h_B_arr[i]));
@@ -264,6 +310,14 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     free(h_A_arr);
     free(h_B_arr);
     free(h_C_arr);
+    */
+     
+    gpuErrchk(cudaFree(d_A_arr));
+    gpuErrchk(cudaFree(d_B_arr));
+    gpuErrchk(cudaFree(d_C_arr));
+    t1 = get_timestamp();
+    secs = (t1 - t0) / 1000000.0L;
+    printf("Freeing Memory: %f\n", secs);
 }
 
 __global__ void packed_2d_accessor_kernel_4d(
@@ -274,7 +328,6 @@ __global__ void packed_2d_accessor_kernel_4d(
   // turns a 4d matrix into a 2d array of [batch_size][matrix_idx]
   // batch size spans the first two dimensions
   // matrix idx spans the last two (rows/cols)
-  int NUM_THREADS = 64;
   int batch_dim1 = accessor.size(0);
   int batch_dim2 = accessor.size(1);
   int n_rows = accessor.size(2);
@@ -294,7 +347,7 @@ __global__ void packed_2d_accessor_kernel_4d(
     row = (idx / idx_per_row) % n_rows;
     col = (idx % idx_per_row) * NUM_THREADS + off;
   } else {
-    d_1 = threadId / (batch_dim2 * n_rows * n_cols)
+    d_1 = threadId / (batch_dim2 * n_rows * n_cols);
     d_2 = (threadId % (batch_dim2 * n_rows * n_cols))/ (n_rows * n_cols);
     row = (threadId % (n_rows * n_cols))/ n_cols;
     col = threadId % n_cols;
@@ -315,7 +368,6 @@ __global__ void packed_2d_setter_kernel_4d(
   // turns a 4d matrix into a 2d array of [batch_size][matrix_idx]
   // batch size spans the first two dimensions
   // matrix idx spans the last two (rows/cols)
-  int NUM_THREADS = 64;
   int batch_dim1 = accessor.size(0);
   int batch_dim2 = accessor.size(1);
   int n_rows = accessor.size(2);
@@ -335,7 +387,7 @@ __global__ void packed_2d_setter_kernel_4d(
     row = (idx / idx_per_row) % n_rows;
     col = (idx % idx_per_row) * NUM_THREADS + off;
   } else {
-    d_1 = threadId / (batch_dim2 * n_rows * n_cols)
+    d_1 = threadId / (batch_dim2 * n_rows * n_cols);
     d_2 = (threadId % (batch_dim2 * n_rows * n_cols))/ (n_rows * n_cols);
     row = (threadId % (n_rows * n_cols))/ n_cols;
     col = threadId % n_cols;
@@ -358,23 +410,23 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     size_t c_size = sizeof(float) * a_rows * b_cols;
 
     float **d_A_arr, **d_B_arr, **d_C_arr;
-    float **h_A_arr = (float **) malloc(batch_dim * sizeof(float*));
-    float **h_B_arr = (float **) malloc(batch_dim * sizeof(float*));
-    float **h_C_arr = (float **) malloc(batch_dim * sizeof(float*));
+    float **h_A_arr = (float **) malloc(batch_dim1 * batch_dim2 * sizeof(float*));
+    float **h_B_arr = (float **) malloc(batch_dim1 * batch_dim2 * sizeof(float*));
+    float **h_C_arr = (float **) malloc(batch_dim1 * batch_dim2 * sizeof(float*));
 
-    gpuErrchk(cudaMalloc((void **)&d_A_arr, batch_dim * sizeof(float *)));
-    gpuErrchk(cudaMalloc((void **)&d_B_arr, batch_dim * sizeof(float *)));
-    gpuErrchk(cudaMalloc((void **)&d_C_arr, batch_dim * sizeof(float *)));
+    gpuErrchk(cudaMalloc((void **)&d_A_arr, batch_dim1 * batch_dim2 * sizeof(float *)));
+    gpuErrchk(cudaMalloc((void **)&d_B_arr, batch_dim1 * batch_dim2 * sizeof(float *)));
+    gpuErrchk(cudaMalloc((void **)&d_C_arr, batch_dim1 * batch_dim2 * sizeof(float *)));
 
-    for (int i = 0; i < batch_dim; i++) {
+    for (int i = 0; i < batch_dim1 * batch_dim2; i++) {
         gpuErrchk(cudaMalloc(&h_A_arr[i], a_size));
         gpuErrchk(cudaMalloc(&h_B_arr[i], b_size));
         gpuErrchk(cudaMalloc(&h_C_arr[i], c_size));
     }
 
-    gpuErrchk(cudaMemcpy(d_A_arr, h_A_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
-    gpuErrchk(cudaMemcpy(d_B_arr, h_B_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
-    gpuErrchk(cudaMemcpy(d_C_arr, h_C_arr, batch_dim * sizeof(float*), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(d_A_arr, h_A_arr, batch_dim1 * batch_dim2 * sizeof(float*), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(d_B_arr, h_B_arr, batch_dim1 * batch_dim2 * sizeof(float*), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMemcpy(d_C_arr, h_C_arr, batch_dim1 * batch_dim2 * sizeof(float*), cudaMemcpyHostToDevice));
 
     auto A_accessor = d_A.packed_accessor32<float,4>();
     auto B_accessor = d_B.packed_accessor32<float,4>();
@@ -388,6 +440,7 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
 
     // <<<total threads/64 ,64>>>>
     packed_2d_accessor_kernel_4d<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
+    cudaDeviceSynchronize();
     packed_2d_accessor_kernel_4d<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
   
     const float alpha = 1.0f, beta = 0.0f;
@@ -396,7 +449,7 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
                                        , b_cols, a_rows, b_rows
                                        , &alpha, d_B_arr, b_cols, d_A_arr, b_rows
                                        , &beta, d_C_arr, b_cols
-                                       , batch_dim);
+                                       , batch_dim1 * batch_dim2);
     
     if (status != CUBLAS_STATUS_SUCCESS)
     {
@@ -405,7 +458,7 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
 
     packed_2d_setter_kernel_4d<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
     
-    for (int i = 0; i < batch_dim; i++) {
+    for (int i = 0; i < batch_dim1 * batch_dim2; i++) {
         gpuErrchk(cudaFree(h_A_arr[i]));
         gpuErrchk(cudaFree(h_B_arr[i]));
         gpuErrchk(cudaFree(h_C_arr[i]));
