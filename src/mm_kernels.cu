@@ -172,6 +172,7 @@ __global__ void packed_2d_accessor_kernel_combined(
   int batch_size = a_accessor.size(0);
   int a_rows = a_accessor.size(1);
   int a_cols = a_accessor.size(2);
+  int b_rows = b_accessor.size(1);
   int b_cols = b_accessor.size(2);
     
   int a_idx_per_row = (int) ((float) (a_cols + NUM_THREADS - 1) / NUM_THREADS);
@@ -181,34 +182,40 @@ __global__ void packed_2d_accessor_kernel_combined(
   int a_batch = 0, a_row = 0, a_col = 0;
   int b_batch = 0, b_row = 0, b_col = 0;
 
-  if (n_cols >= NUM_THREADS) {
+  if (a_cols >= NUM_THREADS) {
     int idx = threadId / NUM_THREADS;
     int off = threadId % NUM_THREADS;
 
     a_batch = idx / (a_idx_per_row * a_rows);
     a_row = (idx / a_idx_per_row) % a_rows;
     a_col = (idx % a_idx_per_row) * NUM_THREADS + off;
+  } else {
+    a_batch = threadId / (a_rows * a_cols);
+    a_row = (threadId % (a_rows * a_cols))/ a_cols;
+    a_col = threadId % a_cols;
+  }
+
+  if (b_cols >= NUM_THREADS) {
+    int idx = threadId / NUM_THREADS;
+    int off = threadId % NUM_THREADS;
 
     b_batch = idx / (b_idx_per_row * b_rows);
     b_row = (idx / b_idx_per_row) % b_rows;
     b_col = (idx % b_idx_per_row) * NUM_THREADS + off;
   } else {
-    a_batch = threadId / (a_rows * a_cols);
-    a_row = (threadId % (a_rows * a_cols))/ a_cols;
-    a_col = threadId % a_cols;
-
     b_batch = threadId / (b_rows * b_cols);
     b_row = (threadId % (b_rows * b_cols))/ b_cols;
     b_col = threadId % b_cols;
   }
 
-  if (a_batch >= batch_size || a_row >= a_rows || a_col >= a_cols ||
-      b_batch >= batch_size || b_row >= b_rows || b_col >= b_cols) {
-    return;
+  if (a_batch < batch_size && a_row < a_rows && a_col < a_cols) {
+    a_trace[a_batch * a_rows * a_cols + a_row * a_cols + a_col] = a_accessor[a_batch][a_row][a_col];
   }
-  
-  a_trace[a_batch * a_rows * a_cols + a_row * a_cols + a_col] = a_accessor[a_batch][a_row][a_col];
-  b_trace[b_batch * b_rows * b_cols + b_row * b_cols + b_col] = b_accessor[b_batch][b_row][b_col];
+
+  if (b_batch < batch_size && b_row < b_rows && b_col < b_cols) {
+    b_trace[b_batch * b_rows * b_cols + b_row * b_cols + b_col] = b_accessor[b_batch][b_row][b_col];
+  }
+ 
 }
 
 
