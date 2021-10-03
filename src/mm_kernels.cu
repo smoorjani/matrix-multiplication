@@ -257,12 +257,11 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t b_cols, size_t b_rows,
                size_t batch_dim) {
-
+    // ==============
+    timestamp_t t0 = get_timestamp();
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
     size_t c_size = sizeof(float) * a_rows * b_cols;
-
-    timestamp_t t0 = get_timestamp();
     
     // setting up device arrays for bmm
     float *d_A_arr, *d_B_arr, *d_C_arr;
@@ -270,30 +269,30 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     gpuErrchk(cudaMalloc(&d_B_arr, batch_dim * b_size));
     gpuErrchk(cudaMalloc(&d_C_arr, batch_dim * c_size));
     
-    timestamp_t t1 = get_timestamp();
-    double secs = (t1 - t0) / 1000000.0L;
-    printf("2d array declaration: %f\n", secs);
-    t0 = get_timestamp();
     // creating accessors for tensors
     auto A_accessor = d_A.packed_accessor32<float,3>();
     auto B_accessor = d_B.packed_accessor32<float,3>();
     auto C_accessor = d_C.packed_accessor32<float,3>();
 
+    // const int num_streams = 16;
+    // cudaStream_t streams[num_streams];
     // execute 1 time with a_rows threads
+    // << blocks_per_grid/NUM_THREADS, NUM_THREADS, 0, streams[i]>>
     dim3 thread_per_block(NUM_THREADS);
     dim3 C_blocks_per_grid((batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
     dim3 AB_blocks_per_grid((batch_dim * a_rows * b_rows + batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-    // <<<total threads/64 ,64>>>>
+
+    timestamp_t t1 = get_timestamp();
+    double secs = (t1 - t0) / 1000000.0L;
+    printf("Preprocessing: %f\n", secs);
+    // ==============
+    t0 = get_timestamp();
     packed_2d_accessor_kernel_combined<<<AB_blocks_per_grid, thread_per_block>>>(A_accessor, B_accessor, d_A_arr, d_B_arr);
+    gpuErrchk(cudaDeviceSynchronize());
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Accessor Kernel: %f\n", secs);
-
-    gpuErrchk(cudaDeviceSynchronize());
-
-    cuda_print_arr(d_A_arr, batch_dim, a_rows * b_rows);
-    cuda_print_arr(d_B_arr, batch_dim, b_rows * b_cols);
-
+    // ==============
     t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
 
@@ -308,17 +307,18 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
         std::cerr << "Kernel execution error.";
     }
 
+    gpuErrchk(cudaDeviceSynchronize());
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Batch GEMM: %f\n", secs);
-
-    gpuErrchk(cudaDeviceSynchronize());
+    // ==============
     t0 = get_timestamp();
     packed_2d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
+    gpuErrchk(cudaDeviceSynchronize());
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Setter: %f\n", secs);
-
+    // ==============
     t0 = get_timestamp();
     gpuErrchk(cudaFree(d_A_arr));
     gpuErrchk(cudaFree(d_B_arr));
@@ -326,6 +326,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Freeing Memory: %f\n", secs);
+    // ==============
 }
 
 __global__ void packed_2d_accessor_kernel_4d(
@@ -362,15 +363,8 @@ __global__ void packed_2d_accessor_kernel_4d(
   }
 
   if (d_1 >= batch_dim1 || d_2 >= batch_dim2 || row >= n_rows || col >= n_cols) {
-  //if (threadId > 17000000) {
-    //printf("Return ThreadId: %d, Batch1: %d, Batch2: %d, Row: %d, Col: %d, Matrix: [%d,%d,%d,%d]\n", threadId, d_1, d_2, row, col, batch_dim1, batch_dim2, n_rows, n_cols);
-  //}
     return;
   }
-  
-  //if (threadId > 17000000) {
-    //printf("ThreadId: %d, Batch1: %d, Batch2: %d, Row: %d, Col: %d, Matrix: [%d,%d,%d,%d]\n", threadId, d_1, d_2, row, col, batch_dim1, batch_dim2, n_rows, n_cols);
-  //}
 
   trace[threadId] = accessor[d_1][d_2][row][col];
 }
@@ -446,9 +440,6 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     packed_2d_accessor_kernel_4d<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
  
     gpuErrchk(cudaDeviceSynchronize());
-
-    //cuda_print_arr(d_A_arr, batch_dim2*2,a_rows*b_rows);
-    //cuda_print_arr(d_B_arr, batch_dim2*2,b_rows*b_cols);
 
     const float alpha = 1.0f, beta = 0.0f;
        
