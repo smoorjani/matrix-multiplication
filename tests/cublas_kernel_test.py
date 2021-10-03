@@ -32,7 +32,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
     	assert (torch.allclose(expected, output))
     except AssertionError:
         print(torch.count_nonzero(output), torch.count_nonzero(expected))
-        #print(expected, output)
+        print(expected, output)
         return tf, False
     return tf, True
 
