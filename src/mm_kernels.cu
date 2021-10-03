@@ -328,7 +328,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
 __global__ void packed_2d_accessor_kernel_4d(
     // figure out if this is coalesced
     torch::PackedTensorAccessor32<float, 4> accessor,
-    float** trace
+    float* trace
 ) {
   // turns a 4d matrix into a 2d array of [batch_size][matrix_idx]
   // batch size spans the first two dimensions
@@ -362,13 +362,13 @@ __global__ void packed_2d_accessor_kernel_4d(
     return;
   }
   
-  trace[d_1 * batch_dim2 + d_2][row * n_cols + col] = accessor[d_1][d_2][row][col];
+  trace[d_1 * batch_dim2 * n_rows * n_cols + d_2 * n_rows * n_cols + row * n_cols + col] = accessor[d_1][d_2][row][col];
 }
 
 __global__ void packed_2d_setter_kernel_4d(
     // figure out if this is coalesced
     torch::PackedTensorAccessor32<float, 4> accessor,
-    float** trace
+    float* trace
 ) {
   // turns a 4d matrix into a 2d array of [batch_size][matrix_idx]
   // batch size spans the first two dimensions
@@ -402,7 +402,7 @@ __global__ void packed_2d_setter_kernel_4d(
     return;
   }
   
-  accessor[d_1][d_2][row][col] = trace[d_1 * batch_dim2 + d_2][row * n_cols + col];
+  accessor[d_1][d_2][row][col] = trace[d_1 * batch_dim2 * n_rows * n_cols + d_2 * n_rows * n_cols + row * n_cols + col];
 }
 
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
