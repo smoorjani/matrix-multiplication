@@ -291,6 +291,9 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
 
     gpuErrchk(cudaDeviceSynchronize());
 
+    cuda_print_arr(d_A_arr, batch_dim, a_rows * b_rows);
+    cuda_print_arr(d_B_arr, batch_dim, b_rows * b_cols);
+
     t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
 
@@ -347,8 +350,8 @@ __global__ void packed_2d_accessor_kernel_4d(
     int idx = threadId / NUM_THREADS;
     int off = threadId % NUM_THREADS;
 
-    d_1 = idx / (idx_per_row * n_rows);
-    d_2 = idx / (idx_per_row * n_rows * batch_dim2);
+    d_1 = idx / (idx_per_row * n_rows * batch_dim2);
+    d_2 = (idx / (idx_per_row * n_rows)) % batch_dim2;
     row = (idx / idx_per_row) % n_rows;
     col = (idx % idx_per_row) * NUM_THREADS + off;
   } else {
@@ -359,10 +362,17 @@ __global__ void packed_2d_accessor_kernel_4d(
   }
 
   if (d_1 >= batch_dim1 || d_2 >= batch_dim2 || row >= n_rows || col >= n_cols) {
+  //if (threadId > 17000000) {
+    //printf("Return ThreadId: %d, Batch1: %d, Batch2: %d, Row: %d, Col: %d, Matrix: [%d,%d,%d,%d]\n", threadId, d_1, d_2, row, col, batch_dim1, batch_dim2, n_rows, n_cols);
+  //}
     return;
   }
   
-  trace[d_1 * batch_dim2 * n_rows * n_cols + d_2 * n_rows * n_cols + row * n_cols + col] = accessor[d_1][d_2][row][col];
+  //if (threadId > 17000000) {
+    //printf("ThreadId: %d, Batch1: %d, Batch2: %d, Row: %d, Col: %d, Matrix: [%d,%d,%d,%d]\n", threadId, d_1, d_2, row, col, batch_dim1, batch_dim2, n_rows, n_cols);
+  //}
+
+  trace[threadId] = accessor[d_1][d_2][row][col];
 }
 
 __global__ void packed_2d_setter_kernel_4d(
@@ -387,8 +397,9 @@ __global__ void packed_2d_setter_kernel_4d(
     int idx = threadId / NUM_THREADS;
     int off = threadId % NUM_THREADS;
 
-    d_1 = idx / (idx_per_row * n_rows);
-    d_2 = idx / (idx_per_row * n_rows * batch_dim2);
+
+    d_1 = idx / (idx_per_row * n_rows * batch_dim2);
+    d_2 = (idx / (idx_per_row * n_rows)) % batch_dim2;
     row = (idx / idx_per_row) % n_rows;
     col = (idx % idx_per_row) * NUM_THREADS + off;
   } else {
@@ -402,7 +413,7 @@ __global__ void packed_2d_setter_kernel_4d(
     return;
   }
   
-  accessor[d_1][d_2][row][col] = trace[d_1 * batch_dim2 * n_rows * n_cols + d_2 * n_rows * n_cols + row * n_cols + col];
+  accessor[d_1][d_2][row][col] = trace[threadId];
 }
 
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
@@ -433,8 +444,12 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     // <<<total threads/64 ,64>>>>
     packed_2d_accessor_kernel_4d<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
     packed_2d_accessor_kernel_4d<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
-  
+ 
     gpuErrchk(cudaDeviceSynchronize());
+
+    //cuda_print_arr(d_A_arr, batch_dim2*2,a_rows*b_rows);
+    //cuda_print_arr(d_B_arr, batch_dim2*2,b_rows*b_cols);
+
     const float alpha = 1.0f, beta = 0.0f;
        
     cublasStatus_t status = cublasSgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
