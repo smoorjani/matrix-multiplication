@@ -86,6 +86,7 @@ void cublas_mm_wrapper(cublasHandle_t handle,
                        torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                        int a_rows, int b_rows, int b_cols) {
 
+    /*
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
     size_t c_size = sizeof(float) * a_rows * b_cols;
@@ -106,7 +107,12 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
     packed_1d_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);   
     packed_1d_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
+    */
     
+    float *d_A_arr = d_A.data_ptr<float>();
+    float *d_B_arr = d_B.data_ptr<float>();
+    float *d_C_arr = d_C.data_ptr<float>();
+
     float alpha = 1.0;
     float beta = 0.0;
     cublasStatus_t status = cublasSgemm(
@@ -120,12 +126,14 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
-
+    
+    /*
     packed_1d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
     
     gpuErrchk(cudaFree(d_A_arr));
     gpuErrchk(cudaFree(d_B_arr));
     gpuErrchk(cudaFree(d_C_arr));
+    */
 }
 
 __global__ void packed_2d_accessor_kernel(
@@ -257,8 +265,13 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t b_cols, size_t b_rows,
                size_t batch_dim) {
+    
     // ==============
     timestamp_t t0 = get_timestamp();
+    float *d_A_arr = d_A.data_ptr<float>();
+    float *d_B_arr = d_B.data_ptr<float>();
+    float *d_C_arr = d_C.data_ptr<float>();
+    /*
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
     size_t c_size = sizeof(float) * a_rows * b_cols;
@@ -281,10 +294,11 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     dim3 thread_per_block(NUM_THREADS);
     dim3 C_blocks_per_grid((batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
     dim3 AB_blocks_per_grid((batch_dim * a_rows * b_rows + batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-
+    */
     timestamp_t t1 = get_timestamp();
     double secs = (t1 - t0) / 1000000.0L;
     printf("Preprocessing: %f\n", secs);
+    /*
     // ==============
     t0 = get_timestamp();
     packed_2d_accessor_kernel_combined<<<AB_blocks_per_grid, thread_per_block>>>(A_accessor, B_accessor, d_A_arr, d_B_arr);
@@ -293,6 +307,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     secs = (t1 - t0) / 1000000.0L;
     printf("Accessor Kernel: %f\n", secs);
     // ==============
+    */
     t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
 
@@ -311,6 +326,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Batch GEMM: %f\n", secs);
+    /*
     // ==============
     t0 = get_timestamp();
     packed_2d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
@@ -327,6 +343,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     secs = (t1 - t0) / 1000000.0L;
     printf("Freeing Memory: %f\n", secs);
     // ==============
+    */
 }
 
 __global__ void packed_2d_accessor_kernel_4d(
@@ -415,6 +432,7 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
                size_t a_rows, size_t b_cols, size_t b_rows,
                size_t batch_dim1, size_t batch_dim2) {
 
+    /*
     size_t a_size = sizeof(float) * a_rows * b_rows;
     size_t b_size = sizeof(float) * b_rows * b_cols;
     size_t c_size = sizeof(float) * a_rows * b_cols;
@@ -440,6 +458,11 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     packed_2d_accessor_kernel_4d<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
  
     gpuErrchk(cudaDeviceSynchronize());
+    */
+
+    float *d_A_arr = d_A.data_ptr<float>();
+    float *d_B_arr = d_B.data_ptr<float>();
+    float *d_C_arr = d_C.data_ptr<float>();
 
     const float alpha = 1.0f, beta = 0.0f;
        
@@ -454,6 +477,8 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
+
+    /*
     gpuErrchk(cudaDeviceSynchronize());
 
     packed_2d_setter_kernel_4d<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
@@ -461,6 +486,7 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     gpuErrchk(cudaFree(d_A_arr));
     gpuErrchk(cudaFree(d_B_arr));
     gpuErrchk(cudaFree(d_C_arr));
+    */
 }
 
 /*
@@ -529,9 +555,9 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
 
     cusparseSafeCall(cusparseSetPointerMode(handle, CUSPARSE_POINTER_MODE_HOST));
 
-    cusparseSafeCall(cusparseXcsrgemmNnz(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, k, descrA, nnzA,
-                                         d_A_RowIndices, d_A_ColIndices, descrB, nnzB, d_B_RowIndices, d_B_ColIndices, descrC, d_C_RowIndices,
-                                         nnzTotalDevHostPtr));
+    //cusparseSafeCall(cusparseXcsrgemmNnz(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, k, descrA, nnzA,
+    //                                     d_A_RowIndices, d_A_ColIndices, descrB, nnzB, d_B_RowIndices, d_B_ColIndices, descrC, d_C_RowIndices,
+    //                                     nnzTotalDevHostPtr));
     if (nnzTotalDevHostPtr != NULL)
         nnzC = *nnzTotalDevHostPtr;
     else
@@ -547,9 +573,9 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     int *d_C_ColIndices;
     gpuErrchk(cudaMalloc(&d_C_ColIndices, nnzC * sizeof(int)));
 
-    cusparseSafeCall(cusparseDcsrgemm(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, k, descrA, nnzA,
-                                      d_A, d_A_RowIndices, d_A_ColIndices, descrB, nnzB, d_B, d_B_RowIndices, d_B_ColIndices, descrC,
-                                      d_C, d_C_RowIndices, d_C_ColIndices));
+    //cusparseSafeCall(cusparseDcsrgemm(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, k, descrA, nnzA,
+    //                                  d_A, d_A_RowIndices, d_A_ColIndices, descrB, nnzB, d_B, d_B_RowIndices, d_B_ColIndices, descrC,
+    //                                  d_C, d_C_RowIndices, d_C_ColIndices));
 
     cusparseSafeCall(cusparseDcsr2dense(handle, m, n, descrC, d_C, d_C_RowIndices, d_C_ColIndices, d_C_dense, m));
 
@@ -640,7 +666,7 @@ void LtIgemmTensor(cublasLtHandle_t ltHandle,
 
     checkCublasStatus(cublasLtMatrixTransformDescCreate(&transformDesc, CUDA_R_32F));
 
-    checkCublasStatus(cublasLtMatmulDescCreate(&matmulDesc, CUDA_R_32F));
+    //checkCublasStatus(cublasLtMatmulDescCreate(&matmulDesc, CUDA_R_32F));
     // tensor op igemm kernels only support NT gemm
     checkCublasStatus(cublasLtMatmulDescSetAttribute(matmulDesc, CUBLASLT_MATMUL_DESC_TRANSB, &opTranspose, sizeof(opTranspose)));
 
