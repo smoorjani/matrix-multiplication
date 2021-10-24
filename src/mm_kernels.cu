@@ -19,6 +19,20 @@ static timestamp_t get_timestamp () {
     return  now.tv_usec + (timestamp_t)now.tv_sec * 1000000;
 }
 
+__global__ void dummyKernel()
+{
+    int tid = threadIdx.x+blockIdx.x*blockDim.x;
+    printf("%d\n", tid);
+}
+
+void dummy_kernel_launch() {
+    dim3 threads_per_block(64);
+    dim3 blocks_per_grid(16);
+    dummyKernel<<<blocks_per_grid, threads_per_block>>>();
+    gpuErrchk(cudaDeviceSynchronize());
+}
+
+
 #define NUM_THREADS (64)
 
 __global__ void packed_1d_accessor_kernel(
@@ -322,7 +336,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
         std::cerr << "Kernel execution error.";
     }
 
-    gpuErrchk(cudaDeviceSynchronize());
+    gpuErrchk(cudaStreamSynchronize(0));
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Batch GEMM: %f\n", secs);

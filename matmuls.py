@@ -16,11 +16,8 @@ def custom_matmul(a: torch.Tensor,
     :param torch_: Set to true if data is passed in in col-major (expected row-major)
     :returns: Matrix multiplication output
     '''
-    a = a.cuda(0)
-    b = b.cuda(0)
     a_shape = a.shape
     b_shape = b.shape
-    print(a_shape, b_shape)
     c = None
     t0 = time.time()
     if len(a_shape) == 1 or len(b_shape) == 1:
@@ -77,7 +74,7 @@ class cublasMM(InplaceFunction):
         # where row major is expected
         ctx.save_for_backward(m1, m2)
         return custom_matmul(
-            m1, m2).to("cuda" if torch.cuda.is_available() else "cpu")
+            m1, m2)
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -86,12 +83,12 @@ class cublasMM(InplaceFunction):
 
         if ctx.needs_input_grad[0]:
             grad_m1 = custom_matmul(grad_output, m2.transpose(
-                -1, -2)).to("cuda" if torch.cuda.is_available() else "cpu")
+                -1, -2))
 
         if ctx.needs_input_grad[1]:
             grad_m2 = custom_matmul(
                 m1.transpose(-1, -2),
-                grad_output).to("cuda" if torch.cuda.is_available() else "cpu")
+                grad_output)
 
         return grad_m1, grad_m2
 

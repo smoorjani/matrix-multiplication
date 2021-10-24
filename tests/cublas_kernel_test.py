@@ -8,12 +8,11 @@ custom_mm.init_cublaslt()
 
 def test_result(function, a: torch.Tensor, b: torch.Tensor):
     t0 = time.time()
-    expected = torch.matmul(a, b).cpu()
-    torch.cuda.synchronize()
-    print(f'PyTorch time: {time.time() - t0}')
-    t0 = time.time()
     output = function(a, b).cpu()
-    tf = time.time() - t0
+    print(f'Our time: {time.time() - t0}')
+    t0 = time.time()
+    expected = torch.matmul(a, b).cpu()
+    print(f'PyTorch time: {time.time() - t0}')
     '''     
     print('A: ', a)
     print('B: ', b)
@@ -27,7 +26,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
             print('B @ A: ', b @ a)
         print('B.T @ A.T: ', b.transpose(1,2) @ a.transpose(1,2))
     '''
-    
+     
     try:
     	assert (expected.shape == output.shape)
     	assert (torch.allclose(expected, output))
@@ -35,7 +34,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
         print(torch.count_nonzero(output), torch.count_nonzero(expected))
         print(expected, output)
         return tf, False
-   
+    
     return 0, True
 
 

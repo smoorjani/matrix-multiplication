@@ -11,6 +11,9 @@
 #include <cusparse_v2.h>
 #include <cublasLt.h>
 
+// dummy kernel forward declaration
+void dummy_kernel_launch();
+
 // cublas mm forward declaration   
 void cublas_mm_wrapper(cublasHandle_t handle,
                        torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
@@ -132,6 +135,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 
     torch::Tensor C = torch::zeros({batch_dim, A_rows, B_cols}, torch::kFloat32).contiguous();
     cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim);
+    //dummy_kernel_launch();
     return C;
   } else if (dim ==4) {
     int A_rows = A.size(2);
