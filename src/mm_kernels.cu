@@ -19,6 +19,8 @@ static timestamp_t get_timestamp () {
     return  now.tv_usec + (timestamp_t)now.tv_sec * 1000000;
 }
 
+#define NUM_THREADS (64)
+
 __global__ void dummyKernel()
 {
     int tid = threadIdx.x+blockIdx.x*blockDim.x;
@@ -26,103 +28,16 @@ __global__ void dummyKernel()
 }
 
 void dummy_kernel_launch() {
-    dim3 threads_per_block(64);
-    dim3 blocks_per_grid(16);
+    dim3 threads_per_block(NUM_THREADS);
+    dim3 blocks_per_grid(NUM_THREADS);
     dummyKernel<<<blocks_per_grid, threads_per_block>>>();
     gpuErrchk(cudaDeviceSynchronize());
-}
-
-
-#define NUM_THREADS (64)
-
-__global__ void packed_1d_accessor_kernel(
-    // figure out if this is coalesced
-    torch::PackedTensorAccessor32<float, 2> accessor,
-    float* trace
-) {
-  int n_rows = accessor.size(0);
-  int n_cols = accessor.size(1);
-    
-  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
-  // find thread id, row = threadid/64, col = threadid%64
-  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
-  int row = 0, col = 0;
-
-  if (n_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-    row = idx;
-    col = row * (idx_per_row - 1) + off;
-  } else {
-    row = threadId / n_cols;
-    col = threadId % n_cols;
-  }
-
-  if (row >= n_rows || col >= n_cols) {
-    return;
-  }
-  trace[row * n_cols + col] = accessor[row][col];
-}
-
-__global__ void packed_1d_setter_kernel(
-    // figure out if this is coalesced
-    torch::PackedTensorAccessor32<float, 2> accessor,
-    float* trace
-) {
-  int n_rows = accessor.size(0);
-  int n_cols = accessor.size(1);
-    
-  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
-  // find thread id, row = threadid/64, col = threadid%64
-  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
-  int row = 0, col = 0;
-
-  if (n_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-    row = idx;
-    col = row * (idx_per_row - 1) + off;
-  } else {
-    row = threadId / n_cols;
-    col = threadId % n_cols;
-  }
-
-  if (row >= n_rows || col >= n_cols) {
-    return;
-  }
-  
-  accessor[row][col] = trace[row * n_cols + col];
 }
 
 void cublas_mm_wrapper(cublasHandle_t handle,
                        torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                        int a_rows, int b_rows, int b_cols) {
 
-    /*
-    size_t a_size = sizeof(float) * a_rows * b_rows;
-    size_t b_size = sizeof(float) * b_rows * b_cols;
-    size_t c_size = sizeof(float) * a_rows * b_cols;
-
-    float *d_A_arr, *d_B_arr, *d_C_arr;
-    gpuErrchk(cudaMalloc((void **)&d_A_arr, a_size));
-    gpuErrchk(cudaMalloc((void **)&d_B_arr, b_size));
-    gpuErrchk(cudaMalloc((void **)&d_C_arr, c_size));
-
-    auto A_accessor = d_A.packed_accessor32<float,2>();
-    auto B_accessor = d_B.packed_accessor32<float,2>();
-    auto C_accessor = d_C.packed_accessor32<float,2>();
- 
-    dim3 thread_per_block(NUM_THREADS);
-    dim3 A_blocks_per_grid((a_rows * b_rows + NUM_THREADS - 1)/NUM_THREADS);
-    dim3 B_blocks_per_grid((b_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-    dim3 C_blocks_per_grid((a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-
-    packed_1d_accessor_kernel<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);   
-    packed_1d_accessor_kernel<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
-    */
-    
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
@@ -140,137 +55,6 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
-    
-    /*
-    packed_1d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
-    
-    gpuErrchk(cudaFree(d_A_arr));
-    gpuErrchk(cudaFree(d_B_arr));
-    gpuErrchk(cudaFree(d_C_arr));
-    */
-}
-
-__global__ void packed_2d_accessor_kernel(
-    // figure out if this is coalesced
-    torch::PackedTensorAccessor32<float, 3> accessor,
-    float* trace
-) {
-  int batch_size = accessor.size(0);
-  int n_rows = accessor.size(1);
-  int n_cols = accessor.size(2);
-    
-  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
-  // find thread id, row = threadid/64, col = threadid%64
-  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
-  int batch = 0, row = 0, col = 0;
-
-  if (n_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-    batch = idx / (idx_per_row * n_rows);
-    row = (idx / idx_per_row) % n_rows;
-    col = (idx % idx_per_row) * NUM_THREADS + off;
-  } else {
-    batch = threadId / (n_rows * n_cols);
-    row = (threadId % (n_rows * n_cols))/ n_cols;
-    col = threadId % n_cols;
-  }
-
-  if (batch >= batch_size || row >= n_rows || col >= n_cols) {
-    return;
-  }
-  
-  trace[batch * n_rows * n_cols + row * n_cols + col] = accessor[batch][row][col];
-}
-
-__global__ void packed_2d_accessor_kernel_combined(
-    // figure out if this is coalesced
-    torch::PackedTensorAccessor32<float, 3> a_accessor,
-    torch::PackedTensorAccessor32<float, 3> b_accessor,
-    float* a_trace,
-    float* b_trace
-) {
-  int batch_size = a_accessor.size(0);
-  int a_rows = a_accessor.size(1);
-  int a_cols = a_accessor.size(2);
-  int b_rows = b_accessor.size(1);
-  int b_cols = b_accessor.size(2);
-    
-  int a_idx_per_row = (int) ((float) (a_cols + NUM_THREADS - 1) / NUM_THREADS);
-  int b_idx_per_row = (int) ((float) (b_cols + NUM_THREADS - 1) / NUM_THREADS);
-  // find thread id, row = threadid/64, col = threadid%64
-  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
-  int a_batch = 0, a_row = 0, a_col = 0;
-  int b_batch = 0, b_row = 0, b_col = 0;
-
-  if (a_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-    a_batch = idx / (a_idx_per_row * a_rows);
-    a_row = (idx / a_idx_per_row) % a_rows;
-    a_col = (idx % a_idx_per_row) * NUM_THREADS + off;
-  } else {
-    a_batch = threadId / (a_rows * a_cols);
-    a_row = (threadId % (a_rows * a_cols))/ a_cols;
-    a_col = threadId % a_cols;
-  }
-
-  if (b_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-    b_batch = idx / (b_idx_per_row * b_rows);
-    b_row = (idx / b_idx_per_row) % b_rows;
-    b_col = (idx % b_idx_per_row) * NUM_THREADS + off;
-  } else {
-    b_batch = threadId / (b_rows * b_cols);
-    b_row = (threadId % (b_rows * b_cols))/ b_cols;
-    b_col = threadId % b_cols;
-  }
-
-  if (a_batch < batch_size && a_row < a_rows && a_col < a_cols) {
-    a_trace[a_batch * a_rows * a_cols + a_row * a_cols + a_col] = a_accessor[a_batch][a_row][a_col];
-  }
-
-  if (b_batch < batch_size && b_row < b_rows && b_col < b_cols) {
-    b_trace[b_batch * b_rows * b_cols + b_row * b_cols + b_col] = b_accessor[b_batch][b_row][b_col];
-  }
- 
-}
-
-
-__global__ void packed_2d_setter_kernel(
-    torch::PackedTensorAccessor32<float, 3> accessor,
-    float* trace
-) {
-  int batch_size = accessor.size(0);
-  int n_rows = accessor.size(1);
-  int n_cols = accessor.size(2);
-  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
-  // find thread id, row = threadid/64, col = threadid%64
-  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
-  int batch= 0, row = 0, col = 0;
-
-  if (n_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-    batch = idx / (idx_per_row * n_rows);
-    row = (idx / idx_per_row) % n_rows;
-    col = (idx % idx_per_row) * NUM_THREADS + off;
-  } else {
-    batch = threadId / (n_rows * n_cols);
-    row = (threadId % (n_rows * n_cols))/ n_cols;
-    col = threadId % n_cols;
-  }
-
-  if (batch >= batch_size || row >= n_rows || col >= n_cols) {
-    return;
-  }
-
-  accessor[batch][row][col] = trace[batch * n_rows * n_cols + row * n_cols + col];
 }
 
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
@@ -285,43 +69,11 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
-    /*
-    size_t a_size = sizeof(float) * a_rows * b_rows;
-    size_t b_size = sizeof(float) * b_rows * b_cols;
-    size_t c_size = sizeof(float) * a_rows * b_cols;
-    
-    // setting up device arrays for bmm
-    float *d_A_arr, *d_B_arr, *d_C_arr;
-    gpuErrchk(cudaMalloc(&d_A_arr, batch_dim * a_size));
-    gpuErrchk(cudaMalloc(&d_B_arr, batch_dim * b_size));
-    gpuErrchk(cudaMalloc(&d_C_arr, batch_dim * c_size));
-    
-    // creating accessors for tensors
-    auto A_accessor = d_A.packed_accessor32<float,3>();
-    auto B_accessor = d_B.packed_accessor32<float,3>();
-    auto C_accessor = d_C.packed_accessor32<float,3>();
-
-    // const int num_streams = 16;
-    // cudaStream_t streams[num_streams];
-    // execute 1 time with a_rows threads
-    // << blocks_per_grid/NUM_THREADS, NUM_THREADS, 0, streams[i]>>
-    dim3 thread_per_block(NUM_THREADS);
-    dim3 C_blocks_per_grid((batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-    dim3 AB_blocks_per_grid((batch_dim * a_rows * b_rows + batch_dim * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-    */
+  
     timestamp_t t1 = get_timestamp();
     double secs = (t1 - t0) / 1000000.0L;
     printf("Preprocessing: %f\n", secs);
-    /*
-    // ==============
-    t0 = get_timestamp();
-    packed_2d_accessor_kernel_combined<<<AB_blocks_per_grid, thread_per_block>>>(A_accessor, B_accessor, d_A_arr, d_B_arr);
-    gpuErrchk(cudaDeviceSynchronize());
-    t1 = get_timestamp();
-    secs = (t1 - t0) / 1000000.0L;
-    printf("Accessor Kernel: %f\n", secs);
-    // ==============
-    */
+
     t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
 
@@ -340,139 +92,12 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Batch GEMM: %f\n", secs);
-    /*
-    // ==============
-    t0 = get_timestamp();
-    packed_2d_setter_kernel<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
-    gpuErrchk(cudaDeviceSynchronize());
-    t1 = get_timestamp();
-    secs = (t1 - t0) / 1000000.0L;
-    printf("Setter: %f\n", secs);
-    // ==============
-    t0 = get_timestamp();
-    gpuErrchk(cudaFree(d_A_arr));
-    gpuErrchk(cudaFree(d_B_arr));
-    gpuErrchk(cudaFree(d_C_arr));
-    t1 = get_timestamp();
-    secs = (t1 - t0) / 1000000.0L;
-    printf("Freeing Memory: %f\n", secs);
-    // ==============
-    */
-}
-
-__global__ void packed_2d_accessor_kernel_4d(
-    // figure out if this is coalesced
-    torch::PackedTensorAccessor32<float, 4> accessor,
-    float* trace
-) {
-  // turns a 4d matrix into a 2d array of [batch_size][matrix_idx]
-  // batch size spans the first two dimensions
-  // matrix idx spans the last two (rows/cols)
-  int batch_dim1 = accessor.size(0);
-  int batch_dim2 = accessor.size(1);
-  int n_rows = accessor.size(2);
-  int n_cols = accessor.size(3);
-    
-  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
-  // find thread id, row = threadid/64, col = threadid%64
-  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
-  int d_1 = 0, d_2 = 0, row = 0, col = 0;
-
-  if (n_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-    d_1 = idx / (idx_per_row * n_rows * batch_dim2);
-    d_2 = (idx / (idx_per_row * n_rows)) % batch_dim2;
-    row = (idx / idx_per_row) % n_rows;
-    col = (idx % idx_per_row) * NUM_THREADS + off;
-  } else {
-    d_1 = threadId / (batch_dim2 * n_rows * n_cols);
-    d_2 = (threadId % (batch_dim2 * n_rows * n_cols))/ (n_rows * n_cols);
-    row = (threadId % (n_rows * n_cols))/ n_cols;
-    col = threadId % n_cols;
-  }
-
-  if (d_1 >= batch_dim1 || d_2 >= batch_dim2 || row >= n_rows || col >= n_cols) {
-    return;
-  }
-
-  trace[threadId] = accessor[d_1][d_2][row][col];
-}
-
-__global__ void packed_2d_setter_kernel_4d(
-    // figure out if this is coalesced
-    torch::PackedTensorAccessor32<float, 4> accessor,
-    float* trace
-) {
-  // turns a 4d matrix into a 2d array of [batch_size][matrix_idx]
-  // batch size spans the first two dimensions
-  // matrix idx spans the last two (rows/cols)
-  int batch_dim1 = accessor.size(0);
-  int batch_dim2 = accessor.size(1);
-  int n_rows = accessor.size(2);
-  int n_cols = accessor.size(3);
-    
-  int idx_per_row = (int) ((float) (n_cols + NUM_THREADS - 1) / NUM_THREADS);
-  // find thread id, row = threadid/64, col = threadid%64
-  int threadId = threadIdx.x + blockDim.x * blockIdx.x;
-  int d_1 = 0, d_2 = 0, row = 0, col = 0;
-
-  if (n_cols >= NUM_THREADS) {
-    int idx = threadId / NUM_THREADS;
-    int off = threadId % NUM_THREADS;
-
-
-    d_1 = idx / (idx_per_row * n_rows * batch_dim2);
-    d_2 = (idx / (idx_per_row * n_rows)) % batch_dim2;
-    row = (idx / idx_per_row) % n_rows;
-    col = (idx % idx_per_row) * NUM_THREADS + off;
-  } else {
-    d_1 = threadId / (batch_dim2 * n_rows * n_cols);
-    d_2 = (threadId % (batch_dim2 * n_rows * n_cols))/ (n_rows * n_cols);
-    row = (threadId % (n_rows * n_cols))/ n_cols;
-    col = threadId % n_cols;
-  }
-
-  if (d_1 >= batch_dim1 || d_2 >= batch_dim2 || row >= n_rows || col >= n_cols) {
-    return;
-  }
-  
-  accessor[d_1][d_2][row][col] = trace[threadId];
 }
 
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t b_cols, size_t b_rows,
                size_t batch_dim1, size_t batch_dim2) {
-
-    /*
-    size_t a_size = sizeof(float) * a_rows * b_rows;
-    size_t b_size = sizeof(float) * b_rows * b_cols;
-    size_t c_size = sizeof(float) * a_rows * b_cols;
-
-    // setting up device arrays for bmm
-    float *d_A_arr, *d_B_arr, *d_C_arr;
-    gpuErrchk(cudaMalloc(&d_A_arr, batch_dim1 * batch_dim2 * a_size));
-    gpuErrchk(cudaMalloc(&d_B_arr, batch_dim1 * batch_dim2 * b_size));
-    gpuErrchk(cudaMalloc(&d_C_arr, batch_dim1 * batch_dim2 * c_size));
-
-    auto A_accessor = d_A.packed_accessor32<float,4>();
-    auto B_accessor = d_B.packed_accessor32<float,4>();
-    auto C_accessor = d_C.packed_accessor32<float,4>();
-
-    // execute 1 time with a_rows threads
-    dim3 thread_per_block(NUM_THREADS);
-    dim3 A_blocks_per_grid((batch_dim1 * batch_dim2 * a_rows * b_rows + NUM_THREADS - 1)/NUM_THREADS);
-    dim3 B_blocks_per_grid((batch_dim1 * batch_dim2 * b_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-    dim3 C_blocks_per_grid((batch_dim1 * batch_dim2 * a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-
-    // <<<total threads/64 ,64>>>>
-    packed_2d_accessor_kernel_4d<<<A_blocks_per_grid, thread_per_block>>>(A_accessor, d_A_arr);
-    packed_2d_accessor_kernel_4d<<<B_blocks_per_grid, thread_per_block>>>(B_accessor, d_B_arr);
- 
-    gpuErrchk(cudaDeviceSynchronize());
-    */
 
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
@@ -491,16 +116,6 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
-
-    /*
-    gpuErrchk(cudaDeviceSynchronize());
-
-    packed_2d_setter_kernel_4d<<<C_blocks_per_grid, thread_per_block>>>(C_accessor, d_C_arr);
-    
-    gpuErrchk(cudaFree(d_A_arr));
-    gpuErrchk(cudaFree(d_B_arr));
-    gpuErrchk(cudaFree(d_C_arr));
-    */
 }
 
 /*

@@ -120,12 +120,7 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
 
 torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 {
-  // torch passes in with column major
-  // the current
-
-  // TODO: dim = 4
   if (dim == 3) {
-
     int A_rows = A.size(1);
     int B_rows = B.size(1);
     int B_cols = B.size(2);
@@ -135,7 +130,6 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 
     torch::Tensor C = torch::zeros({batch_dim, A_rows, B_cols}, torch::kFloat32).contiguous();
     cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim);
-    //dummy_kernel_launch();
     return C;
   } else if (dim ==4) {
     int A_rows = A.size(2);
@@ -157,26 +151,16 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
   }
 }
 
-torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
+torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
 {
-  // torch passes in with column major
-  // the current
-
-  auto A_tensor = torch::transpose(A, 0, 1);
-  auto B_tensor = torch::transpose(B, 0, 1);
-  
   double *A_arr = A_tensor.data_ptr<double>();
   double *B_arr = B_tensor.data_ptr<double>();
 
-  int A_rows = A_tensor.size(0);
-  int A_cols = A_tensor.size(1);
-  int B_rows = B_tensor.size(0);
-  int B_cols = B_tensor.size(1);
+  int A_rows = A.size(0);
+  int A_cols = A.size(1);
+  int B_cols = B.size(1);;
 
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kDouble);
-  int C_rows = C.size(0);
-  int C_cols = C.size(1);
-
   double *C_arr = C.data_ptr<double>();
 
   double *h_A_val = nullptr;
@@ -200,15 +184,6 @@ torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A)
   cusparse_mm_wrapper(g_cusparse_handle, h_A_val, h_A_colind, h_A_rowptr, nnzA,
                       h_A_rowptr_size, B_arr, B_rows, B_cols, C_arr);
 
-  auto accessor = C.accessor<double, 2>();
-
-  for (int i = 0; i < C_rows; i++)
-  {
-    for (int j = 0; j < C_cols; j++)
-    {
-      accessor[i][j] = C_arr[i * C_rows + j];
-    }
-  }
 
   return C;
 }
@@ -251,39 +226,3 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
   m.def("cublaslt_mmul", &cublaslt_mmul, "cuBLASLt Torch Matrix Multiplication");
 }
-
-// else if (dim == 4) {
-  //   A_tensor = torch::transpose(A, 2, 3);
-  //   B_tensor = torch::transpose(B, 2, 3);
-
-  //   A_rows = A_tensor.size(2);
-  //   A_cols = A_tensor.size(3);
-  //   B_rows = B_tensor.size(2);
-  //   B_cols = B_tensor.size(3);
-
-  //   batch_dim = A_tensor.size(1);
-  //   assert(batch_dim == B_tensor.size(1));
-
-  //   torch::Tensor C = torch::zeros({batch_dim, B_cols, A_rows}, torch::kFloat32);
-  //   int C_rows = C.size(2);
-  //   int C_cols = C.size(3);
-
-  //   float *A_arr = A_tensor.data_ptr<float>();
-  //   float *B_arr = B_tensor.data_ptr<float>();
-  //   float *C_arr = C.data_ptr<float>();
-
-  //   cublas_bmm_wrapper(g_cublas_handle, A_arr, A_rows, A_cols, B_arr, B_rows, B_cols, C_arr, batch_dim);
-  //   auto accessor = C.accessor<float, 3>();
-
-  //   for (int b = 0; b < batch_dim; b++) {
-  //     for (int i = 0; i < C_rows; i++)
-  //     {
-  //       for (int j = 0; j < C_cols; j++)
-  //       {
-  //         accessor[b][i][j] = C_arr[i * C_cols + j];
-  //       }
-  //     }
-  //   }
-    
-  //   return C;
-  // }
