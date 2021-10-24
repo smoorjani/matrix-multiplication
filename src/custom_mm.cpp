@@ -153,8 +153,8 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 
 torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
 {
-  double *A_arr = A_tensor.data_ptr<double>();
-  double *B_arr = B_tensor.data_ptr<double>();
+  double *A_arr = A.data_ptr<double>();
+  double *B_arr = B.data_ptr<double>();
 
   int A_rows = A.size(0);
   int A_cols = A.size(1);
