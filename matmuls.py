@@ -18,9 +18,10 @@ def custom_matmul(a: torch.Tensor,
     '''
     a_shape = a.shape
     b_shape = b.shape
-    #c = torch.empty(tuple(list(a_shape[:-1]) + [b_shape[-1]])).to(a.device)
+    c = torch.zeros(tuple(list(a_shape[:-1]) + [b_shape[-1]]), device=torch.device('cuda'))
+    #c = torch.zeros(tuple(list(a_shape[:-1]) + [b_shape[-1]])).to('cuda')
     #print(c.shape)
-    c = None
+    #c = None
     if len(a_shape) == 1 or len(b_shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
@@ -41,9 +42,9 @@ def custom_matmul(a: torch.Tensor,
         assert lda == ldb
         assert a_dim2 == b_dim1
         if len(a_shape) == 3 and len(b_shape) == 3:
-            c = bmm_op(a, b, 3)
+            c = bmm_op(a, b, c, 3)
         elif len(a_shape) == 4 and len(b_shape) == 4:
-            c = bmm_op(a, b, 4)
+            c = bmm_op(a, b, c, 4)
         else:
             c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
                              for i in range(lda)])

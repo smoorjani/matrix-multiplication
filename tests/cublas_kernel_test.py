@@ -9,7 +9,7 @@ custom_mm.init_cublaslt()
 def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both'):
     output, expected = None, None
     tf, pt_tf = None, None
-    kernel = 'ours'
+    kernel = 'both'
     if 'ours' in kernel or 'both' in kernel:
         t0 = time.time()
         output = function(a, b)

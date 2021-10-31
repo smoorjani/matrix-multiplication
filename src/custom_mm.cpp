@@ -119,7 +119,7 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
   return C;
 }
 
-torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
+torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim)
 {
   if (dim == 3) {
     int A_rows = A.size(1);
@@ -128,16 +128,8 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 
     int batch_dim = A.size(0);
     assert(batch_dim == B.size(0));
-    torch::Tensor C = torch::zeros({batch_dim, A_rows, B_cols}, torch::kFloat32).contiguous();
-    //C = C.to(device);
-    std::cout << "A C++ Before: " << A.device() << std::endl;
-    std::cout << "B C++ Before: " << B.device() << std::endl;
-    std::cout << "C C++ Before: " << C.device() << std::endl;
     cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim);
-    std::cout << "A C++ After: " << A.device() << std::endl;
-    std::cout << "B C++ After: " << B.device() << std::endl;
-    std::cout << "C C++ After: " << C.device() << std::endl;
-    return C; //return C;
+    return C;
   } else if (dim ==4) {
     int A_rows = A.size(2);
     int B_rows = B.size(2);
@@ -148,16 +140,8 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
     assert(batch_dim1 == B.size(0));
     assert(batch_dim2 == B.size(1));
 
-    torch::Tensor C = torch::zeros({batch_dim1, batch_dim2, A_rows, B_cols}, torch::kFloat32).contiguous();
-    //C = C.to(device);
-    std::cout << "A C++ Before: " << A.device() << std::endl;
-    std::cout << "B C++ Before: " << B.device() << std::endl;
-    std::cout << "C C++ Before: " << C.device() << std::endl;
     cublas_4d_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim1, batch_dim2);
-    std::cout << "A C++ After: " << A.device() << std::endl;
-    std::cout << "B C++ After: " << B.device() << std::endl;
-    std::cout << "C C++ After: " << C.device() << std::endl;
-    return C; //return C;
+    return C;
   } else if (dim == 2) {
     return cublas_mmul(A, B);
   } else {
