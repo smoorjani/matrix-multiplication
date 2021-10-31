@@ -122,7 +122,6 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
 torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 {
   if (dim == 3) {
-    dummy_kernel_launch();
     int A_rows = A.size(1);
     int B_rows = B.size(1);
     int B_cols = B.size(2);
@@ -140,7 +139,6 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
     std::cout << "C C++ After: " << C.device() << std::endl;
     return C; //return C;
   } else if (dim ==4) {
-    dummy_kernel_launch();
     int A_rows = A.size(2);
     int B_rows = B.size(2);
     int B_cols = B.size(3);

@@ -58,6 +58,19 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     
 }
 
+__global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols)
+{
+    int tid = threadIdx.x+blockIdx.x*blockDim.x;
+    if (tid >= rows * cols) {
+        return;
+    }
+
+    if (d_Arr[tid] == h_Arr[tid]) {
+        printf("Equal %d\n", tid);
+    } else {
+        printf("Not Equal %d\n", tid);
+    }
+}
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
 
 void cublas_bmm_wrapper(cublasHandle_t handle,
@@ -70,12 +83,18 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
-
-    float *d_C;
-    gpuErrchk(cudaMalloc(&d_C, a_rows * b_cols * sizeof(float)));
-    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyDeviceToHost);
-  
+    /*
+    printf("chkpt1\n");
+    float *C;
+    gpuErrchk(cudaMalloc(&C, a_rows * b_cols * sizeof(float)));
+    gpuErrchk(cudaMemcpy(C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice));
+    printf("chkpt2\n");
+    dim3 threads_per_block(NUM_THREADS);
+    dim3 C_blocks_per_grid((a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
+    check_equal<<<threads_per_block, C_blocks_per_grid>>>(C, d_C_arr, a_rows, b_cols);
+    printf("chkpt3\n");
+    gpuErrchk(cudaDeviceSynchronize());
+    */
     timestamp_t t1 = get_timestamp();
     double secs = (t1 - t0) / 1000000.0L;
     printf("Preprocessing: %f\n", secs);
@@ -93,9 +112,18 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
-
-    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyDeviceToHost);
+    /*
+    gpuErrchk(cudaDeviceSynchronize());
+    printf("chkpt4\n");
+    //gpuErrchk(cudaMemcpy(C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice));
+    //check_equal<<<threads_per_block, C_blocks_per_grid>>>(C, d_C_arr, a_rows, b_cols);
+    //gpuErrchk(cudaDeviceSynchronize());
+    printf("chkpt5\n");
+    gpuErrchk(cudaMemcpy(C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyDeviceToDevice));
+    check_equal<<<threads_per_block, C_blocks_per_grid>>>(C, d_C_arr, a_rows, b_cols);
+    gpuErrchk(cudaDeviceSynchronize());
+    printf("chkpt6\n");
+    */
 
     gpuErrchk(cudaStreamSynchronize(0));
     t1 = get_timestamp();

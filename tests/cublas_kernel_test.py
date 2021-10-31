@@ -6,13 +6,22 @@ import time
 custom_mm.init_cublas()
 custom_mm.init_cublaslt()
 
-def test_result(function, a: torch.Tensor, b: torch.Tensor):
-    t0 = time.time()
-    output = function(a, b).cpu()
-    print(f'Our time: {time.time() - t0}')
-    t0 = time.time()
-    expected = torch.matmul(a, b).cpu()
-    print(f'PyTorch time: {time.time() - t0}')
+def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both'):
+    output, expected = None, None
+    tf, pt_tf = None, None
+    kernel = 'ours'
+    if 'ours' in kernel or 'both' in kernel:
+        t0 = time.time()
+        output = function(a, b)
+        tf = time.time() - t0
+        print('CUDA after returning: ', output.is_cuda)
+        output = output.cpu()
+        print(f'Our time: {tf}')
+    if 'pytorch' in kernel or 'both' in kernel:
+        t0 = time.time()
+        expected = torch.matmul(a, b).cpu()
+        pt_tf = time.time() - t0
+        print(f'PyTorch time: {pt_tf}')
     '''     
     print('A: ', a)
     print('B: ', b)
@@ -26,16 +35,16 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor):
             print('B @ A: ', b @ a)
         print('B.T @ A.T: ', b.transpose(1,2) @ a.transpose(1,2))
     '''
-     
-    try:
-    	assert (expected.shape == output.shape)
-    	assert (torch.allclose(expected, output))
-    except AssertionError:
-        print(torch.count_nonzero(output), torch.count_nonzero(expected))
-        print(expected, output)
-        return tf, False
+    if 'both' in kernel: 
+        try:
+       	    assert (expected.shape == output.shape)
+            assert (torch.allclose(expected, output))
+        except AssertionError:
+            print(torch.count_nonzero(output), torch.count_nonzero(expected))
+            print(expected, output)
+            return tf, False
     
-    return 0, True
+    return tf if 'both' in kernel or 'ours' in kernel else pt_tf, True
 
 
 def test_matmuls(a_dim, b_dim):
@@ -67,4 +76,5 @@ test_matmuls((2, 8, 64, 16), (2, 8, 16, 8))
 #print(get_average_time((2, 3, 2), (2, 2, 4)))
 #print(get_average_time((8, 64, 16), (8, 16, 8)))
 print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))
+#print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), 10))
 custom_mm.destroy_cublas()
