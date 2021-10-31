@@ -7,7 +7,9 @@ import custom_mm
 def custom_matmul(a: torch.Tensor,
                   b: torch.Tensor,
                   mm_op=custom_mm.cublas_mmul,
-                  bmm_op=custom_mm.cublas_bmm) -> torch.Tensor:
+                  bmm_op=custom_mm.cublas_bmm,
+                  transa=False,
+                  transb=False) -> torch.Tensor:
     '''
     Uses cuBLAS kernel to perform matrix multiplication.
 
@@ -42,9 +44,9 @@ def custom_matmul(a: torch.Tensor,
         assert lda == ldb
         assert a_dim2 == b_dim1
         if len(a_shape) == 3 and len(b_shape) == 3:
-            c = bmm_op(a, b, c, 3)
+            c = bmm_op(a, b, c, 3, transa, transb)
         elif len(a_shape) == 4 and len(b_shape) == 4:
-            c = bmm_op(a, b, c, 4)
+            c = bmm_op(a, b, c, 4, transa, transb)
         else:
             c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
                              for i in range(lda)])
@@ -61,26 +63,26 @@ def custom_matmul(a: torch.Tensor,
 
 class cublasMM(InplaceFunction):
     @staticmethod
-    def forward(ctx, m1, m2):
+    def forward(ctx, m1, m2, transa=False, transb=False):
         # swap around for col-major call
         # where row major is expected
-        ctx.save_for_backward(m1, m2)
+        ctx.save_for_backward(m1, m2, transa, transb)
         return custom_matmul(
-            m1, m2)
+            m1, m2, transa=transa, transb=transb)
 
     @staticmethod
     def backward(ctx, grad_output):
-        m1, m2 = ctx.saved_variables
+        m1, m2, transa, transb = ctx.saved_variables
         grad_m1 = grad_m2 = None
 
         if ctx.needs_input_grad[0]:
             grad_m1 = custom_matmul(grad_output, m2.transpose(
-                -1, -2))
+                -1, -2), transa=transa, transb=transb)
 
         if ctx.needs_input_grad[1]:
             grad_m2 = custom_matmul(
                 m1.transpose(-1, -2),
-                grad_output)
+                grad_output, transa=transa, transb=transb)
 
         return grad_m1, grad_m2
 

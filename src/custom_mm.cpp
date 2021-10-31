@@ -23,11 +23,12 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor A, torch::Tensor B, torch::Tensor C,
                size_t a_rows, size_t b_cols, size_t b_rows,
-               size_t batch_dim);
+               size_t batch_dim, bool transa, bool transb);
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor A, torch::Tensor B, torch::Tensor C,
                size_t a_rows, size_t b_cols, size_t b_rows,
-               size_t batch_dim1, size_t batch_dim2);
+               size_t batch_dim1, size_t batch_dim2,
+               bool transa, bool transb);
 
 // cusparse mm forward declaration
 void cusparse_mm_wrapper(cusparseHandle_t handle,
@@ -119,7 +120,7 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
   return C;
 }
 
-torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim)
+torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim, bool transa, bool transb)
 {
   if (dim == 3) {
     int A_rows = A.size(1);
@@ -128,7 +129,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
 
     int batch_dim = A.size(0);
     assert(batch_dim == B.size(0));
-    cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim);
+    cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim, transa, transb);
     return C;
   } else if (dim ==4) {
     int A_rows = A.size(2);
@@ -140,7 +141,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
     assert(batch_dim1 == B.size(0));
     assert(batch_dim2 == B.size(1));
 
-    cublas_4d_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim1, batch_dim2);
+    cublas_4d_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim1, batch_dim2, transa, transb);
     return C;
   } else if (dim == 2) {
     return cublas_mmul(A, B);

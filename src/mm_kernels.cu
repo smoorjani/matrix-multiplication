@@ -76,7 +76,7 @@ __global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols
 void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t b_cols, size_t b_rows,
-               size_t batch_dim) {
+               size_t batch_dim, bool transa, bool transb) {
     
     // ==============
     timestamp_t t0 = get_timestamp();
@@ -102,7 +102,10 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
 
-    cublasStatus_t status = cublasSgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
+    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T
+    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T
+
+    cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , b_cols, a_rows, b_rows
                                        , &alpha, d_B_arr, b_cols, b_rows * b_cols
                                        , d_A_arr, b_rows, a_rows * b_rows
@@ -134,14 +137,18 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t b_cols, size_t b_rows,
-               size_t batch_dim1, size_t batch_dim2) {
+               size_t batch_dim1, size_t batch_dim2,
+               bool transa, bool transb) {
 
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
     const float alpha = 1.0f, beta = 0.0f;
+
+    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T
+    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T
     
-    cublasStatus_t status = cublasSgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
+    cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , b_cols, a_rows, b_rows
                                        , &alpha, d_B_arr, b_cols, b_rows * b_cols
                                        , d_A_arr, b_rows, a_rows * b_rows
