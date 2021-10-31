@@ -1,0 +1,1901 @@
+[Sep21 13:17] opal: OPAL detected !
+[  +0.000000] Allocated 5767168 bytes for 2048 pacas at         (ptrval)
+[  +0.000000] dt-cpu-ftrs: setup for ISA 3000
+[  +0.000000] dt-cpu-ftrs: not enabling: system-call-vectored (disabled or unsupported by kernel)
+[  +0.000000] dt-cpu-ftrs: final cpu/mmu features = 0x0000f0eb8f5fb1a7 0x3c006041
+[  +0.000000] radix-mmu: Page sizes from device-tree:
+[  +0.000000] radix-mmu: Page size shift = 12 AP=0x0
+[  +0.000000] radix-mmu: Page size shift = 16 AP=0x5
+[  +0.000000] radix-mmu: Page size shift = 21 AP=0x1
+[  +0.000000] radix-mmu: Page size shift = 30 AP=0x2
+[  +0.000000] radix-mmu: Initializing Radix MMU
+[  +0.000000] radix-mmu: Partition table         (ptrval)
+[  +0.000000] radix-mmu: Mapped 0x0000000000000000-0x0000008000000000 with 1.00 GiB pages
+[  +0.000000] radix-mmu: Mapped 0x0000200000000000-0x0000208000000000 with 1.00 GiB pages
+[  +0.000000] radix-mmu: Process table         (ptrval) and radix root for kernel:         (ptrval)
+[  +0.000000] Linux version 4.15.0-74-generic (buildd@bos02-ppc64el-014) (gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1)) #84-Ubuntu SMP Thu Dec 19 08:06:13 UTC 2019 (Ubuntu 4.15.0-74.84-generic 4.15.18)
+[  +0.000000] Found initrd at 0xc0000000038f0000:0xc000000007d3f924
+[  +0.000000] OPAL: Found memory mapped LPC bus on chip 0
+[  +0.000000] ISA: Non-PCI bridge is /lpcm-opb@6030000000000/lpc@0
+[  +0.000000] Using PowerNV machine description
+[  +0.000000] CPU maps initialized for 4 threads per core
+[  +0.000000]  (thread shift is 2)
+[  +0.000000] Freed 5308416 bytes for unused pacas
+[  +0.000000] -----------------------------------------------------
+[  +0.000000] ppc64_pft_size    = 0x0
+[  +0.000000] phys_mem_size     = 0x10000000000
+[  +0.000000] dcache_bsize      = 0x80
+[  +0.000000] icache_bsize      = 0x80
+[  +0.000000] cpu_features      = 0x0000f0eb8f5fb1a7
+[  +0.000000]   possible        = 0x0000fffbfffff1af
+[  +0.000000]   always          = 0x00000000000001a0
+[  +0.000000] cpu_user_features = 0xdc0065c2 0xaee00000
+[  +0.000000] mmu_features      = 0x3c006041
+[  +0.000000] firmware_features = 0x0000000110000000
+[  +0.000000] -----------------------------------------------------
+[  +0.000000] cma: Reserved 52432 MiB at 0x000020732f000000
+[  +0.000000] numa:   NODE_DATA [mem 0x7fffff3c80-0x7fffffffff]
+[  +0.000000] numa:   NODE_DATA [mem 0x207fff1a5c80-0x207fff1b1fff]
+[  +0.000000] numa:   NODE_DATA [mem 0x207fff119900-0x207fff125c7f]
+[  +0.000000] numa:     NODE_DATA(252) on node 8
+[  +0.000000] numa:   NODE_DATA [mem 0x207fff10d580-0x207fff1198ff]
+[  +0.000000] numa:     NODE_DATA(253) on node 8
+[  +0.000000] numa:   NODE_DATA [mem 0x207fff101200-0x207fff10d57f]
+[  +0.000000] numa:     NODE_DATA(254) on node 8
+[  +0.000000] numa:   NODE_DATA [mem 0x207fff0f4e80-0x207fff1011ff]
+[  +0.000000] numa:     NODE_DATA(255) on node 8
+[  +0.000000] rfi-flush: mttrig type flush available
+[  +0.000000] rfi-flush: patched 10 locations (mttrig type flush)
+[  +0.000000] link-stack-flush: software flush enabled.
+[  +0.000000] count-cache-flush: software flush disabled.
+[  +0.000000] stf-barrier: eieio barrier available
+[  +0.000000] stf-barrier: patched 61 entry locations (eieio barrier)
+[  +0.000000] stf-barrier: patched 10 exit locations (eieio barrier)
+[  +0.000000] Initializing IODA2 PHB (/pciex@600c3c0000000)
+[  +0.000000] PCI host bridge /pciex@600c3c0000000 (primary) ranges:
+[  +0.000000]  MEM 0x000600c000000000..0x000600c07ffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006000000000000..0x0006003fffffffff -> 0x0006000000000000 (M64 #1..31)
+[  +0.000000]  Using M64 #31 as default window
+[  +0.000000]   512 (511) PE's M32: 0x80000000 [segment=0x400000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x20000000]
+[  +0.000000]   Allocated bitmap for 4088 MSIs (base IRQ 0xfe000)
+[  +0.000000] Initializing IODA2 PHB (/pciex@600c3c0100000)
+[  +0.000000] PCI host bridge /pciex@600c3c0100000  ranges:
+[  +0.000000]  MEM 0x000600c080000000..0x000600c0fffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006004000000000..0x0006007fffffffff -> 0x0006004000000000 (M64 #1..15)
+[  +0.000000]  Using M64 #15 as default window
+[  +0.000000]   256 (255) PE's M32: 0x80000000 [segment=0x800000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x40000000]
+[  +0.000000]   Allocated bitmap for 2040 MSIs (base IRQ 0xfd800)
+[  +0.000000] Initializing IODA2 PHB (/pciex@600c3c0200000)
+[  +0.000000] PCI host bridge /pciex@600c3c0200000  ranges:
+[  +0.000000]  MEM 0x000600c100000000..0x000600c17ffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006008000000000..0x000600bfffffffff -> 0x0006008000000000 (M64 #1..15)
+[  +0.000000]  Using M64 #15 as default window
+[  +0.000000]   256 (255) PE's M32: 0x80000000 [segment=0x800000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x40000000]
+[  +0.000000]   Allocated bitmap for 2040 MSIs (base IRQ 0xfd000)
+[  +0.000000] Initializing IODA2 PHB (/pciex@600c3c0300000)
+[  +0.000000] PCI host bridge /pciex@600c3c0300000  ranges:
+[  +0.000000]  MEM 0x000600c180000000..0x000600c1fffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006020000000000..0x0006023fffffffff -> 0x0006020000000000 (M64 #1..31)
+[  +0.000000]  Using M64 #31 as default window
+[  +0.000000]   512 (511) PE's M32: 0x80000000 [segment=0x400000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x20000000]
+[  +0.000000]   Allocated bitmap for 4088 MSIs (base IRQ 0xfc000)
+[  +0.000000] Initializing IODA2 PHB (/pciex@600c3c0400000)
+[  +0.000000] PCI host bridge /pciex@600c3c0400000  ranges:
+[  +0.000000]  MEM 0x000600c200000000..0x000600c27ffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006024000000000..0x0006027fffffffff -> 0x0006024000000000 (M64 #1..15)
+[  +0.000000]  Using M64 #15 as default window
+[  +0.000000]   256 (255) PE's M32: 0x80000000 [segment=0x800000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x40000000]
+[  +0.000000]   Allocated bitmap for 2040 MSIs (base IRQ 0xfb800)
+[  +0.000000] Initializing IODA2 PHB (/pciex@600c3c0500000)
+[  +0.000000] PCI host bridge /pciex@600c3c0500000  ranges:
+[  +0.000000]  MEM 0x000600c280000000..0x000600c2fffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006028000000000..0x000602bfffffffff -> 0x0006028000000000 (M64 #1..15)
+[  +0.000000]  Using M64 #15 as default window
+[  +0.000000]   256 (255) PE's M32: 0x80000000 [segment=0x800000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x40000000]
+[  +0.000000]   Allocated bitmap for 2040 MSIs (base IRQ 0xfb000)
+[  +0.000000] Initializing IODA2 PHB (/pciex@620c3c0000000)
+[  +0.000000] PCI host bridge /pciex@620c3c0000000  ranges:
+[  +0.000000]  MEM 0x000620c000000000..0x000620c07ffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006200000000000..0x0006203fffffffff -> 0x0006200000000000 (M64 #1..31)
+[  +0.000000]  Using M64 #31 as default window
+[  +0.000000]   512 (511) PE's M32: 0x80000000 [segment=0x400000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x20000000]
+[  +0.000000]   Allocated bitmap for 4088 MSIs (base IRQ 0x1fe000)
+[  +0.000000] Initializing IODA2 PHB (/pciex@620c3c0300000)
+[  +0.000000] PCI host bridge /pciex@620c3c0300000  ranges:
+[  +0.000000]  MEM 0x000620c180000000..0x000620c1fffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006220000000000..0x0006223fffffffff -> 0x0006220000000000 (M64 #1..31)
+[  +0.000000]  Using M64 #31 as default window
+[  +0.000000]   512 (511) PE's M32: 0x80000000 [segment=0x400000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x20000000]
+[  +0.000000]   Allocated bitmap for 4088 MSIs (base IRQ 0x1fd000)
+[  +0.000000] Initializing IODA2 PHB (/pciex@620c3c0400000)
+[  +0.000000] PCI host bridge /pciex@620c3c0400000  ranges:
+[  +0.000000]  MEM 0x000620c200000000..0x000620c27ffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006224000000000..0x0006227fffffffff -> 0x0006224000000000 (M64 #1..15)
+[  +0.000000]  Using M64 #15 as default window
+[  +0.000000]   256 (255) PE's M32: 0x80000000 [segment=0x800000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x40000000]
+[  +0.000000]   Allocated bitmap for 2040 MSIs (base IRQ 0x1fc800)
+[  +0.000000] Initializing IODA2 PHB (/pciex@620c3c0500000)
+[  +0.000000] PCI host bridge /pciex@620c3c0500000  ranges:
+[  +0.000000]  MEM 0x000620c280000000..0x000620c2fffeffff -> 0x0000000080000000 
+[  +0.000000]  MEM 0x0006228000000000..0x000622bfffffffff -> 0x0006228000000000 (M64 #1..15)
+[  +0.000000]  Using M64 #15 as default window
+[  +0.000000]   256 (255) PE's M32: 0x80000000 [segment=0x800000]
+[  +0.000000]                  M64: 0x4000000000 [segment=0x40000000]
+[  +0.000000]   Allocated bitmap for 2040 MSIs (base IRQ 0x1fc000)
+[  +0.000000] Initializing NPU_NVLINK PHB (/pciex@6030200000000)
+[  +0.000000] PCI host bridge /pciex@6030200000000  ranges:
+[  +0.000000]  MEM 0x0006030201600000..0x000603020171ffff -> 0x0006030201600000 
+[  +0.000000]   Not support M64 window
+[  +0.000000]   016 (015) PE's M32: 0x130000 [segment=0x13000]
+[  +0.000000] Initializing NPU_NVLINK PHB (/pciex@6230200000000)
+[  +0.000000] PCI host bridge /pciex@6230200000000  ranges:
+[  +0.000000]  MEM 0x0006230201600000..0x000623020171ffff -> 0x0006230201600000 
+[  +0.000000]   Not support M64 window
+[  +0.000000]   016 (015) PE's M32: 0x130000 [segment=0x13000]
+[  +0.000000] OPAL nvram setup, 589824 bytes
+[  +0.000000] barrier-nospec: using ORI speculation barrier
+[  +0.000000] barrier-nospec: patched 578 locations
+[  +0.000000] Top of RAM: 0x208000000000, Total RAM: 0x10000000000
+[  +0.000000] Memory hole size: 33030144MB
+[  +0.000000] Zone ranges:
+[  +0.000000]   DMA      [mem 0x0000000000000000-0x0000207fffffffff]
+[  +0.000000]   DMA32    empty
+[  +0.000000]   Normal   empty
+[  +0.000000]   Device   empty
+[  +0.000000] Movable zone start for each node
+[  +0.000000] Early memory node ranges
+[  +0.000000]   node   0: [mem 0x0000000000000000-0x0000007fffffffff]
+[  +0.000000]   node   8: [mem 0x0000200000000000-0x0000207fffffffff]
+[  +0.000000] Initmem setup node 0 [mem 0x0000000000000000-0x0000007fffffffff]
+[  +0.000000] On node 0 totalpages: 8388608
+[  +0.000000]   DMA zone: 8192 pages used for memmap
+[  +0.000000]   DMA zone: 0 pages reserved
+[  +0.000000]   DMA zone: 8388608 pages, LIFO batch:1
+[  +0.000000] Initmem setup node 8 [mem 0x0000200000000000-0x0000207fffffffff]
+[  +0.000000] On node 8 totalpages: 8388608
+[  +0.000000]   DMA zone: 8192 pages used for memmap
+[  +0.000000]   DMA zone: 0 pages reserved
+[  +0.000000]   DMA zone: 8388608 pages, LIFO batch:1
+[  +0.000000] Could not find start_pfn for node 252
+[  +0.000000] Initmem setup node 252 [mem 0x0000000000000000-0x0000000000000000]
+[  +0.000000] On node 252 totalpages: 0
+[  +0.000000] Could not find start_pfn for node 253
+[  +0.000000] Initmem setup node 253 [mem 0x0000000000000000-0x0000000000000000]
+[  +0.000000] On node 253 totalpages: 0
+[  +0.000000] Could not find start_pfn for node 254
+[  +0.000000] Initmem setup node 254 [mem 0x0000000000000000-0x0000000000000000]
+[  +0.000000] On node 254 totalpages: 0
+[  +0.000000] Could not find start_pfn for node 255
+[  +0.000000] Initmem setup node 255 [mem 0x0000000000000000-0x0000000000000000]
+[  +0.000000] On node 255 totalpages: 0
+[  +0.000000] percpu: Embedded 4 pages/cpu s166936 r0 d95208 u262144
+[  +0.000000] pcpu-alloc: s166936 r0 d95208 u262144 alloc=4*65536
+[  +0.000000] pcpu-alloc: [0] 000 [0] 001 [0] 002 [0] 003 
+[  +0.000000] pcpu-alloc: [0] 004 [0] 005 [0] 006 [0] 007 
+[  +0.000000] pcpu-alloc: [0] 008 [0] 009 [0] 010 [0] 011 
+[  +0.000000] pcpu-alloc: [0] 012 [0] 013 [0] 014 [0] 015 
+[  +0.000000] pcpu-alloc: [0] 016 [0] 017 [0] 018 [0] 019 
+[  +0.000000] pcpu-alloc: [0] 020 [0] 021 [0] 022 [0] 023 
+[  +0.000000] pcpu-alloc: [0] 024 [0] 025 [0] 026 [0] 027 
+[  +0.000000] pcpu-alloc: [0] 028 [0] 029 [0] 030 [0] 031 
+[  +0.000000] pcpu-alloc: [0] 032 [0] 033 [0] 034 [0] 035 
+[  +0.000000] pcpu-alloc: [0] 036 [0] 037 [0] 038 [0] 039 
+[  +0.000000] pcpu-alloc: [0] 040 [0] 041 [0] 042 [0] 043 
+[  +0.000000] pcpu-alloc: [0] 044 [0] 045 [0] 046 [0] 047 
+[  +0.000000] pcpu-alloc: [0] 048 [0] 049 [0] 050 [0] 051 
+[  +0.000000] pcpu-alloc: [0] 052 [0] 053 [0] 054 [0] 055 
+[  +0.000000] pcpu-alloc: [0] 056 [0] 057 [0] 058 [0] 059 
+[  +0.000000] pcpu-alloc: [0] 060 [0] 061 [0] 062 [0] 063 
+[  +0.000000] pcpu-alloc: [0] 064 [0] 065 [0] 066 [0] 067 
+[  +0.000000] pcpu-alloc: [0] 068 [0] 069 [0] 070 [0] 071 
+[  +0.000000] pcpu-alloc: [0] 072 [0] 073 [0] 074 [0] 075 
+[  +0.000000] pcpu-alloc: [0] 076 [0] 077 [0] 078 [0] 079 
+[  +0.000000] pcpu-alloc: [1] 080 [1] 081 [1] 082 [1] 083 
+[  +0.000000] pcpu-alloc: [1] 084 [1] 085 [1] 086 [1] 087 
+[  +0.000000] pcpu-alloc: [1] 088 [1] 089 [1] 090 [1] 091 
+[  +0.000000] pcpu-alloc: [1] 092 [1] 093 [1] 094 [1] 095 
+[  +0.000000] pcpu-alloc: [1] 096 [1] 097 [1] 098 [1] 099 
+[  +0.000000] pcpu-alloc: [1] 100 [1] 101 [1] 102 [1] 103 
+[  +0.000000] pcpu-alloc: [1] 104 [1] 105 [1] 106 [1] 107 
+[  +0.000000] pcpu-alloc: [1] 108 [1] 109 [1] 110 [1] 111 
+[  +0.000000] pcpu-alloc: [1] 112 [1] 113 [1] 114 [1] 115 
+[  +0.000000] pcpu-alloc: [1] 116 [1] 117 [1] 118 [1] 119 
+[  +0.000000] pcpu-alloc: [1] 120 [1] 121 [1] 122 [1] 123 
+[  +0.000000] pcpu-alloc: [1] 124 [1] 125 [1] 126 [1] 127 
+[  +0.000000] pcpu-alloc: [1] 128 [1] 129 [1] 130 [1] 131 
+[  +0.000000] pcpu-alloc: [1] 132 [1] 133 [1] 134 [1] 135 
+[  +0.000000] pcpu-alloc: [1] 136 [1] 137 [1] 138 [1] 139 
+[  +0.000000] pcpu-alloc: [1] 140 [1] 141 [1] 142 [1] 143 
+[  +0.000000] pcpu-alloc: [1] 144 [1] 145 [1] 146 [1] 147 
+[  +0.000000] pcpu-alloc: [1] 148 [1] 149 [1] 150 [1] 151 
+[  +0.000000] pcpu-alloc: [1] 152 [1] 153 [1] 154 [1] 155 
+[  +0.000000] pcpu-alloc: [1] 156 [1] 157 [1] 158 [1] 159 
+[  +0.000000] Built 6 zonelists, mobility grouping on.  Total pages: 16760832
+[  +0.000000] Policy zone: DMA
+[  +0.000000] Kernel command line: root=UUID=b8babb32-9912-49ca-81e4-67a953dd8ded ro
+[  +0.000000] log_buf_len individual max cpu contribution: 4096 bytes
+[  +0.000000] log_buf_len total cpu_extra contributions: 651264 bytes
+[  +0.000000] log_buf_len min size: 262144 bytes
+[  +0.000000] log_buf_len: 1048576 bytes
+[  +0.000000] early log buf free: 247484(94%)
+[  +0.000000] Memory: 1018514048K/1073741824K available (13504K kernel code, 2048K rwdata, 3712K rodata, 4800K init, 3209K bss, 1537408K reserved, 53690368K cma-reserved)
+[  +0.000000] random: get_random_u64 called from kmem_cache_open+0x54/0x630 with crng_init=0
+[  +0.000000] SLUB: HWalign=128, Order=0-3, MinObjects=0, CPUs=160, Nodes=256
+[  +0.000000] ftrace: allocating 35030 entries in 13 pages
+[  +0.000000] Hierarchical RCU implementation.
+[  +0.000000] 	RCU restricting CPUs from NR_CPUS=2048 to nr_cpu_ids=160.
+[  +0.000000] 	Tasks RCU enabled.
+[  +0.000000] RCU: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=160
+[  +0.000000] NR_IRQS: 512, nr_irqs: 512, preallocated irqs: 16
+[  +0.000000] xive: Interrupt handling initialized with native backend
+[  +0.000000] xive: Using priority 7 for all interrupts
+[  +0.000000] xive: Using 64kB queues
+[  +0.000000] time_init: decrementer frequency = 512.000000 MHz
+[  +0.000000] time_init: processor frequency   = 2400.000000 MHz
+[  +0.000000] time_init: 56 bit decrementer (max: 7fffffffffffff)
+[  +0.000005] clocksource: timebase: mask: 0xffffffffffffffff max_cycles: 0x761537d007, max_idle_ns: 440795202126 ns
+[  +0.000004] clocksource: timebase mult[1f40000] shift[24] registered
+[  +0.000009] clockevent: decrementer mult[83126f] shift[24] cpu[0]
+[  +0.000249] Console: colour dummy device 80x25
+[  +0.000640] console [tty0] enabled
+[  +0.000642] mempolicy: Enabling automatic NUMA balancing. Configure with numa_balancing= or the kernel.numa_balancing sysctl
+[  +0.000012] pid_max: default: 163840 minimum: 1280
+[  +0.001997] Security Framework initialized
+[  +0.000006] Yama: becoming mindful.
+[  +0.000506] AppArmor: AppArmor initialized
+[  +0.020213] Dentry cache hash table entries: 33554432 (order: 12, 268435456 bytes)
+[  +0.010110] Inode-cache hash table entries: 16777216 (order: 11, 134217728 bytes)
+[  +0.000532] Mount-cache hash table entries: 524288 (order: 6, 4194304 bytes)
+[  +0.000317] Mountpoint-cache hash table entries: 524288 (order: 6, 4194304 bytes)
+[  +0.001984] EEH: PowerNV platform initialized
+[  +0.000009] POWER9 performance monitor hardware support registered
+[  +0.000073] Hierarchical SRCU implementation.
+[  +0.002648] smp: Bringing up secondary CPUs ...
+[  +0.742401] smp: Brought up 6 nodes, 160 CPUs
+[  +0.000012] numa: Node 0 CPUs: 0-79
+[  +0.000010] numa: Node 8 CPUs: 80-159
+[  +0.000009] numa: Node 252 CPUs:
+[  +0.000007] numa: Node 253 CPUs:
+[  +0.000006] numa: Node 254 CPUs:
+[  +0.000006] numa: Node 255 CPUs:
+[  +0.000007] Using shared cache scheduler topology
+[  +0.034183] devtmpfs: initialized
+[  +0.144489] evm: security.selinux
+[  +0.000011] evm: security.SMACK64
+[  +0.000004] evm: security.SMACK64EXEC
+[  +0.000004] evm: security.SMACK64TRANSMUTE
+[  +0.000005] evm: security.SMACK64MMAP
+[  +0.000004] evm: security.apparmor
+[  +0.000004] evm: security.ima
+[  +0.000004] evm: security.capability
+[  +0.001149] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[  +0.000090] futex hash table entries: 65536 (order: 7, 8388608 bytes)
+[  +0.030210] pinctrl core: initialized pinctrl subsystem
+[  +0.000680] NET: Registered protocol family 16
+[  +0.000150] EEH: No capable adapters found
+[  +0.000246] audit: initializing netlink subsys (disabled)
+[  +0.000127] audit: type=2000 audit(1632230259.992:1): state=initialized audit_enabled=0 res=1
+[  +0.000307] cpuidle: using governor ladder
+[  +0.000073] cpuidle: using governor menu
+[  +0.000337] pstore: using zlib compression
+[  +0.000009] pstore: Registered nvram as persistent store backend
+[  +0.001472] xive: Interrupt 146 (HW 0x92) type mismatch, Linux says Level, FW says Edge
+[  +0.000062] xive: Interrupt 162 (HW 0x100092) type mismatch, Linux says Level, FW says Edge
+[  +0.093021] PCI: Probing PCI hardware
+[  +0.000073] PCI host bridge to bus 0000:00
+[  +0.000015] pci_bus 0000:00: root bus resource [mem 0x600c000000000-0x600c07ffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000010] pci_bus 0000:00: root bus resource [mem 0x6000000000000-0x6003fbfffffff 64bit pref]
+[  +0.000009] pci_bus 0000:00: root bus resource [bus 00-ff]
+[  +0.000009] pci_bus 0000:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000042] pci 0000:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000094] pci 0000:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0000:00:00.0: disabling bridge mem windows
+[  +0.000094] pci 0000:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000231] pci 0000:01:00.0: [144d:a822] type 00 class 0x010802
+[  +0.000063] pci 0000:01:00.0: reg 0x10: [mem 0x600c000000000-0x600c000003fff 64bit]
+[  +0.000082] pci 0000:01:00.0: reg 0x30: [mem 0x00000000-0x0000ffff pref]
+[  +0.000024] pci 0000:01:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000014] pci 0000:01:00.0: BAR0 [mem size 0x00004000 64bit]: requesting alignment to 0x10000
+[  +0.000245] pci 0000:00:00.0: PCI bridge to [bus 01]
+[  +0.000011] pci 0000:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000286] pci_bus 0000:00: busn_res: [bus 00-ff] end is updated to 01
+[  +0.000059] PCI host bridge to bus 0001:00
+[  +0.000009] pci_bus 0001:00: root bus resource [mem 0x600c080000000-0x600c0fffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000010] pci_bus 0001:00: root bus resource [mem 0x6004000000000-0x6007f7fffffff 64bit pref]
+[  +0.000008] pci_bus 0001:00: root bus resource [bus 00-ff]
+[  +0.000008] pci_bus 0001:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000028] pci 0001:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000086] pci 0001:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0001:00:00.0: disabling bridge mem windows
+[  +0.000091] pci 0001:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000218] pci 0001:01:00.0: [104c:8241] type 00 class 0x0c0330
+[  +0.000058] pci 0001:01:00.0: reg 0x10: [mem 0x600c080000000-0x600c08000ffff 64bit]
+[  +0.000030] pci 0001:01:00.0: reg 0x18: [mem 0x600c080010000-0x600c080011fff 64bit]
+[  +0.000069] pci 0001:01:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000014] pci 0001:01:00.0: BAR2 [mem size 0x00002000 64bit]: requesting alignment to 0x10000
+[  +0.000119] pci 0001:01:00.0: supports D1 D2
+[  +0.000003] pci 0001:01:00.0: PME# supported from D0 D1 D2 D3hot
+[  +0.000107] pci 0001:00:00.0: PCI bridge to [bus 01]
+[  +0.000011] pci 0001:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000081] pci_bus 0001:00: busn_res: [bus 00-ff] end is updated to 01
+[  +0.000056] PCI host bridge to bus 0002:00
+[  +0.000008] pci_bus 0002:00: root bus resource [mem 0x600c100000000-0x600c17ffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000009] pci_bus 0002:00: root bus resource [mem 0x6008000000000-0x600bf7fffffff 64bit pref]
+[  +0.000009] pci_bus 0002:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0002:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000028] pci 0002:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000084] pci 0002:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0002:00:00.0: disabling bridge mem windows
+[  +0.000091] pci 0002:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000214] pci 0002:01:00.0: [1a03:1150] type 01 class 0x060400
+[  +0.000116] pci 0002:01:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0002:01:00.0: disabling bridge mem windows
+[  +0.000125] pci 0002:01:00.0: supports D1 D2
+[  +0.000004] pci 0002:01:00.0: PME# supported from D0 D1 D2 D3hot D3cold
+[  +0.000107] pci 0002:00:00.0: PCI bridge to [bus 01-02]
+[  +0.000012] pci 0002:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000184] pci 0002:02:00.0: [1a03:2000] type 00 class 0x030000
+[  +0.000048] pci 0002:02:00.0: reg 0x10: [mem 0x600c100000000-0x600c100ffffff]
+[  +0.000021] pci 0002:02:00.0: reg 0x14: [mem 0x600c101000000-0x600c10101ffff]
+[  +0.000020] pci 0002:02:00.0: reg 0x18: [io  0x0000-0x007f]
+[  +0.000079] pci 0002:02:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000087] pci 0002:02:00.0: supports D1 D2
+[  +0.000003] pci 0002:02:00.0: PME# supported from D0 D1 D2 D3hot D3cold
+[  +0.000086] pci 0002:01:00.0: PCI bridge to [bus 02]
+[  +0.000081] pci_bus 0002:00: busn_res: [bus 00-ff] end is updated to 02
+[  +0.000056] PCI host bridge to bus 0003:00
+[  +0.000009] pci_bus 0003:00: root bus resource [mem 0x600c180000000-0x600c1fffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000009] pci_bus 0003:00: root bus resource [mem 0x6020000000000-0x6023fbfffffff 64bit pref]
+[  +0.000008] pci_bus 0003:00: root bus resource [bus 00-ff]
+[  +0.000008] pci_bus 0003:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000028] pci 0003:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000073] pci 0003:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0003:00:00.0: disabling bridge mem windows
+[  +0.000097] pci 0003:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000196] pci 0003:00:00.0: PCI bridge to [bus 01]
+[  +0.000012] pci 0003:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000028] pci_bus 0003:00: busn_res: [bus 00-ff] end is updated to 01
+[  +0.000054] PCI host bridge to bus 0004:00
+[  +0.000008] pci_bus 0004:00: root bus resource [mem 0x600c200000000-0x600c27ffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000009] pci_bus 0004:00: root bus resource [mem 0x6024000000000-0x6027f7fffffff 64bit pref]
+[  +0.000009] pci_bus 0004:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0004:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000028] pci 0004:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000084] pci 0004:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0004:00:00.0: disabling bridge mem windows
+[  +0.000091] pci 0004:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000210] pci 0004:01:00.0: [10b5:8725] type 01 class 0x060400
+[  +0.000067] pci 0004:01:00.0: reg 0x10: [mem 0x600c202800000-0x600c20283ffff]
+[  +0.000066] pci 0004:01:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0004:01:00.0: disabling bridge mem windows
+[  +0.000167] pci 0004:01:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000180] pci 0004:01:00.1: [10b5:87d0] type 00 class 0x088000
+[  +0.000058] pci 0004:01:00.1: reg 0x10: [mem 0x600c202840000-0x600c202841fff]
+[  +0.000093] pci 0004:01:00.1: Disabling memory decoding and releasing memory resources.
+[  +0.000015] pci 0004:01:00.1: BAR0 [mem size 0x00002000]: requesting alignment to 0x10000
+[  +0.000229] pci 0004:01:00.2: [10b5:87d0] type 00 class 0x088000
+[  +0.000059] pci 0004:01:00.2: reg 0x10: [mem 0x600c202850000-0x600c202851fff]
+[  +0.000095] pci 0004:01:00.2: Disabling memory decoding and releasing memory resources.
+[  +0.000014] pci 0004:01:00.2: BAR0 [mem size 0x00002000]: requesting alignment to 0x10000
+[  +0.000233] pci 0004:01:00.3: [10b5:87d0] type 00 class 0x088000
+[  +0.000059] pci 0004:01:00.3: reg 0x10: [mem 0x600c202860000-0x600c202861fff]
+[  +0.000096] pci 0004:01:00.3: Disabling memory decoding and releasing memory resources.
+[  +0.000014] pci 0004:01:00.3: BAR0 [mem size 0x00002000]: requesting alignment to 0x10000
+[  +0.000234] pci 0004:01:00.4: [10b5:87d0] type 00 class 0x088000
+[  +0.000060] pci 0004:01:00.4: reg 0x10: [mem 0x600c202870000-0x600c202871fff]
+[  +0.000097] pci 0004:01:00.4: Disabling memory decoding and releasing memory resources.
+[  +0.000014] pci 0004:01:00.4: BAR0 [mem size 0x00002000]: requesting alignment to 0x10000
+[  +0.000205] pci 0004:00:00.0: PCI bridge to [bus 01-0a]
+[  +0.000011] pci 0004:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000339] pci 0004:02:02.0: [10b5:8725] type 01 class 0x060400
+[  +0.000124] pci 0004:02:02.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0004:02:02.0: disabling bridge mem windows
+[  +0.000157] pci 0004:02:02.0: PME# supported from D0 D3hot D3cold
+[  +0.000154] pci 0004:02:0a.0: [10b5:8725] type 01 class 0x060400
+[  +0.000125] pci 0004:02:0a.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0004:02:0a.0: disabling bridge mem windows
+[  +0.000158] pci 0004:02:0a.0: PME# supported from D0 D3hot D3cold
+[  +0.000165] pci 0004:02:0b.0: [10b5:8725] type 01 class 0x060400
+[  +0.000126] pci 0004:02:0b.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0004:02:0b.0: disabling bridge mem windows
+[  +0.000158] pci 0004:02:0b.0: PME# supported from D0 D3hot D3cold
+[  +0.000151] pci 0004:02:0c.0: [10b5:8725] type 01 class 0x060400
+[  +0.000127] pci 0004:02:0c.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0004:02:0c.0: disabling bridge mem windows
+[  +0.000160] pci 0004:02:0c.0: PME# supported from D0 D3hot D3cold
+[  +0.000128] pci 0004:01:00.0: PCI bridge to [bus 02-0a]
+[  +0.002078] pci 0004:03:00.0: [1b4b:9235] type 00 class 0x010601
+[  +0.000045] pci 0004:03:00.0: reg 0x10: [io  0x8000-0x8007]
+[  +0.000019] pci 0004:03:00.0: reg 0x14: [io  0x8040-0x8043]
+[  +0.000019] pci 0004:03:00.0: reg 0x18: [io  0x8100-0x8107]
+[  +0.000019] pci 0004:03:00.0: reg 0x1c: [io  0x8140-0x8143]
+[  +0.000019] pci 0004:03:00.0: reg 0x20: [io  0x800000-0x80001f]
+[  +0.000019] pci 0004:03:00.0: reg 0x24: [mem 0x600c202000000-0x600c2020007ff]
+[  +0.000019] pci 0004:03:00.0: reg 0x30: [mem 0x600c250000000-0x600c25000ffff pref]
+[  +0.000021] pci 0004:03:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000014] pci 0004:03:00.0: BAR5 [mem size 0x00000800]: requesting alignment to 0x10000
+[  +0.000103] pci 0004:03:00.0: PME# supported from D3hot
+[  +0.000100] pci 0004:02:02.0: PCI bridge to [bus 03]
+[  +0.000175] pci 0004:04:00.0: [10de:1db5] type 00 class 0x030200
+[  +0.000064] pci 0004:04:00.0: reg 0x10: [mem 0x600c200000000-0x600c200ffffff]
+[  +0.000024] pci 0004:04:00.0: reg 0x14: [mem 0x6024000000000-0x60247ffffffff 64bit pref]
+[  +0.000024] pci 0004:04:00.0: reg 0x1c: [mem 0x6024800000000-0x6024801ffffff 64bit pref]
+[  +0.000048] pci 0004:04:00.0: Enabling HDA controller
+[  +0.000013] pci 0004:04:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000280] pci 0004:02:0a.0: PCI bridge to [bus 04]
+[  +0.000177] pci 0004:05:00.0: [10de:1db5] type 00 class 0x030200
+[  +0.000064] pci 0004:05:00.0: reg 0x10: [mem 0x600c201000000-0x600c201ffffff]
+[  +0.000024] pci 0004:05:00.0: reg 0x14: [mem 0x6025000000000-0x60257ffffffff 64bit pref]
+[  +0.000024] pci 0004:05:00.0: reg 0x1c: [mem 0x6024c00000000-0x6024c01ffffff 64bit pref]
+[  +0.000047] pci 0004:05:00.0: Enabling HDA controller
+[  +0.000014] pci 0004:05:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000274] pci 0004:02:0b.0: PCI bridge to [bus 05]
+[  +0.000147] pci 0004:02:0c.0: PCI bridge to [bus 06-0a]
+[  +0.000096] pci_bus 0004:00: busn_res: [bus 00-ff] end is updated to 0a
+[  +0.000062] PCI host bridge to bus 0005:00
+[  +0.000009] pci_bus 0005:00: root bus resource [mem 0x600c280000000-0x600c2fffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000009] pci_bus 0005:00: root bus resource [mem 0x6028000000000-0x602bf7fffffff 64bit pref]
+[  +0.000009] pci_bus 0005:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0005:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000028] pci 0005:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000084] pci 0005:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000012] pci 0005:00:00.0: disabling bridge mem windows
+[  +0.000091] pci 0005:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000221] pci 0005:01:00.0: [14e4:1657] type 00 class 0x020000
+[  +0.000064] pci 0005:01:00.0: reg 0x10: [mem 0x6028000000000-0x602800000ffff 64bit pref]
+[  +0.000030] pci 0005:01:00.0: reg 0x18: [mem 0x6028000010000-0x602800001ffff 64bit pref]
+[  +0.000030] pci 0005:01:00.0: reg 0x20: [mem 0x6028000020000-0x602800002ffff 64bit pref]
+[  +0.000037] pci 0005:01:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000171] pci 0005:01:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000168] pci 0005:01:00.1: [14e4:1657] type 00 class 0x020000
+[  +0.000066] pci 0005:01:00.1: reg 0x10: [mem 0x6028000030000-0x602800003ffff 64bit pref]
+[  +0.000030] pci 0005:01:00.1: reg 0x18: [mem 0x6028000040000-0x602800004ffff 64bit pref]
+[  +0.000030] pci 0005:01:00.1: reg 0x20: [mem 0x6028000050000-0x602800005ffff 64bit pref]
+[  +0.000038] pci 0005:01:00.1: Disabling memory decoding and releasing memory resources.
+[  +0.000174] pci 0005:01:00.1: PME# supported from D0 D3hot D3cold
+[  +0.000102] pci 0005:00:00.0: PCI bridge to [bus 01]
+[  +0.000012] pci 0005:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000135] pci_bus 0005:00: busn_res: [bus 00-ff] end is updated to 01
+[  +0.000059] PCI host bridge to bus 0030:00
+[  +0.000008] pci_bus 0030:00: root bus resource [mem 0x620c000000000-0x620c07ffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000010] pci_bus 0030:00: root bus resource [mem 0x6200000000000-0x6203fbfffffff 64bit pref]
+[  +0.000009] pci_bus 0030:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0030:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000032] pci 0030:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000089] pci 0030:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0030:00:00.0: disabling bridge mem windows
+[  +0.000110] pci 0030:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000200] pci 0030:00:00.0: PCI bridge to [bus 01]
+[  +0.000012] pci 0030:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000033] pci_bus 0030:00: busn_res: [bus 00-ff] end is updated to 01
+[  +0.000054] PCI host bridge to bus 0033:00
+[  +0.000008] pci_bus 0033:00: root bus resource [mem 0x620c180000000-0x620c1fffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000010] pci_bus 0033:00: root bus resource [mem 0x6220000000000-0x6223fbfffffff 64bit pref]
+[  +0.000008] pci_bus 0033:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0033:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000033] pci 0033:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000088] pci 0033:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0033:00:00.0: disabling bridge mem windows
+[  +0.000111] pci 0033:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000200] pci 0033:00:00.0: PCI bridge to [bus 01]
+[  +0.000012] pci 0033:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000033] pci_bus 0033:00: busn_res: [bus 00-ff] end is updated to 01
+[  +0.000054] PCI host bridge to bus 0034:00
+[  +0.000008] pci_bus 0034:00: root bus resource [mem 0x620c200000000-0x620c27ffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000010] pci_bus 0034:00: root bus resource [mem 0x6224000000000-0x6227f7fffffff 64bit pref]
+[  +0.000008] pci_bus 0034:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0034:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000032] pci 0034:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000088] pci 0034:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0034:00:00.0: disabling bridge mem windows
+[  +0.000115] pci 0034:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000201] pci 0034:00:00.0: PCI bridge to [bus 01]
+[  +0.000013] pci 0034:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000032] pci_bus 0034:00: busn_res: [bus 00-ff] end is updated to 01
+[  +0.000054] PCI host bridge to bus 0035:00
+[  +0.000008] pci_bus 0035:00: root bus resource [mem 0x620c280000000-0x620c2fffeffff] (bus address [0x80000000-0xfffeffff])
+[  +0.000009] pci_bus 0035:00: root bus resource [mem 0x6228000000000-0x622bf7fffffff 64bit pref]
+[  +0.000009] pci_bus 0035:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0035:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000032] pci 0035:00:00.0: [1014:04c1] type 01 class 0x060400
+[  +0.000103] pci 0035:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0035:00:00.0: disabling bridge mem windows
+[  +0.000110] pci 0035:00:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000249] pci 0035:01:00.0: [10b5:8725] type 01 class 0x060400
+[  +0.000079] pci 0035:01:00.0: reg 0x10: [mem 0x620c282000000-0x620c28203ffff]
+[  +0.000079] pci 0035:01:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000014] pci 0035:01:00.0: disabling bridge mem windows
+[  +0.000202] pci 0035:01:00.0: PME# supported from D0 D3hot D3cold
+[  +0.000169] pci 0035:00:00.0: PCI bridge to [bus 01-09]
+[  +0.000012] pci 0035:00:00.0:   bridge window [io  0x0000-0x0fff]
+[  +0.000209] pci 0035:02:04.0: [10b5:8725] type 01 class 0x060400
+[  +0.000153] pci 0035:02:04.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0035:02:04.0: disabling bridge mem windows
+[  +0.000193] pci 0035:02:04.0: PME# supported from D0 D3hot D3cold
+[  +0.000169] pci 0035:02:05.0: [10b5:8725] type 01 class 0x060400
+[  +0.000153] pci 0035:02:05.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0035:02:05.0: disabling bridge mem windows
+[  +0.000193] pci 0035:02:05.0: PME# supported from D0 D3hot D3cold
+[  +0.000172] pci 0035:02:0d.0: [10b5:8725] type 01 class 0x060400
+[  +0.000154] pci 0035:02:0d.0: Disabling memory decoding and releasing memory resources.
+[  +0.000013] pci 0035:02:0d.0: disabling bridge mem windows
+[  +0.000193] pci 0035:02:0d.0: PME# supported from D0 D3hot D3cold
+[  +0.000140] pci 0035:01:00.0: PCI bridge to [bus 02-09]
+[  +0.001401] pci 0035:03:00.0: [10de:1db5] type 00 class 0x030200
+[  +0.000077] pci 0035:03:00.0: reg 0x10: [mem 0x620c280000000-0x620c280ffffff]
+[  +0.000030] pci 0035:03:00.0: reg 0x14: [mem 0x6228000000000-0x62287ffffffff 64bit pref]
+[  +0.000028] pci 0035:03:00.0: reg 0x1c: [mem 0x6228800000000-0x6228801ffffff 64bit pref]
+[  +0.000057] pci 0035:03:00.0: Enabling HDA controller
+[  +0.000014] pci 0035:03:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000321] pci 0035:02:04.0: PCI bridge to [bus 03]
+[  +0.000200] pci 0035:04:00.0: [10de:1db5] type 00 class 0x030200
+[  +0.000076] pci 0035:04:00.0: reg 0x10: [mem 0x620c281000000-0x620c281ffffff]
+[  +0.000029] pci 0035:04:00.0: reg 0x14: [mem 0x6229000000000-0x62297ffffffff 64bit pref]
+[  +0.000028] pci 0035:04:00.0: reg 0x1c: [mem 0x6228c00000000-0x6228c01ffffff 64bit pref]
+[  +0.000057] pci 0035:04:00.0: Enabling HDA controller
+[  +0.000014] pci 0035:04:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000319] pci 0035:02:05.0: PCI bridge to [bus 04]
+[  +0.000165] pci 0035:02:0d.0: PCI bridge to [bus 05-09]
+[  +0.000104] pci_bus 0035:00: busn_res: [bus 00-ff] end is updated to 09
+[  +0.000059] PCI host bridge to bus 0006:00
+[  +0.000007] pci_bus 0006:00: root bus resource [mem 0x6030201600000-0x603020171ffff]
+[  +0.000009] pci_bus 0006:00: root bus resource [bus 00-ff]
+[  +0.000007] pci_bus 0006:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000026] pci 0006:00:00.0: [1014:04ea] type 00 class 0x068001
+[  +0.000070] pci 0006:00:00.0: reg 0x10: [mem 0x6030201600000-0x603020161ffff 64bit]
+[  +0.000026] pci 0006:00:00.0: reg 0x18: [mem 0x60302016c0000-0x60302016cffff 64bit]
+[  +0.000035] pci 0006:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000145] pci 0006:00:00.1: [1014:04ea] type 00 class 0x068001
+[  +0.000064] pci 0006:00:00.1: reg 0x10: [mem 0x6030201620000-0x603020163ffff 64bit]
+[  +0.000025] pci 0006:00:00.1: reg 0x18: [mem 0x60302016d0000-0x60302016dffff 64bit]
+[  +0.000035] pci 0006:00:00.1: Disabling memory decoding and releasing memory resources.
+[  +0.000137] pci 0006:00:00.2: [1014:04ea] type 00 class 0x068001
+[  +0.000063] pci 0006:00:00.2: reg 0x10: [mem 0x6030201640000-0x603020165ffff 64bit]
+[  +0.000026] pci 0006:00:00.2: reg 0x18: [mem 0x60302016e0000-0x60302016effff 64bit]
+[  +0.000035] pci 0006:00:00.2: Disabling memory decoding and releasing memory resources.
+[  +0.000141] pci 0006:00:01.0: [1014:04ea] type 00 class 0x068001
+[  +0.000064] pci 0006:00:01.0: reg 0x10: [mem 0x6030201660000-0x603020167ffff 64bit]
+[  +0.000025] pci 0006:00:01.0: reg 0x18: [mem 0x60302016f0000-0x60302016fffff 64bit]
+[  +0.000036] pci 0006:00:01.0: Disabling memory decoding and releasing memory resources.
+[  +0.000139] pci 0006:00:01.1: [1014:04ea] type 00 class 0x068001
+[  +0.000063] pci 0006:00:01.1: reg 0x10: [mem 0x6030201680000-0x603020169ffff 64bit]
+[  +0.000026] pci 0006:00:01.1: reg 0x18: [mem 0x6030201700000-0x603020170ffff 64bit]
+[  +0.000037] pci 0006:00:01.1: Disabling memory decoding and releasing memory resources.
+[  +0.000139] pci 0006:00:01.2: [1014:04ea] type 00 class 0x068001
+[  +0.000064] pci 0006:00:01.2: reg 0x10: [mem 0x60302016a0000-0x60302016bffff 64bit]
+[  +0.000027] pci 0006:00:01.2: reg 0x18: [mem 0x6030201710000-0x603020171ffff 64bit]
+[  +0.000036] pci 0006:00:01.2: Disabling memory decoding and releasing memory resources.
+[  +0.000610] pci_bus 0006:00: busn_res: [bus 00-ff] end is updated to 00
+[  +0.000060] PCI host bridge to bus 0007:00
+[  +0.000008] pci_bus 0007:00: root bus resource [mem 0x6230201600000-0x623020171ffff]
+[  +0.000008] pci_bus 0007:00: root bus resource [bus 00-ff]
+[  +0.000008] pci_bus 0007:00: busn_res: [bus 00-ff] end is updated to ff
+[  +0.000022] pci 0007:00:00.0: [1014:04ea] type 00 class 0x068001
+[  +0.000070] pci 0007:00:00.0: reg 0x10: [mem 0x6230201600000-0x623020161ffff 64bit]
+[  +0.000027] pci 0007:00:00.0: reg 0x18: [mem 0x62302016c0000-0x62302016cffff 64bit]
+[  +0.000034] pci 0007:00:00.0: Disabling memory decoding and releasing memory resources.
+[  +0.000137] pci 0007:00:00.1: [1014:04ea] type 00 class 0x068001
+[  +0.000067] pci 0007:00:00.1: reg 0x10: [mem 0x6230201620000-0x623020163ffff 64bit]
+[  +0.000027] pci 0007:00:00.1: reg 0x18: [mem 0x62302016d0000-0x62302016dffff 64bit]
+[  +0.000035] pci 0007:00:00.1: Disabling memory decoding and releasing memory resources.
+[  +0.000137] pci 0007:00:00.2: [1014:04ea] type 00 class 0x068001
+[  +0.000068] pci 0007:00:00.2: reg 0x10: [mem 0x6230201640000-0x623020165ffff 64bit]
+[  +0.000027] pci 0007:00:00.2: reg 0x18: [mem 0x62302016e0000-0x62302016effff 64bit]
+[  +0.000035] pci 0007:00:00.2: Disabling memory decoding and releasing memory resources.
+[  +0.000140] pci 0007:00:01.0: [1014:04ea] type 00 class 0x068001
+[  +0.000070] pci 0007:00:01.0: reg 0x10: [mem 0x6230201660000-0x623020167ffff 64bit]
+[  +0.000027] pci 0007:00:01.0: reg 0x18: [mem 0x62302016f0000-0x62302016fffff 64bit]
+[  +0.000035] pci 0007:00:01.0: Disabling memory decoding and releasing memory resources.
+[  +0.000139] pci 0007:00:01.1: [1014:04ea] type 00 class 0x068001
+[  +0.000069] pci 0007:00:01.1: reg 0x10: [mem 0x6230201680000-0x623020169ffff 64bit]
+[  +0.000028] pci 0007:00:01.1: reg 0x18: [mem 0x6230201700000-0x623020170ffff 64bit]
+[  +0.000036] pci 0007:00:01.1: Disabling memory decoding and releasing memory resources.
+[  +0.000142] pci 0007:00:01.2: [1014:04ea] type 00 class 0x068001
+[  +0.000069] pci 0007:00:01.2: reg 0x10: [mem 0x62302016a0000-0x62302016bffff 64bit]
+[  +0.000027] pci 0007:00:01.2: reg 0x18: [mem 0x6230201710000-0x623020171ffff 64bit]
+[  +0.000037] pci 0007:00:01.2: Disabling memory decoding and releasing memory resources.
+[  +0.000613] pci_bus 0007:00: busn_res: [bus 00-ff] end is updated to 00
+[  +0.000046] pci 0000:00:00.0: BAR 14: assigned [mem 0x600c000000000-0x600c0003fffff]
+[  +0.000012] pci 0000:01:00.0: BAR 0: assigned [mem 0x600c000000000-0x600c000003fff 64bit]
+[  +0.000026] pci 0000:01:00.0: BAR 6: assigned [mem 0x600c000010000-0x600c00001ffff pref]
+[  +0.000011] pci 0000:00     : [PE# 1fe] Secondary bus 0 associated with PE#1fe
+[  +0.000272] pci 0000:01     : [PE# 1fd] Secondary bus 1 associated with PE#1fd
+[  +0.000279] pci 0000:01     : [PE# 1fd] Setting up 32-bit TCE table at 0..80000000
+[  +0.007238] IOMMU table initialized, virtual merging enabled
+[  +0.000009] pci 0000:01     : [PE# 1fd] Setting up window#0 0..7fffffff pg=1000
+[  +0.000014] pci 0000:01     : [PE# 1fd] Enabling 64-bit DMA bypass
+[  +0.000013] iommu: Adding device 0000:01:00.0 to group 0
+[  +0.000007] pci 0000:00:00.0: PCI bridge to [bus 01]
+[  +0.000015] pci 0000:00:00.0:   bridge window [mem 0x600c000000000-0x600c07fefffff]
+[  +0.000020] pci_bus 0000:00: resource 4 [mem 0x600c000000000-0x600c07ffeffff]
+[  +0.000004] pci_bus 0000:00: resource 5 [mem 0x6000000000000-0x6003fbfffffff 64bit pref]
+[  +0.000003] pci_bus 0000:01: resource 1 [mem 0x600c000000000-0x600c07fefffff]
+[  +0.000025] pci 0001:00:00.0: BAR 14: assigned [mem 0x600c080000000-0x600c0807fffff]
+[  +0.000011] pci 0001:01:00.0: BAR 0: assigned [mem 0x600c080000000-0x600c08000ffff 64bit]
+[  +0.000026] pci 0001:01:00.0: BAR 2: assigned [mem 0x600c080010000-0x600c080011fff 64bit]
+[  +0.000026] pci 0001:00     : [PE# fe] Secondary bus 0 associated with PE#fe
+[  +0.000268] pci 0001:01     : [PE# fd] Secondary bus 1 associated with PE#fd
+[  +0.000274] pci 0001:01     : [PE# fd] Setting up 32-bit TCE table at 0..80000000
+[  +0.007234] pci 0001:01     : [PE# fd] Setting up window#0 0..7fffffff pg=1000
+[  +0.000012] pci 0001:01     : [PE# fd] Enabling 64-bit DMA bypass
+[  +0.000011] iommu: Adding device 0001:01:00.0 to group 1
+[  +0.000007] pci 0001:00:00.0: PCI bridge to [bus 01]
+[  +0.000015] pci 0001:00:00.0:   bridge window [mem 0x600c080000000-0x600c0ffefffff]
+[  +0.000020] pci_bus 0001:00: resource 4 [mem 0x600c080000000-0x600c0fffeffff]
+[  +0.000003] pci_bus 0001:00: resource 5 [mem 0x6004000000000-0x6007f7fffffff 64bit pref]
+[  +0.000004] pci_bus 0001:01: resource 1 [mem 0x600c080000000-0x600c0ffefffff]
+[  +0.000043] pci 0002:00:00.0: BAR 14: assigned [mem 0x600c100000000-0x600c1017fffff]
+[  +0.000010] pci 0002:01:00.0: BAR 14: assigned [mem 0x600c100000000-0x600c1017fffff]
+[  +0.000008] pci 0002:01:00.0: BAR 13: no space for [io  size 0x1000]
+[  +0.000007] pci 0002:01:00.0: BAR 13: failed to assign [io  size 0x1000]
+[  +0.000009] pci 0002:02:00.0: BAR 0: assigned [mem 0x600c100000000-0x600c100ffffff]
+[  +0.000014] pci 0002:02:00.0: BAR 1: assigned [mem 0x600c101000000-0x600c10101ffff]
+[  +0.000014] pci 0002:02:00.0: BAR 2: no space for [io  size 0x0080]
+[  +0.000007] pci 0002:02:00.0: BAR 2: failed to assign [io  size 0x0080]
+[  +0.000008] pci 0002:00     : [PE# fe] Secondary bus 0 associated with PE#fe
+[  +0.000267] pci 0002:02     : [PE# fd] Secondary bus 2..2 associated with PE#fd
+[  +0.000279] pci 0002:02     : [PE# fd] Setting up 32-bit TCE table at 0..80000000
+[  +0.007224] pci 0002:02     : [PE# fd] Setting up window#0 0..7fffffff pg=1000
+[  +0.000012] pci 0002:02     : [PE# fd] Enabling 64-bit DMA bypass
+[  +0.000012] iommu: Adding device 0002:02:00.0 to group 2
+[  +0.000007] pci 0002:01:00.0: PCI bridge to [bus 02]
+[  +0.000015] pci 0002:01:00.0:   bridge window [mem 0x600c100000000-0x600c17fefffff]
+[  +0.000024] pci 0002:01     : [PE# fc] Secondary bus 1 associated with PE#fc
+[  +0.000263] pci 0002:00:00.0: PCI bridge to [bus 01-02]
+[  +0.000014] pci 0002:00:00.0:   bridge window [mem 0x600c100000000-0x600c17fefffff]
+[  +0.000019] pci_bus 0002:00: Some PCI device resources are unassigned, try booting with pci=realloc
+[  +0.000009] pci_bus 0002:00: resource 4 [mem 0x600c100000000-0x600c17ffeffff]
+[  +0.000004] pci_bus 0002:00: resource 5 [mem 0x6008000000000-0x600bf7fffffff 64bit pref]
+[  +0.000003] pci_bus 0002:01: resource 1 [mem 0x600c100000000-0x600c17fefffff]
+[  +0.000003] pci_bus 0002:02: resource 1 [mem 0x600c100000000-0x600c17fefffff]
+[  +0.000026] pci 0003:00     : [PE# 1fe] Secondary bus 0 associated with PE#1fe
+[  +0.000265] pci 0003:00:00.0: PCI bridge to [bus 01]
+[  +0.000024] pci_bus 0003:00: resource 4 [mem 0x600c180000000-0x600c1fffeffff]
+[  +0.000004] pci_bus 0003:00: resource 5 [mem 0x6020000000000-0x6023fbfffffff 64bit pref]
+[  +0.000024] pci 0004:02:02.0: bridge window [mem 0x40000000-0x3fffffff 64bit pref] to [bus 03] add_size 40000000 add_align 40000000
+[  +0.000088] pci 0004:00:00.0: BAR 15: assigned [mem 0x6024000000000-0x60259ffffffff 64bit pref]
+[  +0.000009] pci 0004:00:00.0: BAR 14: assigned [mem 0x600c200000000-0x600c202ffffff]
+[  +0.000014] pci 0004:01:00.0: BAR 15: assigned [mem 0x6024000000000-0x60259ffffffff 64bit pref]
+[  +0.000009] pci 0004:01:00.0: BAR 14: assigned [mem 0x600c200000000-0x600c2027fffff]
+[  +0.000008] pci 0004:01:00.0: BAR 0: assigned [mem 0x600c202800000-0x600c20283ffff]
+[  +0.000014] pci 0004:01:00.1: BAR 0: assigned [mem 0x600c202840000-0x600c202841fff]
+[  +0.000014] pci 0004:01:00.2: BAR 0: assigned [mem 0x600c202850000-0x600c202851fff]
+[  +0.000014] pci 0004:01:00.3: BAR 0: assigned [mem 0x600c202860000-0x600c202861fff]
+[  +0.000015] pci 0004:01:00.4: BAR 0: assigned [mem 0x600c202870000-0x600c202871fff]
+[  +0.000014] pci 0004:01:00.0: BAR 13: no space for [io  size 0x1000]
+[  +0.000007] pci 0004:01:00.0: BAR 13: failed to assign [io  size 0x1000]
+[  +0.000009] pci 0004:01:00.0: BAR 13: no space for [io  size 0x1000]
+[  +0.000006] pci 0004:01:00.0: BAR 13: failed to assign [io  size 0x1000]
+[  +0.000011] pci 0004:02:0a.0: BAR 15: assigned [mem 0x6024000000000-0x6024bffffffff 64bit pref]
+[  +0.000010] pci 0004:02:0b.0: BAR 15: assigned [mem 0x6024c00000000-0x60257ffffffff 64bit pref]
+[  +0.000009] pci 0004:02:02.0: BAR 15: assigned [mem 0x6025800000000-0x602583fffffff 64bit pref]
+[  +0.000008] pci 0004:02:0a.0: BAR 14: assigned [mem 0x600c200000000-0x600c200ffffff]
+[  +0.000009] pci 0004:02:0b.0: BAR 14: assigned [mem 0x600c201000000-0x600c201ffffff]
+[  +0.000008] pci 0004:02:02.0: BAR 14: assigned [mem 0x600c202000000-0x600c2027fffff]
+[  +0.000008] pci 0004:02:02.0: BAR 13: no space for [io  size 0x1000]
+[  +0.000007] pci 0004:02:02.0: BAR 13: failed to assign [io  size 0x1000]
+[  +0.000008] pci 0004:02:02.0: BAR 13: no space for [io  size 0x1000]
+[  +0.000007] pci 0004:02:02.0: BAR 13: failed to assign [io  size 0x1000]
+[  +0.000009] pci 0004:03:00.0: BAR 5: assigned [mem 0x600c202000000-0x600c2020007ff]
+[  +0.000015] pci 0004:03:00.0: BAR 6: assigned [mem 0x600c202010000-0x600c20201ffff pref]
+[  +0.000008] pci 0004:03:00.0: BAR 4: no space for [io  size 0x0020]
+[  +0.000007] pci 0004:03:00.0: BAR 4: failed to assign [io  size 0x0020]
+[  +0.000007] pci 0004:03:00.0: BAR 0: no space for [io  size 0x0008]
+[  +0.000007] pci 0004:03:00.0: BAR 0: failed to assign [io  size 0x0008]
+[  +0.000007] pci 0004:03:00.0: BAR 2: no space for [io  size 0x0008]
+[  +0.000007] pci 0004:03:00.0: BAR 2: failed to assign [io  size 0x0008]
+[  +0.000007] pci 0004:03:00.0: BAR 1: no space for [io  size 0x0004]
+[  +0.000007] pci 0004:03:00.0: BAR 1: failed to assign [io  size 0x0004]
+[  +0.000007] pci 0004:03:00.0: BAR 3: no space for [io  size 0x0004]
+[  +0.000007] pci 0004:03:00.0: BAR 3: failed to assign [io  size 0x0004]
+[  +0.000008] pci 0004:00     : [PE# fe] Secondary bus 0 associated with PE#fe
+[  +0.000267] pci 0004:03     : [PE# fd] Secondary bus 3 associated with PE#fd
+[  +0.000277] pci 0004:03     : [PE# fd] Setting up 32-bit TCE table at 0..80000000
+[  +0.007231] pci 0004:03     : [PE# fd] Setting up window#0 0..7fffffff pg=1000
+[  +0.000012] pci 0004:03     : [PE# fd] Enabling 64-bit DMA bypass
+[  +0.000012] iommu: Adding device 0004:03:00.0 to group 3
+[  +0.000006] pci 0004:02:02.0: PCI bridge to [bus 03]
+[  +0.000014] pci 0004:02:02.0:   bridge window [mem 0x600c202000000-0x600c2027fffff]
+[  +0.000012] pci 0004:02:02.0:   bridge window [mem 0x6025800000000-0x602583fffffff 64bit pref]
+[  +0.000019] pci 0004:04:00.0: BAR 1: assigned [mem 0x6024000000000-0x60247ffffffff 64bit pref]
+[  +0.000025] pci 0004:04:00.0: BAR 3: assigned [mem 0x6024800000000-0x6024801ffffff 64bit pref]
+[  +0.000025] pci 0004:04:00.0: BAR 0: assigned [mem 0x600c200000000-0x600c200ffffff]
+[  +0.000083] pci 0004:04     : [PE# 00] Secondary bus 4 associated with PE#0
+[  +0.000920] pci 0004:04     : [PE# 00] Setting up 32-bit TCE table at 0..80000000
+[  +0.007234] pci 0004:04     : [PE# 00] Setting up window#0 0..7fffffff pg=1000
+[  +0.000011] pci 0004:04     : [PE# 00] Enabling 64-bit DMA bypass
+[  +0.000013] iommu: Adding device 0004:04:00.0 to group 4
+[  +0.000007] pci 0004:02:0a.0: PCI bridge to [bus 04]
+[  +0.000013] pci 0004:02:0a.0:   bridge window [mem 0x600c200000000-0x600c200ffffff]
+[  +0.000013] pci 0004:02:0a.0:   bridge window [mem 0x6024000000000-0x6024bffffffff 64bit pref]
+[  +0.000018] pci 0004:05:00.0: BAR 1: assigned [mem 0x6025000000000-0x60257ffffffff 64bit pref]
+[  +0.000026] pci 0004:05:00.0: BAR 3: assigned [mem 0x6024c00000000-0x6024c01ffffff 64bit pref]
+[  +0.000024] pci 0004:05:00.0: BAR 0: assigned [mem 0x600c201000000-0x600c201ffffff]
+[  +0.000083] pci 0004:05     : [PE# 30] Secondary bus 5 associated with PE#30
+[  +0.000920] pci 0004:05     : [PE# 30] Setting up 32-bit TCE table at 0..80000000
+[  +0.007223] pci 0004:05     : [PE# 30] Setting up window#0 0..7fffffff pg=1000
+[  +0.000012] pci 0004:05     : [PE# 30] Enabling 64-bit DMA bypass
+[  +0.000012] iommu: Adding device 0004:05:00.0 to group 5
+[  +0.000007] pci 0004:02:0b.0: PCI bridge to [bus 05]
+[  +0.000014] pci 0004:02:0b.0:   bridge window [mem 0x600c201000000-0x600c201ffffff]
+[  +0.000012] pci 0004:02:0b.0:   bridge window [mem 0x6024c00000000-0x60257ffffffff 64bit pref]
+[  +0.000017] pci 0004:02:0c.0: PCI bridge to [bus 06-0a]
+[  +0.000028] pci 0004:02     : [PE# fc] Secondary bus 2 associated with PE#fc
+[  +0.000269] pci 0004:01:00.0: PCI bridge to [bus 02-0a]
+[  +0.000014] pci 0004:01:00.0:   bridge window [mem 0x600c200000000-0x600c27fefffff]
+[  +0.000012] pci 0004:01:00.0:   bridge window [mem 0x6024000000000-0x6027f7ff0ffff 64bit pref]
+[  +0.000021] pci 0004:01     : [PE# fb] Secondary bus 1 associated with PE#fb
+[  +0.000278] pci 0004:01     : [PE# fb] Setting up 32-bit TCE table at 0..80000000
+[  +0.007225] pci 0004:01     : [PE# fb] Setting up window#0 0..7fffffff pg=1000
+[  +0.000011] pci 0004:01     : [PE# fb] Enabling 64-bit DMA bypass
+[  +0.000013] iommu: Adding device 0004:01:00.0 to group 6
+[  +0.000010] iommu: Adding device 0004:01:00.1 to group 6
+[  +0.000010] iommu: Adding device 0004:01:00.2 to group 6
+[  +0.000010] iommu: Adding device 0004:01:00.3 to group 6
+[  +0.000010] iommu: Adding device 0004:01:00.4 to group 6
+[  +0.000007] pci 0004:00:00.0: PCI bridge to [bus 01-0a]
+[  +0.000014] pci 0004:00:00.0:   bridge window [mem 0x600c200000000-0x600c27fefffff]
+[  +0.000012] pci 0004:00:00.0:   bridge window [mem 0x6024000000000-0x6027f7ff0ffff 64bit pref]
+[  +0.000015] pci_bus 0004:00: Some PCI device resources are unassigned, try booting with pci=realloc
+[  +0.000010] pci_bus 0004:00: resource 4 [mem 0x600c200000000-0x600c27ffeffff]
+[  +0.000004] pci_bus 0004:00: resource 5 [mem 0x6024000000000-0x6027f7fffffff 64bit pref]
+[  +0.000003] pci_bus 0004:01: resource 1 [mem 0x600c200000000-0x600c27fefffff]
+[  +0.000004] pci_bus 0004:01: resource 2 [mem 0x6024000000000-0x6027f7ff0ffff 64bit pref]
+[  +0.000003] pci_bus 0004:02: resource 1 [mem 0x600c200000000-0x600c27fefffff]
+[  +0.000003] pci_bus 0004:02: resource 2 [mem 0x6024000000000-0x6027f7ff0ffff 64bit pref]
+[  +0.000004] pci_bus 0004:03: resource 1 [mem 0x600c202000000-0x600c2027fffff]
+[  +0.000003] pci_bus 0004:03: resource 2 [mem 0x6025800000000-0x602583fffffff 64bit pref]
+[  +0.000003] pci_bus 0004:04: resource 1 [mem 0x600c200000000-0x600c200ffffff]
+[  +0.000003] pci_bus 0004:04: resource 2 [mem 0x6024000000000-0x6024bffffffff 64bit pref]
+[  +0.000004] pci_bus 0004:05: resource 1 [mem 0x600c201000000-0x600c201ffffff]
+[  +0.000003] pci_bus 0004:05: resource 2 [mem 0x6024c00000000-0x60257ffffffff 64bit pref]
+[  +0.000029] pci 0005:00:00.0: BAR 15: assigned [mem 0x6028000000000-0x602803fffffff 64bit pref]
+[  +0.000011] pci 0005:01:00.0: BAR 0: assigned [mem 0x6028000000000-0x602800000ffff 64bit pref]
+[  +0.000026] pci 0005:01:00.0: BAR 2: assigned [mem 0x6028000010000-0x602800001ffff 64bit pref]
+[  +0.000026] pci 0005:01:00.0: BAR 4: assigned [mem 0x6028000020000-0x602800002ffff 64bit pref]
+[  +0.000026] pci 0005:01:00.1: BAR 0: assigned [mem 0x6028000030000-0x602800003ffff 64bit pref]
+[  +0.000026] pci 0005:01:00.1: BAR 2: assigned [mem 0x6028000040000-0x602800004ffff 64bit pref]
+[  +0.000026] pci 0005:01:00.1: BAR 4: assigned [mem 0x6028000050000-0x602800005ffff 64bit pref]
+[  +0.000027] pci 0005:00     : [PE# fe] Secondary bus 0 associated with PE#fe
+[  +0.000281] pci 0005:01     : [PE# 00] Secondary bus 1 associated with PE#0
+[  +0.000273] pci 0005:01     : [PE# 00] Setting up 32-bit TCE table at 0..80000000
+[  +0.007223] pci 0005:01     : [PE# 00] Setting up window#0 0..7fffffff pg=1000
+[  +0.000012] pci 0005:01     : [PE# 00] Enabling 64-bit DMA bypass
+[  +0.000012] iommu: Adding device 0005:01:00.0 to group 7
+[  +0.000009] iommu: Adding device 0005:01:00.1 to group 7
+[  +0.000007] pci 0005:00:00.0: PCI bridge to [bus 01]
+[  +0.000018] pci 0005:00:00.0:   bridge window [mem 0x6028000000000-0x602bf7fffffff 64bit pref]
+[  +0.000016] pci_bus 0005:00: resource 4 [mem 0x600c280000000-0x600c2fffeffff]
+[  +0.000004] pci_bus 0005:00: resource 5 [mem 0x6028000000000-0x602bf7fffffff 64bit pref]
+[  +0.000003] pci_bus 0005:01: resource 2 [mem 0x6028000000000-0x602bf7fffffff 64bit pref]
+[  +0.000029] pci 0030:00     : [PE# 1fe] Secondary bus 0 associated with PE#1fe
+[  +0.000267] pci 0030:00:00.0: PCI bridge to [bus 01]
+[  +0.000029] pci_bus 0030:00: resource 4 [mem 0x620c000000000-0x620c07ffeffff]
+[  +0.000003] pci_bus 0030:00: resource 5 [mem 0x6200000000000-0x6203fbfffffff 64bit pref]
+[  +0.000028] pci 0033:00     : [PE# 1fe] Secondary bus 0 associated with PE#1fe
+[  +0.000270] pci 0033:00:00.0: PCI bridge to [bus 01]
+[  +0.000029] pci_bus 0033:00: resource 4 [mem 0x620c180000000-0x620c1fffeffff]
+[  +0.000004] pci_bus 0033:00: resource 5 [mem 0x6220000000000-0x6223fbfffffff 64bit pref]
+[  +0.000027] pci 0034:00     : [PE# fe] Secondary bus 0 associated with PE#fe
+[  +0.000265] pci 0034:00:00.0: PCI bridge to [bus 01]
+[  +0.000029] pci_bus 0034:00: resource 4 [mem 0x620c200000000-0x620c27ffeffff]
+[  +0.000003] pci_bus 0034:00: resource 5 [mem 0x6224000000000-0x6227f7fffffff 64bit pref]
+[  +0.000104] pci 0035:00:00.0: BAR 15: assigned [mem 0x6228000000000-0x62297ffffffff 64bit pref]
+[  +0.000009] pci 0035:00:00.0: BAR 14: assigned [mem 0x620c280000000-0x620c2827fffff]
+[  +0.000010] pci 0035:01:00.0: BAR 15: assigned [mem 0x6228000000000-0x62297ffffffff 64bit pref]
+[  +0.000009] pci 0035:01:00.0: BAR 14: assigned [mem 0x620c280000000-0x620c281ffffff]
+[  +0.000008] pci 0035:01:00.0: BAR 0: assigned [mem 0x620c282000000-0x620c28203ffff]
+[  +0.000017] pci 0035:02:04.0: BAR 15: assigned [mem 0x6228000000000-0x6228bffffffff 64bit pref]
+[  +0.000009] pci 0035:02:05.0: BAR 15: assigned [mem 0x6228c00000000-0x62297ffffffff 64bit pref]
+[  +0.000009] pci 0035:02:04.0: BAR 14: assigned [mem 0x620c280000000-0x620c280ffffff]
+[  +0.000009] pci 0035:02:05.0: BAR 14: assigned [mem 0x620c281000000-0x620c281ffffff]
+[  +0.000010] pci 0035:03:00.0: BAR 1: assigned [mem 0x6228000000000-0x62287ffffffff 64bit pref]
+[  +0.000028] pci 0035:03:00.0: BAR 3: assigned [mem 0x6228800000000-0x6228801ffffff 64bit pref]
+[  +0.000028] pci 0035:03:00.0: BAR 0: assigned [mem 0x620c280000000-0x620c280ffffff]
+[  +0.000015] pci 0035:00     : [PE# fe] Secondary bus 0 associated with PE#fe
+[  +0.000366] pci 0035:03     : [PE# 00] Secondary bus 3 associated with PE#0
+[  +0.000949] pci 0035:03     : [PE# 00] Setting up 32-bit TCE table at 0..80000000
+[  +0.007242] pci 0035:03     : [PE# 00] Setting up window#0 0..7fffffff pg=1000
+[  +0.000070] pci 0035:03     : [PE# 00] Enabling 64-bit DMA bypass
+[  +0.000013] iommu: Adding device 0035:03:00.0 to group 8
+[  +0.000006] pci 0035:02:04.0: PCI bridge to [bus 03]
+[  +0.000015] pci 0035:02:04.0:   bridge window [mem 0x620c280000000-0x620c280ffffff]
+[  +0.000014] pci 0035:02:04.0:   bridge window [mem 0x6228000000000-0x6228bffffffff 64bit pref]
+[  +0.000020] pci 0035:04:00.0: BAR 1: assigned [mem 0x6229000000000-0x62297ffffffff 64bit pref]
+[  +0.000028] pci 0035:04:00.0: BAR 3: assigned [mem 0x6228c00000000-0x6228c01ffffff 64bit pref]
+[  +0.000028] pci 0035:04:00.0: BAR 0: assigned [mem 0x620c281000000-0x620c281ffffff]
+[  +0.000117] pci 0035:04     : [PE# 30] Secondary bus 4 associated with PE#30
+[  +0.000949] pci 0035:04     : [PE# 30] Setting up 32-bit TCE table at 0..80000000
+[  +0.007232] pci 0035:04     : [PE# 30] Setting up window#0 0..7fffffff pg=1000
+[  +0.000012] pci 0035:04     : [PE# 30] Enabling 64-bit DMA bypass
+[  +0.000013] iommu: Adding device 0035:04:00.0 to group 9
+[  +0.000006] pci 0035:02:05.0: PCI bridge to [bus 04]
+[  +0.000015] pci 0035:02:05.0:   bridge window [mem 0x620c281000000-0x620c281ffffff]
+[  +0.000014] pci 0035:02:05.0:   bridge window [mem 0x6228c00000000-0x62297ffffffff 64bit pref]
+[  +0.000018] pci 0035:02:0d.0: PCI bridge to [bus 05-09]
+[  +0.000033] pci 0035:02     : [PE# fd] Secondary bus 2 associated with PE#fd
+[  +0.000265] pci 0035:01:00.0: PCI bridge to [bus 02-09]
+[  +0.000015] pci 0035:01:00.0:   bridge window [mem 0x620c280000000-0x620c2ffefffff]
+[  +0.000014] pci 0035:01:00.0:   bridge window [mem 0x6228000000000-0x622bf7ff0ffff 64bit pref]
+[  +0.000022] pci 0035:01     : [PE# fc] Secondary bus 1 associated with PE#fc
+[  +0.000266] pci 0035:00:00.0: PCI bridge to [bus 01-09]
+[  +0.000014] pci 0035:00:00.0:   bridge window [mem 0x620c280000000-0x620c2ffefffff]
+[  +0.000013] pci 0035:00:00.0:   bridge window [mem 0x6228000000000-0x622bf7ff0ffff 64bit pref]
+[  +0.000018] pci_bus 0035:00: resource 4 [mem 0x620c280000000-0x620c2fffeffff]
+[  +0.000003] pci_bus 0035:00: resource 5 [mem 0x6228000000000-0x622bf7fffffff 64bit pref]
+[  +0.000003] pci_bus 0035:01: resource 1 [mem 0x620c280000000-0x620c2ffefffff]
+[  +0.000004] pci_bus 0035:01: resource 2 [mem 0x6228000000000-0x622bf7ff0ffff 64bit pref]
+[  +0.000003] pci_bus 0035:02: resource 1 [mem 0x620c280000000-0x620c2ffefffff]
+[  +0.000003] pci_bus 0035:02: resource 2 [mem 0x6228000000000-0x622bf7ff0ffff 64bit pref]
+[  +0.000004] pci_bus 0035:03: resource 1 [mem 0x620c280000000-0x620c280ffffff]
+[  +0.000003] pci_bus 0035:03: resource 2 [mem 0x6228000000000-0x6228bffffffff 64bit pref]
+[  +0.000003] pci_bus 0035:04: resource 1 [mem 0x620c281000000-0x620c281ffffff]
+[  +0.000003] pci_bus 0035:04: resource 2 [mem 0x6228c00000000-0x62297ffffffff 64bit pref]
+[  +0.000011] pci 0006:00:00.0: BAR 0: assigned [mem 0x6030201600000-0x603020161ffff 64bit]
+[  +0.000060] pci 0006:00:00.1: BAR 0: assigned [mem 0x6030201620000-0x603020163ffff 64bit]
+[  +0.000055] pci 0006:00:00.2: BAR 0: assigned [mem 0x6030201640000-0x603020165ffff 64bit]
+[  +0.000054] pci 0006:00:01.0: BAR 0: assigned [mem 0x6030201660000-0x603020167ffff 64bit]
+[  +0.000054] pci 0006:00:01.1: BAR 0: assigned [mem 0x6030201680000-0x603020169ffff 64bit]
+[  +0.000054] pci 0006:00:01.2: BAR 0: assigned [mem 0x60302016a0000-0x60302016bffff 64bit]
+[  +0.000055] pci 0006:00:00.0: BAR 2: assigned [mem 0x60302016c0000-0x60302016cffff 64bit]
+[  +0.000053] pci 0006:00:00.1: BAR 2: assigned [mem 0x60302016d0000-0x60302016dffff 64bit]
+[  +0.000053] pci 0006:00:00.2: BAR 2: assigned [mem 0x60302016e0000-0x60302016effff 64bit]
+[  +0.000056] pci 0006:00:01.0: BAR 2: assigned [mem 0x60302016f0000-0x60302016fffff 64bit]
+[  +0.000054] pci 0006:00:01.1: BAR 2: assigned [mem 0x6030201700000-0x603020170ffff 64bit]
+[  +0.000054] pci 0006:00:01.2: BAR 2: assigned [mem 0x6030201710000-0x603020171ffff 64bit]
+[  +0.000055] pci_bus 0006:00: resource 4 [mem 0x6030201600000-0x603020171ffff]
+[  +0.000010] pci 0007:00:00.0: BAR 0: assigned [mem 0x6230201600000-0x623020161ffff 64bit]
+[  +0.000061] pci 0007:00:00.1: BAR 0: assigned [mem 0x6230201620000-0x623020163ffff 64bit]
+[  +0.000059] pci 0007:00:00.2: BAR 0: assigned [mem 0x6230201640000-0x623020165ffff 64bit]
+[  +0.000059] pci 0007:00:01.0: BAR 0: assigned [mem 0x6230201660000-0x623020167ffff 64bit]
+[  +0.000060] pci 0007:00:01.1: BAR 0: assigned [mem 0x6230201680000-0x623020169ffff 64bit]
+[  +0.000059] pci 0007:00:01.2: BAR 0: assigned [mem 0x62302016a0000-0x62302016bffff 64bit]
+[  +0.000060] pci 0007:00:00.0: BAR 2: assigned [mem 0x62302016c0000-0x62302016cffff 64bit]
+[  +0.000059] pci 0007:00:00.1: BAR 2: assigned [mem 0x62302016d0000-0x62302016dffff 64bit]
+[  +0.000062] pci 0007:00:00.2: BAR 2: assigned [mem 0x62302016e0000-0x62302016effff 64bit]
+[  +0.000059] pci 0007:00:01.0: BAR 2: assigned [mem 0x62302016f0000-0x62302016fffff 64bit]
+[  +0.000060] pci 0007:00:01.1: BAR 2: assigned [mem 0x6230201700000-0x623020170ffff 64bit]
+[  +0.000060] pci 0007:00:01.2: BAR 2: assigned [mem 0x6230201710000-0x623020171ffff 64bit]
+[  +0.000061] pci_bus 0007:00: resource 4 [mem 0x6230201600000-0x623020171ffff]
+[  +0.000147] pci 0006:00:00.0: [PE# 0d] Associated device to PE
+[  +0.000070] pci 0006:00:00.1: Associating to existing PE d
+[  +0.000064] pci 0006:00:00.2: Associating to existing PE d
+[  +0.000064] pci 0006:00:01.0: [PE# 0c] Associated device to PE
+[  +0.000064] pci 0006:00:01.1: Associating to existing PE c
+[  +0.000065] pci 0006:00:01.2: Associating to existing PE c
+[  +0.000057] NPU6: Found 1 MMIO ATSD registers
+[  +0.000047] pci 0007:00:00.0: [PE# 0d] Associated device to PE
+[  +0.000084] pci 0007:00:00.1: Associating to existing PE d
+[  +0.000080] pci 0007:00:00.2: Associating to existing PE d
+[  +0.000082] pci 0007:00:01.0: [PE# 0c] Associated device to PE
+[  +0.000081] pci 0007:00:01.1: Associating to existing PE c
+[  +0.000081] pci 0007:00:01.2: Associating to existing PE c
+[  +0.000013] NPU7: Found 1 MMIO ATSD registers
+[  +0.000357] pci 0004:04     : [PE# 00] Attached NPU 0006:00:00.0
+[  +0.000015] iommu: Adding device 0006:00:00.0 to group 4
+[  +0.000032] pci 0004:04     : [PE# 00] Attached NPU 0006:00:00.1
+[  +0.000010] iommu: Adding device 0006:00:00.1 to group 4
+[  +0.000032] pci 0004:04     : [PE# 00] Attached NPU 0006:00:00.2
+[  +0.000011] iommu: Adding device 0006:00:00.2 to group 4
+[  +0.000211] pci 0004:05     : [PE# 30] Attached NPU 0006:00:01.0
+[  +0.000011] iommu: Adding device 0006:00:01.0 to group 5
+[  +0.000032] pci 0004:05     : [PE# 30] Attached NPU 0006:00:01.1
+[  +0.000011] iommu: Adding device 0006:00:01.1 to group 5
+[  +0.000032] pci 0004:05     : [PE# 30] Attached NPU 0006:00:01.2
+[  +0.000010] iommu: Adding device 0006:00:01.2 to group 5
+[  +0.000074] pci 0035:03     : [PE# 00] Attached NPU 0007:00:00.0
+[  +0.000011] iommu: Adding device 0007:00:00.0 to group 8
+[  +0.000040] pci 0035:03     : [PE# 00] Attached NPU 0007:00:00.1
+[  +0.000010] iommu: Adding device 0007:00:00.1 to group 8
+[  +0.000041] pci 0035:03     : [PE# 00] Attached NPU 0007:00:00.2
+[  +0.000009] iommu: Adding device 0007:00:00.2 to group 8
+[  +0.000279] pci 0035:04     : [PE# 30] Attached NPU 0007:00:01.0
+[  +0.000010] iommu: Adding device 0007:00:01.0 to group 9
+[  +0.000041] pci 0035:04     : [PE# 30] Attached NPU 0007:00:01.1
+[  +0.000011] iommu: Adding device 0007:00:01.1 to group 9
+[  +0.000040] pci 0035:04     : [PE# 30] Attached NPU 0007:00:01.2
+[  +0.000010] iommu: Adding device 0007:00:01.2 to group 9
+[  +0.000091] pci 0000:00:00.0: enabling device (0101 -> 0103)
+[  +0.000022] pci 0001:00:00.0: enabling device (0101 -> 0103)
+[  +0.000020] pci 0002:00:00.0: enabling device (0101 -> 0103)
+[  +0.000022] pci 0002:01:00.0: enabling device (0141 -> 0143)
+[  +0.000025] pci 0004:00:00.0: enabling device (0101 -> 0103)
+[  +0.000021] pci 0004:01:00.0: enabling device (0141 -> 0143)
+[  +0.000024] pci 0004:02:02.0: enabling device (0141 -> 0143)
+[  +0.000023] pci 0004:02:0a.0: enabling device (0545 -> 0547)
+[  +0.000023] pci 0004:02:0b.0: enabling device (0545 -> 0547)
+[  +0.000023] pci 0005:00:00.0: enabling device (0101 -> 0103)
+[  +0.000021] pci 0035:00:00.0: enabling device (0105 -> 0107)
+[  +0.000021] pci 0035:01:00.0: enabling device (0545 -> 0547)
+[  +0.000028] pci 0035:02:04.0: enabling device (0545 -> 0547)
+[  +0.000026] pci 0035:02:05.0: enabling device (0545 -> 0547)
+[  +0.005969] PCI: Probing PCI hardware done
+[  +0.002669] cpuidle-powernv: Default stop: psscr = 0x0000000000000330,mask=0x00000000003003ff
+[  +0.000007] cpuidle-powernv: Deepest stop: psscr = 0x0000000000300375,mask=0x00000000003003ff
+[  +0.000006] cpuidle-powernv: Requested Level (RL) value of first deep stop = 0x4
+[  +0.006315] HugeTLB registered 2.00 MiB page size, pre-allocated 0 pages
+[  +0.000007] HugeTLB registered 1.00 GiB page size, pre-allocated 0 pages
+[  +0.003223] SCSI subsystem initialized
+[  +0.000297] libata version 3.00 loaded.
+[  +0.000066] pci 0002:02:00.0: vgaarb: VGA device added: decodes=io+mem,owns=none,locks=none
+[  +0.000031] pci 0002:02:00.0: vgaarb: bridge control possible
+[  +0.000008] pci 0002:02:00.0: vgaarb: setting as boot device (VGA legacy resources not available)
+[  +0.000005] vgaarb: loaded
+[  +0.000061] usbcore: registered new interface driver usbfs
+[  +0.000018] usbcore: registered new interface driver hub
+[  +0.000435] usbcore: registered new device driver usb
+[  +0.000067] pps_core: LinuxPPS API ver. 1 registered
+[  +0.000004] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[  +0.000010] PTP clock support registered
+[  +0.000511] EDAC MC: Ver: 3.0.0
+[  +0.000530] NetLabel: Initializing
+[  +0.000005] NetLabel:  domain hash size = 128
+[  +0.000004] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[  +0.000029] NetLabel:  unlabeled traffic allowed by default
+[  +0.000996] clocksource: Switched to clocksource timebase
+[  +0.024887] VFS: Disk quotas dquot_6.6.0
+[  +0.000265] VFS: Dquot-cache hash table entries: 8192 (order 0, 65536 bytes)
+[  +0.000490] AppArmor: AppArmor Filesystem Enabled
+[  +0.003784] NET: Registered protocol family 2
+[  +0.000399] TCP established hash table entries: 524288 (order: 6, 4194304 bytes)
+[  +0.001503] TCP bind hash table entries: 65536 (order: 4, 1048576 bytes)
+[  +0.000224] TCP: Hash tables configured (established 524288 bind 65536)
+[  +0.000332] UDP hash table entries: 65536 (order: 5, 2097152 bytes)
+[  +0.000626] UDP-Lite hash table entries: 65536 (order: 5, 2097152 bytes)
+[  +0.001143] NET: Registered protocol family 1
+[  +0.000041] pci 0001:01:00.0: enabling device (0140 -> 0142)
+[  +0.000256] PCI: CLS 0 bytes, default 128
+[  +0.000066] Unpacking initramfs...
+[  +1.521454] Freeing initrd memory: 69888K
+[  +0.003226] nest_capp0_imc performance monitor hardware support registered
+[  +0.000070] nest_capp1_imc performance monitor hardware support registered
+[  +0.003222] core_imc performance monitor hardware support registered
+[  +0.000056] nest_mba0_imc performance monitor hardware support registered
+[  +0.000052] nest_mba1_imc performance monitor hardware support registered
+[  +0.000052] nest_mba2_imc performance monitor hardware support registered
+[  +0.000051] nest_mba3_imc performance monitor hardware support registered
+[  +0.000052] nest_mba4_imc performance monitor hardware support registered
+[  +0.000051] nest_mba5_imc performance monitor hardware support registered
+[  +0.000051] nest_mba6_imc performance monitor hardware support registered
+[  +0.000052] nest_mba7_imc performance monitor hardware support registered
+[  +0.000066] nest_mcs01_imc performance monitor hardware support registered
+[  +0.000072] nest_mcs23_imc performance monitor hardware support registered
+[  +0.000120] nest_nvlink0_imc performance monitor hardware support registered
+[  +0.000092] nest_nvlink1_imc performance monitor hardware support registered
+[  +0.000092] nest_nvlink2_imc performance monitor hardware support registered
+[  +0.000091] nest_nvlink3_imc performance monitor hardware support registered
+[  +0.000091] nest_nvlink4_imc performance monitor hardware support registered
+[  +0.000091] nest_nvlink5_imc performance monitor hardware support registered
+[  +0.000069] nest_nx_imc performance monitor hardware support registered
+[  +0.000056] nest_phb0_imc performance monitor hardware support registered
+[  +0.000057] nest_phb1_imc performance monitor hardware support registered
+[  +0.000056] nest_phb2_imc performance monitor hardware support registered
+[  +0.000057] nest_phb3_imc performance monitor hardware support registered
+[  +0.000056] nest_phb4_imc performance monitor hardware support registered
+[  +0.000056] nest_phb5_imc performance monitor hardware support registered
+[  +0.000098] nest_powerbus0_imc performance monitor hardware support registered
+[  +0.003398] thread_imc performance monitor hardware support registered
+[  +0.000074] nest_xlink0_imc performance monitor hardware support registered
+[  +0.000070] nest_xlink1_imc performance monitor hardware support registered
+[  +0.000069] nest_xlink2_imc performance monitor hardware support registered
+[  +0.018206] Initialise system trusted keyrings
+[  +0.000017] Key type blacklist registered
+[  +0.000144] workingset: timestamp_bits=38 max_order=24 bucket_order=0
+[  +0.002624] zbud: loaded
+[  +0.003127] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[  +0.000713] fuse init (API version 7.26)
+[  +0.003022] Key type asymmetric registered
+[  +0.000007] Asymmetric key parser 'x509' registered
+[  +0.000221] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 244)
+[  +0.000323] io scheduler noop registered
+[  +0.000005] io scheduler deadline registered
+[  +0.000211] io scheduler cfq registered (default)
+[  +0.003220] pci 0002:02:00.0: enabling device (0141 -> 0143)
+[  +0.000020] Using unsupported 1024x768 vga at 600c100010000, depth=32, pitch=4096
+[  +0.082828] Console: switching to colour frame buffer device 128x48
+[  +0.083576] fb0: Open Firmware frame buffer device on /pciex@600c3c0200000/pci@0/pci@0/vga@0
+[  +0.001521] hvc0: raw protocol on /ibm,opal/consoles/serial@0
+[  +0.000913] hvc0: No interrupts property, using OPAL event
+[  +0.001271] Serial: 8250/16550 driver, 32 ports, IRQ sharing enabled
+[  +0.004438] Linux agpgart interface v0.103
+[  +0.017595] loop: module loaded
+[  +0.000788] libphy: Fixed MDIO Bus: probed
+[  +0.000634] tun: Universal TUN/TAP device driver, 1.6
+[  +0.000826] PPP generic driver version 2.4.2
+[  +0.000747] VFIO - User Level meta-driver version: 0.3
+[  +0.000946] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[  +0.001035] ehci-pci: EHCI PCI platform driver
+[  +0.000720] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[  +0.000956] ohci-pci: OHCI PCI platform driver
+[  +0.000710] uhci_hcd: USB Universal Host Controller Interface driver
+[  +0.001169] xhci_hcd 0001:01:00.0: xHCI Host Controller
+[  +0.000881] xhci_hcd 0001:01:00.0: new USB bus registered, assigned bus number 1
+[  +0.001226] xhci_hcd 0001:01:00.0: Using 64-bit DMA iommu bypass
+[  +0.000991] xhci_hcd 0001:01:00.0: hcc params 0x0270f06d hci version 0x96 quirks 0x0000000004000000
+[  +0.002035] usb usb1: New USB device found, idVendor=1d6b, idProduct=0002
+[  +0.001050] usb usb1: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[  +0.001118] usb usb1: Product: xHCI Host Controller
+[  +0.000753] usb usb1: Manufacturer: Linux 4.15.0-74-generic xhci-hcd
+[  +0.032899] usb usb1: SerialNumber: 0001:01:00.0
+[  +0.033302] hub 1-0:1.0: USB hub found
+[  +0.032667] hub 1-0:1.0: 4 ports detected
+[  +0.032264] xhci_hcd 0001:01:00.0: xHCI Host Controller
+[  +0.032036] xhci_hcd 0001:01:00.0: new USB bus registered, assigned bus number 2
+[  +0.032098] xhci_hcd 0001:01:00.0: Host supports USB 3.0  SuperSpeed
+[  +0.032516] usb usb2: We don't know the algorithms for LPM for this host, disabling LPM.
+[  +0.033786] usb usb2: New USB device found, idVendor=1d6b, idProduct=0003
+[  +0.033593] usb usb2: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+[  +0.033820] usb usb2: Product: xHCI Host Controller
+[  +0.033499] usb usb2: Manufacturer: Linux 4.15.0-74-generic xhci-hcd
+[  +0.033579] usb usb2: SerialNumber: 0001:01:00.0
+[  +0.033427] hub 2-0:1.0: USB hub found
+[  +0.032973] hub 2-0:1.0: 4 ports detected
+[  +0.033700] mousedev: PS/2 mouse device common for all mice
+[  +0.071986] rtc-opal opal-rtc: rtc core: registered rtc-opal as rtc0
+[  +0.033153] i2c /dev entries driver
+[  +0.033580] tpm_i2c_nuvoton 2-0057: VID: 1050 DID: FE RID: 04
+[  +0.038420] random: fast init done
+[  +0.063595] random: crng init done
+[  +0.036671] device-mapper: uevent: version 1.0.3
+[  +0.033108] device-mapper: ioctl: 4.37.0-ioctl (2017-09-20) initialised: dm-devel@redhat.com
+[  +0.033591] powernv-cpufreq: cpufreq pstate min 90 nominal 84 max 0
+[  +0.033364] powernv-cpufreq: Workload Optimized Frequency is enabled in the platform
+[  +0.047786] powernv_idle_driver registered
+[  +0.001667] ledtrig-cpu: registered to indicate activity on CPUs
+[  +0.033978] NET: Registered protocol family 10
+[  +0.038279] Segment Routing with IPv6
+[  +0.032289] NET: Registered protocol family 17
+[  +0.033258] Key type dns_resolver registered
+[  +0.032046] registered taskstats version 1
+[  +0.031826] Loading compiled-in X.509 certificates
+[  +0.036373] Loaded X.509 cert 'Build time autogenerated kernel key: 95912838900133e1641bee97299772de194e6471'
+[  +0.033683] zswap: loaded using pool lzo/zbud
+[  +0.039366] Key type big_key registered
+[  +0.033292] Key type trusted registered
+[  +0.035478] Key type encrypted registered
+[  +0.032302] AppArmor: AppArmor sha1 policy hashing enabled
+[  +0.052166] ima: Allocated hash algorithm: sha256
+[  +0.159488] evm: HMAC attrs: 0x1
+[  +0.110258] rtc-opal opal-rtc: setting system clock to 2021-09-21 13:17:44 UTC (1632230264)
+[  +0.033958] integrity: Unable to open file: /etc/keys/x509_ima.der (-2)
+[  +0.000003] integrity: Unable to open file: /etc/keys/x509_evm.der (-2)
+[  +0.034615] Freeing unused kernel memory: 4800K
+[  +0.065420] This architecture does not have kernel memory protection.
+[  +0.532702] ipmi message handler version 39.2
+[  +0.000422] nvme nvme0: pci function 0000:01:00.0
+[  +0.032356] ipmi device interface
+[  +0.005931] synth uevent: /devices/vio: failed to send uevent
+[  +0.000002] vio vio: uevent: failed to send synthetic uevent
+[  +0.024960] ahci 0004:03:00.0: version 3.0
+[  +0.000023] nvme 0000:01:00.0: enabling device (0140 -> 0142)
+[  +0.000009] nvme 0000:01:00.0: Using 64-bit DMA iommu bypass
+[  +0.037243] nvidia: loading out-of-tree module taints kernel.
+[  +0.000001] nvidia: loading out-of-tree module taints kernel.
+[  +0.000001] nvidia: loading out-of-tree module taints kernel.
+[  +0.000002] nvidia: loading out-of-tree module taints kernel.
+[  +0.000005] nvidia: module license 'NVIDIA' taints kernel.
+[  +0.000001] Disabling lock debugging due to kernel taint
+[  +0.000001] nvidia: module license 'NVIDIA' taints kernel.
+[  +0.026747] ahci 0004:03:00.0: enabling device (0541 -> 0543)
+[  +0.139243] nvidia: module verification failed: signature and/or required key missing - tainting kernel
+[  +0.020986] ahci 0004:03:00.0: Using 64-bit DMA iommu bypass
+[  +0.035215] nvidia-nvlink: Nvlink Core is being initialized, major device number 239
+[  +0.024855] tg3.c:v3.137 (May 11, 2014)
+[  +0.029604] nvidia-nvlink: IBMNPU: Probing Emulated device 0006:00:00.0, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.029469] tg3 0005:01:00.0: enabling device (0140 -> 0142)
+[  +0.029565] ibmnpu 0006:00:00.0: enabling device (0000 -> 0002)
+[  +0.030097] ahci 0004:03:00.0: AHCI 0001.0000 32 slots 4 ports 6 Gbps 0xf impl SATA mode
+[  +0.031247] nvidia-nvlink: IBMNPU: BAR0 @ 0x6030201600000 [size=128K].
+[  +0.031058] ahci 0004:03:00.0: flags: 64bit ncq sntf led only pmp fbs pio slum part sxs 
+[  +0.031646] nvidia-nvlink: IBMNPU: BAR1 @ 0x60302016c0000 [size=64K].
+[  +0.031992] checking generic (600c100010000 300000) vs hw (600c100000000 1000000)
+[  +0.030939] nvidia-nvlink: IBMNPU: Probing Emulated device 0006:00:00.1, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.032164] fb: switching to astdrmfb from OFfb vga
+[  +0.032932] ibmnpu 0006:00:00.1: enabling device (0000 -> 0002)
+[  +0.032899] scsi host0: ahci
+[  +0.032891] nvidia-nvlink: IBMNPU: BAR0 @ 0x6030201620000 [size=128K].
+[  +0.033196] scsi host1: ahci
+[  +0.032459] nvidia-nvlink: IBMNPU: BAR1 @ 0x60302016d0000 [size=64K].
+[  +0.032987] scsi host2: ahci
+[  +0.032264] nvidia-nvlink: IBMNPU: Probing Emulated device 0006:00:00.2, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.033506] scsi host3: ahci
+[  +0.032821] ibmnpu 0006:00:00.2: enabling device (0000 -> 0002)
+[  +0.033979] ata1: SATA max UDMA/133 abar m2048@0x600c202000000 port 0x600c202000100 irq 88
+[  +0.033487] nvidia-nvlink: IBMNPU: BAR0 @ 0x6030201640000 [size=128K].
+[  +0.032335] ata2: SATA max UDMA/133 abar m2048@0x600c202000000 port 0x600c202000180 irq 88
+[  +0.032237] nvidia-nvlink: IBMNPU: BAR1 @ 0x60302016e0000 [size=64K].
+[  +0.033076] ata3: SATA max UDMA/133 abar m2048@0x600c202000000 port 0x600c202000200 irq 88
+[  +0.033696] nvidia-nvlink: IBMNPU: Probing Emulated device 0006:00:01.0, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.034629] ata4: SATA max UDMA/133 abar m2048@0x600c202000000 port 0x600c202000280 irq 88
+[  +0.004294] tg3 0005:01:00.0: Using 64-bit DMA iommu bypass
+[  +0.030452] ibmnpu 0006:00:01.0: enabling device (0000 -> 0002)
+[  +0.035670] tg3 0005:01:00.0 eth0: Tigon3 [partno(BCM95719) rev 5719001] (PCI Express) MAC address 70:e2:84:14:2d:87
+[  +0.034708] nvidia-nvlink: IBMNPU: BAR0 @ 0x6030201660000 [size=128K].
+[  +0.034529] tg3 0005:01:00.0 eth0: attached PHY is 5719C (10/100/1000Base-T Ethernet) (WireSpeed[1], EEE[1])
+[  +0.000002] tg3 0005:01:00.0 eth0: RXcsums[1] LinkChgREG[0] MIirq[0] ASF[1] TSOcap[1]
+[  +0.034261] nvidia-nvlink: IBMNPU: BAR1 @ 0x60302016f0000 [size=64K].
+[  +0.036143] tg3 0005:01:00.0 eth0: dma_rwctrl[00000000] dma_mask[64-bit]
+[  +0.000104] tg3 0005:01:00.1: enabling device (0140 -> 0142)
+[  +0.035998] nvidia-nvlink: IBMNPU: Probing Emulated device 0006:00:01.1, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.054092] tg3 0005:01:00.1: Using 64-bit DMA iommu bypass
+[  +0.013173] ata4: SATA link down (SStatus 0 SControl 300)
+[  +0.000020] ata3: SATA link down (SStatus 0 SControl 300)
+[  +0.006606] ibmnpu 0006:00:01.1: enabling device (0000 -> 0002)
+[  +0.037534] tg3 0005:01:00.1 eth1: Tigon3 [partno(BCM95719) rev 5719001] (PCI Express) MAC address 70:e2:84:14:2d:88
+[  +0.037437] nvidia-nvlink: IBMNPU: BAR0 @ 0x6030201680000 [size=128K].
+[  +0.037508] tg3 0005:01:00.1 eth1: attached PHY is 5719C (10/100/1000Base-T Ethernet) (WireSpeed[1], EEE[1])
+[  +0.000002] tg3 0005:01:00.1 eth1: RXcsums[1] LinkChgREG[0] MIirq[0] ASF[1] TSOcap[1]
+[  +0.037481] nvidia-nvlink: IBMNPU: BAR1 @ 0x6030201700000 [size=64K].
+[  +0.005047] ata2: SATA link up 6.0 Gbps (SStatus 133 SControl 300)
+[  +0.000015] ata1: SATA link up 6.0 Gbps (SStatus 133 SControl 300)
+[  +0.000818] ata2.00: supports DRM functions and may not be fully accessible
+[  +0.000033] ata2.00: ATA-10: CT1000MX500SSD1, M3CR010, max UDMA/133
+[  +0.000002] ata2.00: 1953525168 sectors, multi 1: LBA48 NCQ (depth 31/32), AA
+[  +0.000613] ata2.00: supports DRM functions and may not be fully accessible
+[  +0.000038] ata1.00: ATA-10: MTFDDAK1T9TCB        00LY461 00LY570IBM,     MJ06, max UDMA/133
+[  +0.000002] ata1.00: 3750748848 sectors, multi 16: LBA48 NCQ (depth 31/32), AA
+[  +0.000122] ata2.00: READ LOG DMA EXT failed, trying PIO
+[  +0.000001] ata2.00: failed to get Identify Device Data, Emask 0x40
+[  +0.000001] ata2.00: ATA Identify Device Log not supported
+[  +0.000001] ata2.00: Security Log not supported
+[  +0.000002] ata2.00: configured for UDMA/133
+[  +0.000003] ata2: exception Emask 0x2 SAct 0x0 SErr 0x2000000 action 0x6 frozen t4
+[  +0.000001] ata2: irq_stat 0x00000010, unknown FIS 00478027 a0000830 00000000 08000001
+[  +0.000002] ata2: SError: { UnrecFIS }
+[  +0.000001] ata2: hard resetting link
+[  +0.001961] ata1.00: configured for UDMA/133
+[  +0.000291] scsi 0:0:0:0: Direct-Access     ATA      MTFDDAK1T9TCB    MJ06 PQ: 0 ANSI: 5
+[  +0.000164] sd 0:0:0:0: [sda] 3750748848 512-byte logical blocks: (1.92 TB/1.75 TiB)
+[  +0.000002] sd 0:0:0:0: [sda] 4096-byte physical blocks
+[  +0.000007] sd 0:0:0:0: [sda] Write Protect is off
+[  +0.000002] sd 0:0:0:0: [sda] Mode Sense: 00 3a 00 00
+[  +0.000001] sd 0:0:0:0: Attached scsi generic sg0 type 0
+[  +0.000011] sd 0:0:0:0: [sda] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[  +0.001187]  sda: sda1 sda2 sda3
+[  +0.000310] sd 0:0:0:0: [sda] Attached SCSI removable disk
+[  +0.026878] tg3 0005:01:00.1 eth1: dma_rwctrl[00000000] dma_mask[64-bit]
+[  +0.000919] tg3 0005:01:00.1 enP5p1s0f1: renamed from eth1
+[  +0.036031] nvidia-nvlink: IBMNPU: Probing Emulated device 0006:00:01.2, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.446580] ata2: SATA link up 6.0 Gbps (SStatus 133 SControl 300)
+[  +0.040825] ibmnpu 0006:00:01.2: enabling device (0000 -> 0002)
+[  +0.042101] ata2.00: supports DRM functions and may not be fully accessible
+[  +0.040275] nvidia-nvlink: IBMNPU: BAR0 @ 0x60302016a0000 [size=128K].
+[  +0.041591] ata2.00: supports DRM functions and may not be fully accessible
+[  +0.040222] nvidia-nvlink: IBMNPU: BAR1 @ 0x6030201710000 [size=64K].
+[  +0.040755] ata2.00: configured for UDMA/133
+[  +0.038997] nvidia-nvlink: IBMNPU: Probing Emulated device 0007:00:00.0, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.039755] ata2: EH complete
+[  +0.000267] scsi 1:0:0:0: Direct-Access     ATA      CT1000MX500SSD1  010  PQ: 0 ANSI: 5
+[  +0.039377] ibmnpu 0007:00:00.0: enabling device (0000 -> 0002)
+[  +0.039231] sd 1:0:0:0: [sdb] 1953525168 512-byte logical blocks: (1.00 TB/932 GiB)
+[  +0.000001] sd 1:0:0:0: Attached scsi generic sg1 type 0
+[  +0.038488] nvidia-nvlink: IBMNPU: BAR0 @ 0x6230201600000 [size=128K].
+[  +0.038422] sd 1:0:0:0: [sdb] 4096-byte physical blocks
+[  +0.000009] sd 1:0:0:0: [sdb] Write Protect is off
+[  +0.027961] nvme nvme0: Shutdown timeout set to 10 seconds
+[  +0.011099] nvidia-nvlink: IBMNPU: BAR1 @ 0x62302016c0000 [size=64K].
+[  +0.009972] nvme0n1: detected capacity change from 0 to 3200631791616
+[  +0.005117]  nvme0n1: p1
+[  +0.024084] sd 1:0:0:0: [sdb] Mode Sense: 00 3a 00 00
+[  +0.038703] nvidia-nvlink: IBMNPU: Probing Emulated device 0007:00:00.1, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.038134] sd 1:0:0:0: [sdb] Write cache: enabled, read cache: enabled, doesn't support DPO or FUA
+[  +0.038596] ibmnpu 0007:00:00.1: enabling device (0000 -> 0002)
+[  +0.040994]  sdb: sdb1
+[  +0.036979] nvidia-nvlink: IBMNPU: BAR0 @ 0x6230201620000 [size=128K].
+[  +0.038794] sd 1:0:0:0: [sdb] supports TCG Opal
+[  +0.038157] nvidia-nvlink: IBMNPU: BAR1 @ 0x62302016d0000 [size=64K].
+[  +0.000020] nvidia-nvlink: IBMNPU: Probing Emulated device 0007:00:00.2, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.037868] sd 1:0:0:0: [sdb] Attached SCSI removable disk
+[  +0.037728] ibmnpu 0007:00:00.2: enabling device (0000 -> 0002)
+[  +0.000028] nvidia-nvlink: IBMNPU: BAR0 @ 0x6230201640000 [size=128K].
+[  +0.997988] nvidia-nvlink: IBMNPU: BAR1 @ 0x62302016e0000 [size=64K].
+[  +0.000021] nvidia-nvlink: IBMNPU: Probing Emulated device 0007:00:01.0, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.000002] ibmnpu 0007:00:01.0: enabling device (0000 -> 0002)
+[  +0.000029] nvidia-nvlink: IBMNPU: BAR0 @ 0x6230201660000 [size=128K].
+[  +0.000002] nvidia-nvlink: IBMNPU: BAR1 @ 0x62302016f0000 [size=64K].
+[  +0.000017] nvidia-nvlink: IBMNPU: Probing Emulated device 0007:00:01.1, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.000003] ibmnpu 0007:00:01.1: enabling device (0000 -> 0002)
+[  +0.000028] nvidia-nvlink: IBMNPU: BAR0 @ 0x6230201680000 [size=128K].
+[  +0.000003] nvidia-nvlink: IBMNPU: BAR1 @ 0x6230201700000 [size=64K].
+[  +0.000017] nvidia-nvlink: IBMNPU: Probing Emulated device 0007:00:01.2, Vendor Id = 0x1014, Device Id = 0x4ea, Class = 0x68001 
+[  +0.000003] ibmnpu 0007:00:01.2: enabling device (0000 -> 0002)
+[  +0.000028] nvidia-nvlink: IBMNPU: BAR0 @ 0x62302016a0000 [size=128K].
+[  +0.000002] nvidia-nvlink: IBMNPU: BAR1 @ 0x6230201710000 [size=64K].
+[  +0.000335] Console: switching to colour dummy device 80x25
+[  +0.000320] [drm] platform has no IO space, trying MMIO
+[  +0.000009] [drm] Using P2A bridge for configuration
+[  +0.000005] [drm] AST 2500 detected
+[  +0.000005] [drm] Analog VGA only
+[  +0.000011] [drm] dram MCLK=800 Mhz type=7 bus_width=16 size=01000000
+[  +0.000173] nvidia 0004:04:00.0: enabling device (0140 -> 0142)
+[  +0.000250] [TTM] Zone  kernel: Available graphics memory: 536173024 kiB
+[  +0.000003] [TTM] Zone   dma32: Available graphics memory: 2097152 kiB
+[  +0.000002] [TTM] Initializing pool allocator
+[  +0.000004] [TTM] Initializing DMA pool allocator
+[  +0.017486] nvidia 0004:04:00.0: Using 64-bit DMA iommu bypass
+[  +0.000027] ibmnpu 0006:00:00.0: Using 64-bit DMA iommu bypass
+[  +0.000002] pci 0006:00:00.0: [PE# 0d] Removing DMA window
+[  +0.000006] ibmnpu 0006:00:00.0: Enabling bypass for PE d
+[  +0.000029] ibmnpu 0006:00:00.1: Using 64-bit DMA iommu bypass
+[  +0.000001] pci 0006:00:00.0: [PE# 0d] Removing DMA window
+[  +0.000003] ibmnpu 0006:00:00.0: Enabling bypass for PE d
+[  +0.000034] ibmnpu 0006:00:00.2: Using 64-bit DMA iommu bypass
+[  +0.000001] pci 0006:00:00.0: [PE# 0d] Removing DMA window
+[  +0.000003] ibmnpu 0006:00:00.0: Enabling bypass for PE d
+[  +0.101694] Console: switching to colour frame buffer device 128x48
+[  +0.012925] ast 0002:02:00.0: fb0: astdrmfb frame buffer device
+[  +0.000091] nvidia 0004:05:00.0: enabling device (0140 -> 0142)
+[  +0.000179] nvidia 0004:05:00.0: Using 64-bit DMA iommu bypass
+[  +0.000038] ibmnpu 0006:00:01.0: Using 64-bit DMA iommu bypass
+[  +0.000015] pci 0006:00:01.0: [PE# 0c] Removing DMA window
+[  +0.000017] ibmnpu 0006:00:01.0: Enabling bypass for PE c
+[  +0.000043] ibmnpu 0006:00:01.1: Using 64-bit DMA iommu bypass
+[  +0.000015] pci 0006:00:01.0: [PE# 0c] Removing DMA window
+[  +0.000017] ibmnpu 0006:00:01.0: Enabling bypass for PE c
+[  +0.000049] ibmnpu 0006:00:01.2: Using 64-bit DMA iommu bypass
+[  +0.000015] pci 0006:00:01.0: [PE# 0c] Removing DMA window
+[  +0.000016] ibmnpu 0006:00:01.0: Enabling bypass for PE c
+[  +0.100724] nvidia 0035:03:00.0: enabling device (0140 -> 0142)
+[  +0.000844] nvidia 0035:03:00.0: Using 64-bit DMA iommu bypass
+[  +0.000445] ibmnpu 0007:00:00.0: Using 64-bit DMA iommu bypass
+[  +0.000412] pci 0007:00:00.0: [PE# 0d] Removing DMA window
+[  +0.000420] ibmnpu 0007:00:00.0: Enabling bypass for PE d
+[  +0.000446] ibmnpu 0007:00:00.1: Using 64-bit DMA iommu bypass
+[  +0.000198] [drm] Initialized ast 0.1.0 20120228 for 0002:02:00.0 on minor 0
+[  +0.000219] pci 0007:00:00.0: [PE# 0d] Removing DMA window
+[  +0.000875] ibmnpu 0007:00:00.0: Enabling bypass for PE d
+[  +0.000464] ibmnpu 0007:00:00.2: Using 64-bit DMA iommu bypass
+[  +0.000423] pci 0007:00:00.0: [PE# 0d] Removing DMA window
+[  +0.000422] ibmnpu 0007:00:00.0: Enabling bypass for PE d
+[  +0.100766] nvidia 0035:04:00.0: enabling device (0140 -> 0142)
+[  +0.000603] nvidia 0035:04:00.0: Using 64-bit DMA iommu bypass
+[  +0.000450] ibmnpu 0007:00:01.0: Using 64-bit DMA iommu bypass
+[  +0.000414] pci 0007:00:01.0: [PE# 0c] Removing DMA window
+[  +0.000420] ibmnpu 0007:00:01.0: Enabling bypass for PE c
+[  +0.000449] ibmnpu 0007:00:01.1: Using 64-bit DMA iommu bypass
+[  +0.000423] pci 0007:00:01.0: [PE# 0c] Removing DMA window
+[  +0.000425] ibmnpu 0007:00:01.0: Enabling bypass for PE c
+[  +0.000456] ibmnpu 0007:00:01.2: Using 64-bit DMA iommu bypass
+[  +0.000416] pci 0007:00:01.0: [PE# 0c] Removing DMA window
+[  +0.000422] ibmnpu 0007:00:01.0: Enabling bypass for PE c
+[  +0.100655] NVRM: loading NVIDIA UNIX ppc64le Kernel Module  440.33.01  Wed Nov 13 00:09:08 UTC 2019
+[  +0.008748] nvidia-modeset: Loading NVIDIA Kernel Mode Setting Driver for UNIX platforms  440.33.01  Tue Nov 12 23:50:10 UTC 2019
+[  +0.001867] [drm] [nvidia-drm] [GPU ID 0x00040400] Loading driver
+[  +0.000485] [drm] Initialized nvidia-drm 0.0.0 20160202 for 0004:04:00.0 on minor 1
+[  +0.000576] [drm] [nvidia-drm] [GPU ID 0x00040500] Loading driver
+[  +0.000496] [drm] Initialized nvidia-drm 0.0.0 20160202 for 0004:05:00.0 on minor 2
+[  +0.000591] [drm] [nvidia-drm] [GPU ID 0x00350300] Loading driver
+[  +0.000502] [drm] Initialized nvidia-drm 0.0.0 20160202 for 0035:03:00.0 on minor 3
+[  +0.000588] [drm] [nvidia-drm] [GPU ID 0x00350400] Loading driver
+[  +0.000512] [drm] Initialized nvidia-drm 0.0.0 20160202 for 0035:04:00.0 on minor 4
+[  +0.149326] raid6: altivecx1 gen()  8231 MB/s
+[  +0.047995] raid6: altivecx2 gen() 13224 MB/s
+[  +0.047998] raid6: altivecx4 gen() 16620 MB/s
+[  +0.048000] raid6: altivecx8 gen() 14710 MB/s
+[  +0.048001] raid6: int64x1  gen()  5459 MB/s
+[  +0.048014] raid6: int64x1  xor()  1923 MB/s
+[  +0.047984] raid6: int64x2  gen()  9513 MB/s
+[  +0.048003] raid6: int64x2  xor()  3573 MB/s
+[  +0.047998] raid6: int64x4  gen() 11499 MB/s
+[  +0.048002] raid6: int64x4  xor()  4369 MB/s
+[  +0.048000] raid6: int64x8  gen()  6709 MB/s
+[  +0.048002] raid6: int64x8  xor()  2753 MB/s
+[  +0.000479] raid6: using algorithm altivecx4 gen() 16620 MB/s
+[  +0.000484] raid6: using intx1 recovery algorithm
+[  +0.001248] xor: measuring software checksum speed
+[  +0.037783]    8regs     : 19488.000 MB/sec
+[  +0.040001]    8regs_prefetch: 16064.000 MB/sec
+[  +0.040002]    32regs    : 19728.000 MB/sec
+[  +0.039999]    32regs_prefetch: 17360.000 MB/sec
+[  +0.039999]    altivec   : 22480.000 MB/sec
+[  +0.000474] xor: using function: altivec (22480.000 MB/sec)
+[  +0.001282] async_tx: api initialized (async)
+[  +0.078648] Btrfs loaded, crc32c=crc32c-vpmsum
+[  +1.851207] EXT4-fs (sda2): mounted filesystem with ordered data mode. Opts: (null)
+[  +0.204941] ip_tables: (C) 2000-2006 Netfilter Core Team
+[  +0.012017] systemd[1]: systemd 237 running in system mode. (+PAM +AUDIT +SELINUX +IMA +APPARMOR +SMACK +SYSVINIT +UTMP +LIBCRYPTSETUP +GCRYPT +GNUTLS +ACL +XZ +LZ4 +SECCOMP +BLKID +ELFUTILS +KMOD -IDN2 +IDN -PCRE2 default-hierarchy=hybrid)
+[  +0.012256] systemd[1]: Detected architecture ppc64-le.
+[  +0.037549] systemd[1]: Set hostname to <css-host-yz-20>.
+[  +0.144720] systemd[1]: Set up automount Arbitrary Executable File Formats File System Automount Point.
+[  +0.025093] systemd[1]: Reached target User and Group Name Lookups.
+[  +0.016605] systemd[1]: Created slice User and Session Slice.
+[  +0.016329] systemd[1]: Created slice System Slice.
+[  +0.016015] systemd[1]: Listening on /dev/initctl Compatibility Named Pipe.
+[  +0.016166] systemd[1]: Listening on Device-mapper event daemon FIFOs.
+[  +0.016175] systemd[1]: rpcbind.socket: Socket service rpcbind.service not loaded, refusing.
+[  +0.041703] EXT4-fs (sda2): re-mounted. Opts: errors=remount-ro
+[  +0.017181] RPC: Registered named UNIX socket transport module.
+[  +0.000003] RPC: Registered udp transport module.
+[  +0.001064] RPC: Registered tcp transport module.
+[  +0.000001] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[  +0.141376] Loading iSCSI transport class v2.0-870.
+[  +0.005655] iscsi: registered transport (tcp)
+[  +0.039942] iscsi: registered transport (iser)
+[  +0.198442] systemd-journald[1540]: Received request to flush runtime journal from PID 1
+[  +0.161382] nvidia-uvm: Loaded the UVM driver, major device number 237.
+[  +0.124328] synth uevent: /devices/vio: failed to send uevent
+[  +0.000006] vio vio: uevent: failed to send synthetic uevent
+[  +0.038018] crypto_register_alg 'aes' = 0
+[  +0.000313] crypto_register_alg 'cbc(aes)' = 0
+[  +0.000602] crypto_register_alg 'ctr(aes)' = 0
+[  +0.000527] crypto_register_alg 'xts(aes)' = 0
+[  +0.138783] at24 0-0050: 16384 byte 24c128 EEPROM, writable, 1 bytes/write
+[  +0.000583] at24 1-0050: 16384 byte 24c128 EEPROM, writable, 1 bytes/write
+[  +0.000486] at24 2-0050: 65536 byte 24c512 EEPROM, writable, 1 bytes/write
+[  +0.002018] ipmi-powernv ibm,opal:ipmi: Found new BMC (man_id: 0x00a741, prod_id: 0x424f, dev_id: 0x00)
+[  +0.003601] at24 3-0052: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000644] at24 3-0053: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000787] at24 3-0054: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000790] at24 3-0055: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000623] at24 4-0052: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000680] at24 4-0053: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.016993] at24 4-0054: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.001319] at24 4-0055: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.002506] at24 5-0050: 16384 byte 24c128 EEPROM, writable, 1 bytes/write
+[  +0.010869] at24 6-0050: 16384 byte 24c128 EEPROM, writable, 1 bytes/write
+[  +0.028852] at24 7-0052: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000747] at24 7-0053: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000605] at24 7-0054: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000545] at24 7-0055: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000578] at24 8-0052: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000640] at24 8-0053: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000570] at24 8-0054: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +0.000586] at24 8-0055: 256 byte spd EEPROM, read-only, 0 bytes/write
+[  +5.538030] Adding 75827136k swap on /dev/sda3.  Priority:-2 extents:1 across:75827136k SSFS
+[  +0.381310] EXT4-fs (nvme0n1p1): mounted filesystem with ordered data mode. Opts: (null)
+[Sep21 13:18] audit: type=1400 audit(1632230285.688:2): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/bin/lxc-start" pid=7064 comm="apparmor_parser"
+[  +0.000813] audit: type=1400 audit(1632230285.688:3): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/bin/man" pid=7065 comm="apparmor_parser"
+[  +0.000002] audit: type=1400 audit(1632230285.688:4): apparmor="STATUS" operation="profile_load" profile="unconfined" name="man_filter" pid=7065 comm="apparmor_parser"
+[  +0.000003] audit: type=1400 audit(1632230285.688:5): apparmor="STATUS" operation="profile_load" profile="unconfined" name="man_groff" pid=7065 comm="apparmor_parser"
+[  +0.000221] audit: type=1400 audit(1632230285.688:6): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/lib/snapd/snap-confine" pid=7066 comm="apparmor_parser"
+[  +0.000003] audit: type=1400 audit(1632230285.688:7): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/lib/snapd/snap-confine//mount-namespace-capture-helper" pid=7066 comm="apparmor_parser"
+[  +0.001344] audit: type=1400 audit(1632230285.692:8): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/sbin/tcpdump" pid=7068 comm="apparmor_parser"
+[  +0.000948] audit: type=1400 audit(1632230285.692:9): apparmor="STATUS" operation="profile_load" profile="unconfined" name="lxc-container-default" pid=7060 comm="apparmor_parser"
+[  +0.000003] audit: type=1400 audit(1632230285.692:10): apparmor="STATUS" operation="profile_load" profile="unconfined" name="lxc-container-default-cgns" pid=7060 comm="apparmor_parser"
+[  +0.000002] audit: type=1400 audit(1632230285.692:11): apparmor="STATUS" operation="profile_load" profile="unconfined" name="lxc-container-default-with-mounting" pid=7060 comm="apparmor_parser"
+[  +0.178817] tg3 0005:01:00.0 eth0: Link is up at 1000 Mbps, full duplex
+[  +0.000003] tg3 0005:01:00.0 eth0: Flow control is off for TX and off for RX
+[  +0.000001] tg3 0005:01:00.0 eth0: EEE is disabled
+[  +0.015208] IPv6: ADDRCONF(NETDEV_UP): eth0: link is not ready
+[  +0.000011] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+[  +5.750269] new mount options do not match the existing superblock, will be ignored
+[  +6.169523] radix-mmu: Mapped 0xc00003e000000000-0xc00003e010000000 with 2.00 MiB pages
+[  +0.070264] radix-mmu: Mapped 0xc00003e010000000-0xc00003e020000000 with 2.00 MiB pages
+[  +0.072350] radix-mmu: Mapped 0xc00003e020000000-0xc00003e030000000 with 2.00 MiB pages
+[  +0.072489] radix-mmu: Mapped 0xc00003e030000000-0xc00003e040000000 with 2.00 MiB pages
+[  +0.072413] radix-mmu: Mapped 0xc00003e040000000-0xc00003e050000000 with 2.00 MiB pages
+[  +0.072334] radix-mmu: Mapped 0xc00003e050000000-0xc00003e060000000 with 2.00 MiB pages
+[  +0.072331] radix-mmu: Mapped 0xc00003e060000000-0xc00003e070000000 with 2.00 MiB pages
+[  +0.072052] radix-mmu: Mapped 0xc00003e070000000-0xc00003e080000000 with 2.00 MiB pages
+[  +0.072021] radix-mmu: Mapped 0xc00003e080000000-0xc00003e090000000 with 2.00 MiB pages
+[  +0.072091] radix-mmu: Mapped 0xc00003e090000000-0xc00003e0a0000000 with 2.00 MiB pages
+[  +0.071941] radix-mmu: Mapped 0xc00003e0a0000000-0xc00003e0b0000000 with 2.00 MiB pages
+[  +0.071943] radix-mmu: Mapped 0xc00003e0b0000000-0xc00003e0c0000000 with 2.00 MiB pages
+[  +0.071939] radix-mmu: Mapped 0xc00003e0c0000000-0xc00003e0d0000000 with 2.00 MiB pages
+[  +0.071893] radix-mmu: Mapped 0xc00003e0d0000000-0xc00003e0e0000000 with 2.00 MiB pages
+[  +0.071957] radix-mmu: Mapped 0xc00003e0e0000000-0xc00003e0f0000000 with 2.00 MiB pages
+[  +0.072759] radix-mmu: Mapped 0xc00003e0f0000000-0xc00003e100000000 with 2.00 MiB pages
+[  +0.074648] radix-mmu: Mapped 0xc00003e100000000-0xc00003e110000000 with 2.00 MiB pages
+[  +0.074374] radix-mmu: Mapped 0xc00003e110000000-0xc00003e120000000 with 2.00 MiB pages
+[  +0.075853] radix-mmu: Mapped 0xc00003e120000000-0xc00003e130000000 with 2.00 MiB pages
+[  +0.076829] radix-mmu: Mapped 0xc00003e130000000-0xc00003e140000000 with 2.00 MiB pages
+[  +0.078851] radix-mmu: Mapped 0xc00003e140000000-0xc00003e150000000 with 2.00 MiB pages
+[  +0.078502] radix-mmu: Mapped 0xc00003e150000000-0xc00003e160000000 with 2.00 MiB pages
+[  +0.073801] radix-mmu: Mapped 0xc00003e160000000-0xc00003e170000000 with 2.00 MiB pages
+[  +0.074820] radix-mmu: Mapped 0xc00003e170000000-0xc00003e180000000 with 2.00 MiB pages
+[  +0.076236] radix-mmu: Mapped 0xc00003e180000000-0xc00003e190000000 with 2.00 MiB pages
+[  +0.071958] radix-mmu: Mapped 0xc00003e190000000-0xc00003e1a0000000 with 2.00 MiB pages
+[  +0.074913] radix-mmu: Mapped 0xc00003e1a0000000-0xc00003e1b0000000 with 2.00 MiB pages
+[  +0.073285] radix-mmu: Mapped 0xc00003e1b0000000-0xc00003e1c0000000 with 2.00 MiB pages
+[  +0.073529] radix-mmu: Mapped 0xc00003e1c0000000-0xc00003e1d0000000 with 2.00 MiB pages
+[  +0.074313] radix-mmu: Mapped 0xc00003e1d0000000-0xc00003e1e0000000 with 2.00 MiB pages
+[  +0.072170] radix-mmu: Mapped 0xc00003e1e0000000-0xc00003e1f0000000 with 2.00 MiB pages
+[  +0.071202] aufs 4.15-20180219
+[  +0.000601] radix-mmu: Mapped 0xc00003e1f0000000-0xc00003e200000000 with 2.00 MiB pages
+[  +0.071287] radix-mmu: Mapped 0xc00003e200000000-0xc00003e210000000 with 2.00 MiB pages
+[  +0.071011] radix-mmu: Mapped 0xc00003e210000000-0xc00003e220000000 with 2.00 MiB pages
+[  +0.072741] radix-mmu: Mapped 0xc00003e220000000-0xc00003e230000000 with 2.00 MiB pages
+[  +0.072547] radix-mmu: Mapped 0xc00003e230000000-0xc00003e240000000 with 2.00 MiB pages
+[  +0.035427] kauditd_printk_skb: 10 callbacks suppressed
+[  +0.000002] audit: type=1400 audit(1632230300.404:22): apparmor="STATUS" operation="profile_load" profile="unconfined" name="docker-default" pid=8005 comm="apparmor_parser"
+[  +0.037335] radix-mmu: Mapped 0xc00003e240000000-0xc00003e250000000 with 2.00 MiB pages
+[  +0.072110] radix-mmu: Mapped 0xc00003e250000000-0xc00003e260000000 with 2.00 MiB pages
+[  +0.071606] radix-mmu: Mapped 0xc00003e260000000-0xc00003e270000000 with 2.00 MiB pages
+[  +0.071647] radix-mmu: Mapped 0xc00003e270000000-0xc00003e280000000 with 2.00 MiB pages
+[  +0.071090] radix-mmu: Mapped 0xc00003e280000000-0xc00003e290000000 with 2.00 MiB pages
+[  +0.071396] radix-mmu: Mapped 0xc00003e290000000-0xc00003e2a0000000 with 2.00 MiB pages
+[  +0.071191] radix-mmu: Mapped 0xc00003e2a0000000-0xc00003e2b0000000 with 2.00 MiB pages
+[  +0.072319] radix-mmu: Mapped 0xc00003e2b0000000-0xc00003e2c0000000 with 2.00 MiB pages
+[  +0.072574] radix-mmu: Mapped 0xc00003e2c0000000-0xc00003e2d0000000 with 2.00 MiB pages
+[  +0.072629] radix-mmu: Mapped 0xc00003e2d0000000-0xc00003e2e0000000 with 2.00 MiB pages
+[  +0.072489] radix-mmu: Mapped 0xc00003e2e0000000-0xc00003e2f0000000 with 2.00 MiB pages
+[  +0.072544] radix-mmu: Mapped 0xc00003e2f0000000-0xc00003e300000000 with 2.00 MiB pages
+[  +0.072475] radix-mmu: Mapped 0xc00003e300000000-0xc00003e310000000 with 2.00 MiB pages
+[  +0.072261] radix-mmu: Mapped 0xc00003e310000000-0xc00003e320000000 with 2.00 MiB pages
+[  +0.071541] radix-mmu: Mapped 0xc00003e320000000-0xc00003e330000000 with 2.00 MiB pages
+[  +0.072151] radix-mmu: Mapped 0xc00003e330000000-0xc00003e340000000 with 2.00 MiB pages
+[  +0.071756] radix-mmu: Mapped 0xc00003e340000000-0xc00003e350000000 with 2.00 MiB pages
+[  +0.072137] radix-mmu: Mapped 0xc00003e350000000-0xc00003e360000000 with 2.00 MiB pages
+[  +0.072380] radix-mmu: Mapped 0xc00003e360000000-0xc00003e370000000 with 2.00 MiB pages
+[  +0.072400] radix-mmu: Mapped 0xc00003e370000000-0xc00003e380000000 with 2.00 MiB pages
+[  +0.072450] radix-mmu: Mapped 0xc00003e380000000-0xc00003e390000000 with 2.00 MiB pages
+[  +0.072065] radix-mmu: Mapped 0xc00003e390000000-0xc00003e3a0000000 with 2.00 MiB pages
+[  +0.071887] radix-mmu: Mapped 0xc00003e3a0000000-0xc00003e3b0000000 with 2.00 MiB pages
+[  +0.071519] radix-mmu: Mapped 0xc00003e3b0000000-0xc00003e3c0000000 with 2.00 MiB pages
+[  +0.071848] radix-mmu: Mapped 0xc00003e3c0000000-0xc00003e3d0000000 with 2.00 MiB pages
+[  +0.071666] radix-mmu: Mapped 0xc00003e3d0000000-0xc00003e3e0000000 with 2.00 MiB pages
+[  +0.071711] radix-mmu: Mapped 0xc00003e3e0000000-0xc00003e3f0000000 with 2.00 MiB pages
+[  +0.071557] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+[  +0.000195] radix-mmu: Mapped 0xc00003e3f0000000-0xc00003e400000000 with 2.00 MiB pages
+[  +0.001270] Bridge firewalling registered
+[  +0.070236] nf_conntrack version 0.5.0 (65536 buckets, 262144 max)
+[  +0.000036] radix-mmu: Mapped 0xc00003e400000000-0xc00003e410000000 with 2.00 MiB pages
+[  +0.071315] radix-mmu: Mapped 0xc00003e410000000-0xc00003e420000000 with 2.00 MiB pages
+[  +0.071480] radix-mmu: Mapped 0xc00003e420000000-0xc00003e430000000 with 2.00 MiB pages
+[  +0.071291] radix-mmu: Mapped 0xc00003e430000000-0xc00003e440000000 with 2.00 MiB pages
+[  +0.071451] radix-mmu: Mapped 0xc00003e440000000-0xc00003e450000000 with 2.00 MiB pages
+[  +0.071208] radix-mmu: Mapped 0xc00003e450000000-0xc00003e460000000 with 2.00 MiB pages
+[  +0.071212] radix-mmu: Mapped 0xc00003e460000000-0xc00003e470000000 with 2.00 MiB pages
+[  +0.071277] radix-mmu: Mapped 0xc00003e470000000-0xc00003e480000000 with 2.00 MiB pages
+[  +0.071188] radix-mmu: Mapped 0xc00003e480000000-0xc00003e490000000 with 2.00 MiB pages
+[  +0.071194] radix-mmu: Mapped 0xc00003e490000000-0xc00003e4a0000000 with 2.00 MiB pages
+[  +0.071155] radix-mmu: Mapped 0xc00003e4a0000000-0xc00003e4b0000000 with 2.00 MiB pages
+[  +0.071209] radix-mmu: Mapped 0xc00003e4b0000000-0xc00003e4c0000000 with 2.00 MiB pages
+[  +0.071230] radix-mmu: Mapped 0xc00003e4c0000000-0xc00003e4d0000000 with 2.00 MiB pages
+[  +0.071420] radix-mmu: Mapped 0xc00003e4d0000000-0xc00003e4e0000000 with 2.00 MiB pages
+[  +0.071330] radix-mmu: Mapped 0xc00003e4e0000000-0xc00003e4f0000000 with 2.00 MiB pages
+[  +0.071574] radix-mmu: Mapped 0xc00003e4f0000000-0xc00003e500000000 with 2.00 MiB pages
+[  +0.037154] Initializing XFRM netlink socket
+[  +0.008549] Netfilter messages via NETLINK v0.30.
+[  +0.002496] ctnetlink v0.93: registering with nfnetlink.
+[  +0.023777] radix-mmu: Mapped 0xc00003e500000000-0xc00003e510000000 with 2.00 MiB pages
+[  +0.071336] radix-mmu: Mapped 0xc00003e510000000-0xc00003e520000000 with 2.00 MiB pages
+[  +0.071387] radix-mmu: Mapped 0xc00003e520000000-0xc00003e530000000 with 2.00 MiB pages
+[  +0.071421] radix-mmu: Mapped 0xc00003e530000000-0xc00003e540000000 with 2.00 MiB pages
+[  +0.071223] radix-mmu: Mapped 0xc00003e540000000-0xc00003e550000000 with 2.00 MiB pages
+[  +0.071317] radix-mmu: Mapped 0xc00003e550000000-0xc00003e560000000 with 2.00 MiB pages
+[  +0.071218] radix-mmu: Mapped 0xc00003e560000000-0xc00003e570000000 with 2.00 MiB pages
+[  +0.072088] radix-mmu: Mapped 0xc00003e570000000-0xc00003e580000000 with 2.00 MiB pages
+[  +0.071971] radix-mmu: Mapped 0xc00003e580000000-0xc00003e590000000 with 2.00 MiB pages
+[  +0.071773] radix-mmu: Mapped 0xc00003e590000000-0xc00003e5a0000000 with 2.00 MiB pages
+[  +0.071603] radix-mmu: Mapped 0xc00003e5a0000000-0xc00003e5b0000000 with 2.00 MiB pages
+[  +0.071315] radix-mmu: Mapped 0xc00003e5b0000000-0xc00003e5c0000000 with 2.00 MiB pages
+[  +0.071393] radix-mmu: Mapped 0xc00003e5c0000000-0xc00003e5d0000000 with 2.00 MiB pages
+[  +0.071510] radix-mmu: Mapped 0xc00003e5d0000000-0xc00003e5e0000000 with 2.00 MiB pages
+[  +0.071347] radix-mmu: Mapped 0xc00003e5e0000000-0xc00003e5f0000000 with 2.00 MiB pages
+[  +0.071468] radix-mmu: Mapped 0xc00003e5f0000000-0xc00003e600000000 with 2.00 MiB pages
+[  +0.055029] IPv6: ADDRCONF(NETDEV_UP): docker0: link is not ready
+[  +0.017054] radix-mmu: Mapped 0xc00003e600000000-0xc00003e610000000 with 2.00 MiB pages
+[  +0.072212] radix-mmu: Mapped 0xc00003e610000000-0xc00003e620000000 with 2.00 MiB pages
+[  +0.071282] radix-mmu: Mapped 0xc00003e620000000-0xc00003e630000000 with 2.00 MiB pages
+[  +0.085614] radix-mmu: Mapped 0xc00003e630000000-0xc00003e640000000 with 2.00 MiB pages
+[  +0.092315] radix-mmu: Mapped 0xc00003e640000000-0xc00003e650000000 with 2.00 MiB pages
+[  +0.091400] radix-mmu: Mapped 0xc00003e650000000-0xc00003e660000000 with 2.00 MiB pages
+[  +0.091316] radix-mmu: Mapped 0xc00003e660000000-0xc00003e670000000 with 2.00 MiB pages
+[  +0.091414] radix-mmu: Mapped 0xc00003e670000000-0xc00003e680000000 with 2.00 MiB pages
+[  +0.091327] radix-mmu: Mapped 0xc00003e680000000-0xc00003e690000000 with 2.00 MiB pages
+[  +0.091356] radix-mmu: Mapped 0xc00003e690000000-0xc00003e6a0000000 with 2.00 MiB pages
+[  +0.091229] radix-mmu: Mapped 0xc00003e6a0000000-0xc00003e6b0000000 with 2.00 MiB pages
+[  +0.091183] radix-mmu: Mapped 0xc00003e6b0000000-0xc00003e6c0000000 with 2.00 MiB pages
+[  +0.091191] radix-mmu: Mapped 0xc00003e6c0000000-0xc00003e6d0000000 with 2.00 MiB pages
+[  +0.091199] radix-mmu: Mapped 0xc00003e6d0000000-0xc00003e6e0000000 with 2.00 MiB pages
+[  +0.091194] radix-mmu: Mapped 0xc00003e6e0000000-0xc00003e6f0000000 with 2.00 MiB pages
+[  +0.091188] radix-mmu: Mapped 0xc00003e6f0000000-0xc00003e700000000 with 2.00 MiB pages
+[  +0.091196] radix-mmu: Mapped 0xc00003e700000000-0xc00003e710000000 with 2.00 MiB pages
+[  +0.091195] radix-mmu: Mapped 0xc00003e710000000-0xc00003e720000000 with 2.00 MiB pages
+[  +0.091223] radix-mmu: Mapped 0xc00003e720000000-0xc00003e730000000 with 2.00 MiB pages
+[  +0.091466] radix-mmu: Mapped 0xc00003e730000000-0xc00003e740000000 with 2.00 MiB pages
+[  +0.091358] radix-mmu: Mapped 0xc00003e740000000-0xc00003e750000000 with 2.00 MiB pages
+[  +0.090828] radix-mmu: Mapped 0xc00003e750000000-0xc00003e760000000 with 2.00 MiB pages
+[  +0.090954] radix-mmu: Mapped 0xc00003e760000000-0xc00003e770000000 with 2.00 MiB pages
+[  +0.090937] radix-mmu: Mapped 0xc00003e770000000-0xc00003e780000000 with 2.00 MiB pages
+[  +0.090956] radix-mmu: Mapped 0xc00003e780000000-0xc00003e790000000 with 2.00 MiB pages
+[  +0.090935] radix-mmu: Mapped 0xc00003e790000000-0xc00003e7a0000000 with 2.00 MiB pages
+[  +0.090933] radix-mmu: Mapped 0xc00003e7a0000000-0xc00003e7b0000000 with 2.00 MiB pages
+[  +0.090949] radix-mmu: Mapped 0xc00003e7b0000000-0xc00003e7c0000000 with 2.00 MiB pages
+[  +0.091016] radix-mmu: Mapped 0xc00003e7c0000000-0xc00003e7d0000000 with 2.00 MiB pages
+[  +0.091009] radix-mmu: Mapped 0xc00003e7d0000000-0xc00003e7e0000000 with 2.00 MiB pages
+[  +0.093820] Built 6 zonelists, mobility grouping on.  Total pages: 16720366
+[  +0.000001] Policy zone: DMA
+[  +0.811617] radix-mmu: Mapped 0xc00003c000000000-0xc00003c010000000 with 2.00 MiB pages
+[  +0.073019] radix-mmu: Mapped 0xc00003c010000000-0xc00003c020000000 with 2.00 MiB pages
+[  +0.072217] radix-mmu: Mapped 0xc00003c020000000-0xc00003c030000000 with 2.00 MiB pages
+[  +0.072184] radix-mmu: Mapped 0xc00003c030000000-0xc00003c040000000 with 2.00 MiB pages
+[  +0.072205] radix-mmu: Mapped 0xc00003c040000000-0xc00003c050000000 with 2.00 MiB pages
+[  +0.072193] radix-mmu: Mapped 0xc00003c050000000-0xc00003c060000000 with 2.00 MiB pages
+[  +0.072205] radix-mmu: Mapped 0xc00003c060000000-0xc00003c070000000 with 2.00 MiB pages
+[  +0.072190] radix-mmu: Mapped 0xc00003c070000000-0xc00003c080000000 with 2.00 MiB pages
+[  +0.072284] radix-mmu: Mapped 0xc00003c080000000-0xc00003c090000000 with 2.00 MiB pages
+[  +0.072212] radix-mmu: Mapped 0xc00003c090000000-0xc00003c0a0000000 with 2.00 MiB pages
+[  +0.072215] radix-mmu: Mapped 0xc00003c0a0000000-0xc00003c0b0000000 with 2.00 MiB pages
+[  +0.072222] radix-mmu: Mapped 0xc00003c0b0000000-0xc00003c0c0000000 with 2.00 MiB pages
+[  +0.072181] radix-mmu: Mapped 0xc00003c0c0000000-0xc00003c0d0000000 with 2.00 MiB pages
+[  +0.072157] radix-mmu: Mapped 0xc00003c0d0000000-0xc00003c0e0000000 with 2.00 MiB pages
+[  +0.072219] radix-mmu: Mapped 0xc00003c0e0000000-0xc00003c0f0000000 with 2.00 MiB pages
+[  +0.072194] radix-mmu: Mapped 0xc00003c0f0000000-0xc00003c100000000 with 2.00 MiB pages
+[  +0.072199] radix-mmu: Mapped 0xc00003c100000000-0xc00003c110000000 with 2.00 MiB pages
+[  +0.072162] radix-mmu: Mapped 0xc00003c110000000-0xc00003c120000000 with 2.00 MiB pages
+[  +0.072165] radix-mmu: Mapped 0xc00003c120000000-0xc00003c130000000 with 2.00 MiB pages
+[  +0.072161] radix-mmu: Mapped 0xc00003c130000000-0xc00003c140000000 with 2.00 MiB pages
+[  +0.072216] radix-mmu: Mapped 0xc00003c140000000-0xc00003c150000000 with 2.00 MiB pages
+[  +0.072216] radix-mmu: Mapped 0xc00003c150000000-0xc00003c160000000 with 2.00 MiB pages
+[  +0.072197] radix-mmu: Mapped 0xc00003c160000000-0xc00003c170000000 with 2.00 MiB pages
+[  +0.072200] radix-mmu: Mapped 0xc00003c170000000-0xc00003c180000000 with 2.00 MiB pages
+[  +0.072286] radix-mmu: Mapped 0xc00003c180000000-0xc00003c190000000 with 2.00 MiB pages
+[  +0.072202] radix-mmu: Mapped 0xc00003c190000000-0xc00003c1a0000000 with 2.00 MiB pages
+[  +0.072178] radix-mmu: Mapped 0xc00003c1a0000000-0xc00003c1b0000000 with 2.00 MiB pages
+[  +0.072190] radix-mmu: Mapped 0xc00003c1b0000000-0xc00003c1c0000000 with 2.00 MiB pages
+[  +0.072176] radix-mmu: Mapped 0xc00003c1c0000000-0xc00003c1d0000000 with 2.00 MiB pages
+[  +0.072196] radix-mmu: Mapped 0xc00003c1d0000000-0xc00003c1e0000000 with 2.00 MiB pages
+[  +0.072197] radix-mmu: Mapped 0xc00003c1e0000000-0xc00003c1f0000000 with 2.00 MiB pages
+[  +0.072213] radix-mmu: Mapped 0xc00003c1f0000000-0xc00003c200000000 with 2.00 MiB pages
+[  +0.072999] radix-mmu: Mapped 0xc00003c200000000-0xc00003c210000000 with 2.00 MiB pages
+[  +0.072864] radix-mmu: Mapped 0xc00003c210000000-0xc00003c220000000 with 2.00 MiB pages
+[  +0.072856] radix-mmu: Mapped 0xc00003c220000000-0xc00003c230000000 with 2.00 MiB pages
+[  +0.072834] radix-mmu: Mapped 0xc00003c230000000-0xc00003c240000000 with 2.00 MiB pages
+[  +0.072233] radix-mmu: Mapped 0xc00003c240000000-0xc00003c250000000 with 2.00 MiB pages
+[  +0.072849] radix-mmu: Mapped 0xc00003c250000000-0xc00003c260000000 with 2.00 MiB pages
+[  +0.072889] radix-mmu: Mapped 0xc00003c260000000-0xc00003c270000000 with 2.00 MiB pages
+[  +0.072202] radix-mmu: Mapped 0xc00003c270000000-0xc00003c280000000 with 2.00 MiB pages
+[  +0.072891] radix-mmu: Mapped 0xc00003c280000000-0xc00003c290000000 with 2.00 MiB pages
+[  +0.072994] radix-mmu: Mapped 0xc00003c290000000-0xc00003c2a0000000 with 2.00 MiB pages
+[  +0.072355] radix-mmu: Mapped 0xc00003c2a0000000-0xc00003c2b0000000 with 2.00 MiB pages
+[  +0.072294] radix-mmu: Mapped 0xc00003c2b0000000-0xc00003c2c0000000 with 2.00 MiB pages
+[  +0.073515] radix-mmu: Mapped 0xc00003c2c0000000-0xc00003c2d0000000 with 2.00 MiB pages
+[  +0.072222] radix-mmu: Mapped 0xc00003c2d0000000-0xc00003c2e0000000 with 2.00 MiB pages
+[  +0.072272] radix-mmu: Mapped 0xc00003c2e0000000-0xc00003c2f0000000 with 2.00 MiB pages
+[  +0.072217] radix-mmu: Mapped 0xc00003c2f0000000-0xc00003c300000000 with 2.00 MiB pages
+[  +0.072254] radix-mmu: Mapped 0xc00003c300000000-0xc00003c310000000 with 2.00 MiB pages
+[  +0.072245] radix-mmu: Mapped 0xc00003c310000000-0xc00003c320000000 with 2.00 MiB pages
+[  +0.072324] radix-mmu: Mapped 0xc00003c320000000-0xc00003c330000000 with 2.00 MiB pages
+[  +0.072213] radix-mmu: Mapped 0xc00003c330000000-0xc00003c340000000 with 2.00 MiB pages
+[  +0.072226] radix-mmu: Mapped 0xc00003c340000000-0xc00003c350000000 with 2.00 MiB pages
+[  +0.072224] radix-mmu: Mapped 0xc00003c350000000-0xc00003c360000000 with 2.00 MiB pages
+[  +0.072889] radix-mmu: Mapped 0xc00003c360000000-0xc00003c370000000 with 2.00 MiB pages
+[  +0.071488] radix-mmu: Mapped 0xc00003c370000000-0xc00003c380000000 with 2.00 MiB pages
+[  +0.072229] radix-mmu: Mapped 0xc00003c380000000-0xc00003c390000000 with 2.00 MiB pages
+[  +0.072268] radix-mmu: Mapped 0xc00003c390000000-0xc00003c3a0000000 with 2.00 MiB pages
+[  +0.072346] radix-mmu: Mapped 0xc00003c3a0000000-0xc00003c3b0000000 with 2.00 MiB pages
+[  +0.072264] radix-mmu: Mapped 0xc00003c3b0000000-0xc00003c3c0000000 with 2.00 MiB pages
+[  +0.072258] radix-mmu: Mapped 0xc00003c3c0000000-0xc00003c3d0000000 with 2.00 MiB pages
+[  +0.072256] radix-mmu: Mapped 0xc00003c3d0000000-0xc00003c3e0000000 with 2.00 MiB pages
+[  +0.072440] radix-mmu: Mapped 0xc00003c3e0000000-0xc00003c3f0000000 with 2.00 MiB pages
+[  +0.072277] radix-mmu: Mapped 0xc00003c3f0000000-0xc00003c400000000 with 2.00 MiB pages
+[  +0.072279] radix-mmu: Mapped 0xc00003c400000000-0xc00003c410000000 with 2.00 MiB pages
+[  +0.072273] radix-mmu: Mapped 0xc00003c410000000-0xc00003c420000000 with 2.00 MiB pages
+[  +0.072355] radix-mmu: Mapped 0xc00003c420000000-0xc00003c430000000 with 2.00 MiB pages
+[  +0.072279] radix-mmu: Mapped 0xc00003c430000000-0xc00003c440000000 with 2.00 MiB pages
+[  +0.072264] radix-mmu: Mapped 0xc00003c440000000-0xc00003c450000000 with 2.00 MiB pages
+[  +0.072250] radix-mmu: Mapped 0xc00003c450000000-0xc00003c460000000 with 2.00 MiB pages
+[  +0.072261] radix-mmu: Mapped 0xc00003c460000000-0xc00003c470000000 with 2.00 MiB pages
+[  +0.072309] radix-mmu: Mapped 0xc00003c470000000-0xc00003c480000000 with 2.00 MiB pages
+[  +0.072280] radix-mmu: Mapped 0xc00003c480000000-0xc00003c490000000 with 2.00 MiB pages
+[  +0.072267] radix-mmu: Mapped 0xc00003c490000000-0xc00003c4a0000000 with 2.00 MiB pages
+[  +0.072267] radix-mmu: Mapped 0xc00003c4a0000000-0xc00003c4b0000000 with 2.00 MiB pages
+[  +0.072268] radix-mmu: Mapped 0xc00003c4b0000000-0xc00003c4c0000000 with 2.00 MiB pages
+[  +0.072289] radix-mmu: Mapped 0xc00003c4c0000000-0xc00003c4d0000000 with 2.00 MiB pages
+[  +0.072317] radix-mmu: Mapped 0xc00003c4d0000000-0xc00003c4e0000000 with 2.00 MiB pages
+[  +0.072302] radix-mmu: Mapped 0xc00003c4e0000000-0xc00003c4f0000000 with 2.00 MiB pages
+[  +0.072308] radix-mmu: Mapped 0xc00003c4f0000000-0xc00003c500000000 with 2.00 MiB pages
+[  +0.072341] radix-mmu: Mapped 0xc00003c500000000-0xc00003c510000000 with 2.00 MiB pages
+[  +0.072307] radix-mmu: Mapped 0xc00003c510000000-0xc00003c520000000 with 2.00 MiB pages
+[  +0.072290] radix-mmu: Mapped 0xc00003c520000000-0xc00003c530000000 with 2.00 MiB pages
+[  +0.072279] radix-mmu: Mapped 0xc00003c530000000-0xc00003c540000000 with 2.00 MiB pages
+[  +0.072433] radix-mmu: Mapped 0xc00003c540000000-0xc00003c550000000 with 2.00 MiB pages
+[  +0.072342] radix-mmu: Mapped 0xc00003c550000000-0xc00003c560000000 with 2.00 MiB pages
+[  +0.072323] radix-mmu: Mapped 0xc00003c560000000-0xc00003c570000000 with 2.00 MiB pages
+[  +0.072333] radix-mmu: Mapped 0xc00003c570000000-0xc00003c580000000 with 2.00 MiB pages
+[  +0.072446] radix-mmu: Mapped 0xc00003c580000000-0xc00003c590000000 with 2.00 MiB pages
+[  +0.072369] radix-mmu: Mapped 0xc00003c590000000-0xc00003c5a0000000 with 2.00 MiB pages
+[  +0.072347] radix-mmu: Mapped 0xc00003c5a0000000-0xc00003c5b0000000 with 2.00 MiB pages
+[  +0.072793] radix-mmu: Mapped 0xc00003c5b0000000-0xc00003c5c0000000 with 2.00 MiB pages
+[  +0.072346] radix-mmu: Mapped 0xc00003c5c0000000-0xc00003c5d0000000 with 2.00 MiB pages
+[  +0.072353] radix-mmu: Mapped 0xc00003c5d0000000-0xc00003c5e0000000 with 2.00 MiB pages
+[  +0.072339] radix-mmu: Mapped 0xc00003c5e0000000-0xc00003c5f0000000 with 2.00 MiB pages
+[  +0.072352] radix-mmu: Mapped 0xc00003c5f0000000-0xc00003c600000000 with 2.00 MiB pages
+[  +0.072312] radix-mmu: Mapped 0xc00003c600000000-0xc00003c610000000 with 2.00 MiB pages
+[  +0.072319] radix-mmu: Mapped 0xc00003c610000000-0xc00003c620000000 with 2.00 MiB pages
+[  +0.072320] radix-mmu: Mapped 0xc00003c620000000-0xc00003c630000000 with 2.00 MiB pages
+[  +0.077641] radix-mmu: Mapped 0xc00003c630000000-0xc00003c640000000 with 2.00 MiB pages
+[  +0.070274] radix-mmu: Mapped 0xc00003c640000000-0xc00003c650000000 with 2.00 MiB pages
+[  +0.072522] radix-mmu: Mapped 0xc00003c650000000-0xc00003c660000000 with 2.00 MiB pages
+[  +0.072665] radix-mmu: Mapped 0xc00003c660000000-0xc00003c670000000 with 2.00 MiB pages
+[  +0.072421] radix-mmu: Mapped 0xc00003c670000000-0xc00003c680000000 with 2.00 MiB pages
+[  +0.072435] radix-mmu: Mapped 0xc00003c680000000-0xc00003c690000000 with 2.00 MiB pages
+[  +0.072486] radix-mmu: Mapped 0xc00003c690000000-0xc00003c6a0000000 with 2.00 MiB pages
+[  +0.072483] radix-mmu: Mapped 0xc00003c6a0000000-0xc00003c6b0000000 with 2.00 MiB pages
+[  +0.072488] radix-mmu: Mapped 0xc00003c6b0000000-0xc00003c6c0000000 with 2.00 MiB pages
+[  +0.072429] radix-mmu: Mapped 0xc00003c6c0000000-0xc00003c6d0000000 with 2.00 MiB pages
+[  +0.072451] radix-mmu: Mapped 0xc00003c6d0000000-0xc00003c6e0000000 with 2.00 MiB pages
+[  +0.072417] radix-mmu: Mapped 0xc00003c6e0000000-0xc00003c6f0000000 with 2.00 MiB pages
+[  +0.072703] radix-mmu: Mapped 0xc00003c6f0000000-0xc00003c700000000 with 2.00 MiB pages
+[  +0.072447] radix-mmu: Mapped 0xc00003c700000000-0xc00003c710000000 with 2.00 MiB pages
+[  +0.072455] radix-mmu: Mapped 0xc00003c710000000-0xc00003c720000000 with 2.00 MiB pages
+[  +0.072421] radix-mmu: Mapped 0xc00003c720000000-0xc00003c730000000 with 2.00 MiB pages
+[  +0.072425] radix-mmu: Mapped 0xc00003c730000000-0xc00003c740000000 with 2.00 MiB pages
+[  +0.072417] radix-mmu: Mapped 0xc00003c740000000-0xc00003c750000000 with 2.00 MiB pages
+[  +0.072424] radix-mmu: Mapped 0xc00003c750000000-0xc00003c760000000 with 2.00 MiB pages
+[  +0.072421] radix-mmu: Mapped 0xc00003c760000000-0xc00003c770000000 with 2.00 MiB pages
+[  +0.072434] radix-mmu: Mapped 0xc00003c770000000-0xc00003c780000000 with 2.00 MiB pages
+[  +0.072440] radix-mmu: Mapped 0xc00003c780000000-0xc00003c790000000 with 2.00 MiB pages
+[  +0.072471] radix-mmu: Mapped 0xc00003c790000000-0xc00003c7a0000000 with 2.00 MiB pages
+[  +0.072727] radix-mmu: Mapped 0xc00003c7a0000000-0xc00003c7b0000000 with 2.00 MiB pages
+[  +0.072340] radix-mmu: Mapped 0xc00003c7b0000000-0xc00003c7c0000000 with 2.00 MiB pages
+[  +0.072456] radix-mmu: Mapped 0xc00003c7c0000000-0xc00003c7d0000000 with 2.00 MiB pages
+[  +0.072505] radix-mmu: Mapped 0xc00003c7d0000000-0xc00003c7e0000000 with 2.00 MiB pages
+[  +0.081263] Built 6 zonelists, mobility grouping on.  Total pages: 17240035
+[  +0.000002] Policy zone: DMA
+[  +0.821685] radix-mmu: Mapped 0xc00023e000000000-0xc00023e010000000 with 2.00 MiB pages
+[  +0.071178] radix-mmu: Mapped 0xc00023e010000000-0xc00023e020000000 with 2.00 MiB pages
+[  +0.070712] radix-mmu: Mapped 0xc00023e020000000-0xc00023e030000000 with 2.00 MiB pages
+[  +0.070447] radix-mmu: Mapped 0xc00023e030000000-0xc00023e040000000 with 2.00 MiB pages
+[  +0.070445] radix-mmu: Mapped 0xc00023e040000000-0xc00023e050000000 with 2.00 MiB pages
+[  +0.070453] radix-mmu: Mapped 0xc00023e050000000-0xc00023e060000000 with 2.00 MiB pages
+[  +0.070499] radix-mmu: Mapped 0xc00023e060000000-0xc00023e070000000 with 2.00 MiB pages
+[  +0.070660] radix-mmu: Mapped 0xc00023e070000000-0xc00023e080000000 with 2.00 MiB pages
+[  +0.070489] radix-mmu: Mapped 0xc00023e080000000-0xc00023e090000000 with 2.00 MiB pages
+[  +0.070488] radix-mmu: Mapped 0xc00023e090000000-0xc00023e0a0000000 with 2.00 MiB pages
+[  +0.070482] radix-mmu: Mapped 0xc00023e0a0000000-0xc00023e0b0000000 with 2.00 MiB pages
+[  +0.070497] radix-mmu: Mapped 0xc00023e0b0000000-0xc00023e0c0000000 with 2.00 MiB pages
+[  +0.070494] radix-mmu: Mapped 0xc00023e0c0000000-0xc00023e0d0000000 with 2.00 MiB pages
+[  +0.070507] radix-mmu: Mapped 0xc00023e0d0000000-0xc00023e0e0000000 with 2.00 MiB pages
+[  +0.070484] radix-mmu: Mapped 0xc00023e0e0000000-0xc00023e0f0000000 with 2.00 MiB pages
+[  +0.070503] radix-mmu: Mapped 0xc00023e0f0000000-0xc00023e100000000 with 2.00 MiB pages
+[  +0.070482] radix-mmu: Mapped 0xc00023e100000000-0xc00023e110000000 with 2.00 MiB pages
+[  +0.070499] radix-mmu: Mapped 0xc00023e110000000-0xc00023e120000000 with 2.00 MiB pages
+[  +0.070494] radix-mmu: Mapped 0xc00023e120000000-0xc00023e130000000 with 2.00 MiB pages
+[  +0.070497] radix-mmu: Mapped 0xc00023e130000000-0xc00023e140000000 with 2.00 MiB pages
+[  +0.070493] radix-mmu: Mapped 0xc00023e140000000-0xc00023e150000000 with 2.00 MiB pages
+[  +0.070501] radix-mmu: Mapped 0xc00023e150000000-0xc00023e160000000 with 2.00 MiB pages
+[  +0.070491] radix-mmu: Mapped 0xc00023e160000000-0xc00023e170000000 with 2.00 MiB pages
+[  +0.070501] radix-mmu: Mapped 0xc00023e170000000-0xc00023e180000000 with 2.00 MiB pages
+[  +0.070566] radix-mmu: Mapped 0xc00023e180000000-0xc00023e190000000 with 2.00 MiB pages
+[  +0.070529] radix-mmu: Mapped 0xc00023e190000000-0xc00023e1a0000000 with 2.00 MiB pages
+[  +0.070535] radix-mmu: Mapped 0xc00023e1a0000000-0xc00023e1b0000000 with 2.00 MiB pages
+[  +0.070482] radix-mmu: Mapped 0xc00023e1b0000000-0xc00023e1c0000000 with 2.00 MiB pages
+[  +0.070496] radix-mmu: Mapped 0xc00023e1c0000000-0xc00023e1d0000000 with 2.00 MiB pages
+[  +0.070527] radix-mmu: Mapped 0xc00023e1d0000000-0xc00023e1e0000000 with 2.00 MiB pages
+[  +0.070491] radix-mmu: Mapped 0xc00023e1e0000000-0xc00023e1f0000000 with 2.00 MiB pages
+[  +0.070483] radix-mmu: Mapped 0xc00023e1f0000000-0xc00023e200000000 with 2.00 MiB pages
+[  +0.070500] radix-mmu: Mapped 0xc00023e200000000-0xc00023e210000000 with 2.00 MiB pages
+[  +0.070497] radix-mmu: Mapped 0xc00023e210000000-0xc00023e220000000 with 2.00 MiB pages
+[  +0.070513] radix-mmu: Mapped 0xc00023e220000000-0xc00023e230000000 with 2.00 MiB pages
+[  +0.070506] radix-mmu: Mapped 0xc00023e230000000-0xc00023e240000000 with 2.00 MiB pages
+[  +0.070577] radix-mmu: Mapped 0xc00023e240000000-0xc00023e250000000 with 2.00 MiB pages
+[  +0.070552] radix-mmu: Mapped 0xc00023e250000000-0xc00023e260000000 with 2.00 MiB pages
+[  +0.070509] radix-mmu: Mapped 0xc00023e260000000-0xc00023e270000000 with 2.00 MiB pages
+[  +0.070518] radix-mmu: Mapped 0xc00023e270000000-0xc00023e280000000 with 2.00 MiB pages
+[  +0.070531] radix-mmu: Mapped 0xc00023e280000000-0xc00023e290000000 with 2.00 MiB pages
+[  +0.070510] radix-mmu: Mapped 0xc00023e290000000-0xc00023e2a0000000 with 2.00 MiB pages
+[  +0.070514] radix-mmu: Mapped 0xc00023e2a0000000-0xc00023e2b0000000 with 2.00 MiB pages
+[  +0.070536] radix-mmu: Mapped 0xc00023e2b0000000-0xc00023e2c0000000 with 2.00 MiB pages
+[  +0.070553] radix-mmu: Mapped 0xc00023e2c0000000-0xc00023e2d0000000 with 2.00 MiB pages
+[  +0.070523] radix-mmu: Mapped 0xc00023e2d0000000-0xc00023e2e0000000 with 2.00 MiB pages
+[  +0.070517] radix-mmu: Mapped 0xc00023e2e0000000-0xc00023e2f0000000 with 2.00 MiB pages
+[  +0.075057] radix-mmu: Mapped 0xc00023e2f0000000-0xc00023e300000000 with 2.00 MiB pages
+[  +0.071616] radix-mmu: Mapped 0xc00023e300000000-0xc00023e310000000 with 2.00 MiB pages
+[  +0.071599] radix-mmu: Mapped 0xc00023e310000000-0xc00023e320000000 with 2.00 MiB pages
+[  +0.071600] radix-mmu: Mapped 0xc00023e320000000-0xc00023e330000000 with 2.00 MiB pages
+[  +0.071590] radix-mmu: Mapped 0xc00023e330000000-0xc00023e340000000 with 2.00 MiB pages
+[  +0.071730] radix-mmu: Mapped 0xc00023e340000000-0xc00023e350000000 with 2.00 MiB pages
+[  +0.071591] radix-mmu: Mapped 0xc00023e350000000-0xc00023e360000000 with 2.00 MiB pages
+[  +0.071596] radix-mmu: Mapped 0xc00023e360000000-0xc00023e370000000 with 2.00 MiB pages
+[  +0.071602] radix-mmu: Mapped 0xc00023e370000000-0xc00023e380000000 with 2.00 MiB pages
+[  +0.071594] radix-mmu: Mapped 0xc00023e380000000-0xc00023e390000000 with 2.00 MiB pages
+[  +0.071590] radix-mmu: Mapped 0xc00023e390000000-0xc00023e3a0000000 with 2.00 MiB pages
+[  +0.071604] radix-mmu: Mapped 0xc00023e3a0000000-0xc00023e3b0000000 with 2.00 MiB pages
+[  +0.071628] radix-mmu: Mapped 0xc00023e3b0000000-0xc00023e3c0000000 with 2.00 MiB pages
+[  +0.071607] radix-mmu: Mapped 0xc00023e3c0000000-0xc00023e3d0000000 with 2.00 MiB pages
+[  +0.071612] radix-mmu: Mapped 0xc00023e3d0000000-0xc00023e3e0000000 with 2.00 MiB pages
+[  +0.071636] radix-mmu: Mapped 0xc00023e3e0000000-0xc00023e3f0000000 with 2.00 MiB pages
+[  +0.071632] radix-mmu: Mapped 0xc00023e3f0000000-0xc00023e400000000 with 2.00 MiB pages
+[  +0.071608] radix-mmu: Mapped 0xc00023e400000000-0xc00023e410000000 with 2.00 MiB pages
+[  +0.071606] radix-mmu: Mapped 0xc00023e410000000-0xc00023e420000000 with 2.00 MiB pages
+[  +0.071618] radix-mmu: Mapped 0xc00023e420000000-0xc00023e430000000 with 2.00 MiB pages
+[  +0.071617] radix-mmu: Mapped 0xc00023e430000000-0xc00023e440000000 with 2.00 MiB pages
+[  +0.071617] radix-mmu: Mapped 0xc00023e440000000-0xc00023e450000000 with 2.00 MiB pages
+[  +0.071637] radix-mmu: Mapped 0xc00023e450000000-0xc00023e460000000 with 2.00 MiB pages
+[  +0.071637] radix-mmu: Mapped 0xc00023e460000000-0xc00023e470000000 with 2.00 MiB pages
+[  +0.071621] radix-mmu: Mapped 0xc00023e470000000-0xc00023e480000000 with 2.00 MiB pages
+[  +0.071629] radix-mmu: Mapped 0xc00023e480000000-0xc00023e490000000 with 2.00 MiB pages
+[  +0.071627] radix-mmu: Mapped 0xc00023e490000000-0xc00023e4a0000000 with 2.00 MiB pages
+[  +0.071626] radix-mmu: Mapped 0xc00023e4a0000000-0xc00023e4b0000000 with 2.00 MiB pages
+[  +0.071629] radix-mmu: Mapped 0xc00023e4b0000000-0xc00023e4c0000000 with 2.00 MiB pages
+[  +0.071664] radix-mmu: Mapped 0xc00023e4c0000000-0xc00023e4d0000000 with 2.00 MiB pages
+[  +0.071627] radix-mmu: Mapped 0xc00023e4d0000000-0xc00023e4e0000000 with 2.00 MiB pages
+[  +0.071651] radix-mmu: Mapped 0xc00023e4e0000000-0xc00023e4f0000000 with 2.00 MiB pages
+[  +0.071634] radix-mmu: Mapped 0xc00023e4f0000000-0xc00023e500000000 with 2.00 MiB pages
+[  +0.071875] radix-mmu: Mapped 0xc00023e500000000-0xc00023e510000000 with 2.00 MiB pages
+[  +0.071652] radix-mmu: Mapped 0xc00023e510000000-0xc00023e520000000 with 2.00 MiB pages
+[  +0.071690] radix-mmu: Mapped 0xc00023e520000000-0xc00023e530000000 with 2.00 MiB pages
+[  +0.071772] radix-mmu: Mapped 0xc00023e530000000-0xc00023e540000000 with 2.00 MiB pages
+[  +0.071684] radix-mmu: Mapped 0xc00023e540000000-0xc00023e550000000 with 2.00 MiB pages
+[  +0.071655] radix-mmu: Mapped 0xc00023e550000000-0xc00023e560000000 with 2.00 MiB pages
+[  +0.071649] radix-mmu: Mapped 0xc00023e560000000-0xc00023e570000000 with 2.00 MiB pages
+[  +0.071659] radix-mmu: Mapped 0xc00023e570000000-0xc00023e580000000 with 2.00 MiB pages
+[  +0.071664] radix-mmu: Mapped 0xc00023e580000000-0xc00023e590000000 with 2.00 MiB pages
+[  +0.071662] radix-mmu: Mapped 0xc00023e590000000-0xc00023e5a0000000 with 2.00 MiB pages
+[  +0.071720] radix-mmu: Mapped 0xc00023e5a0000000-0xc00023e5b0000000 with 2.00 MiB pages
+[  +0.071694] radix-mmu: Mapped 0xc00023e5b0000000-0xc00023e5c0000000 with 2.00 MiB pages
+[  +0.071809] radix-mmu: Mapped 0xc00023e5c0000000-0xc00023e5d0000000 with 2.00 MiB pages
+[  +0.071670] radix-mmu: Mapped 0xc00023e5d0000000-0xc00023e5e0000000 with 2.00 MiB pages
+[  +0.071672] radix-mmu: Mapped 0xc00023e5e0000000-0xc00023e5f0000000 with 2.00 MiB pages
+[  +0.071668] radix-mmu: Mapped 0xc00023e5f0000000-0xc00023e600000000 with 2.00 MiB pages
+[  +0.071673] radix-mmu: Mapped 0xc00023e600000000-0xc00023e610000000 with 2.00 MiB pages
+[  +0.071684] radix-mmu: Mapped 0xc00023e610000000-0xc00023e620000000 with 2.00 MiB pages
+[  +0.071697] radix-mmu: Mapped 0xc00023e620000000-0xc00023e630000000 with 2.00 MiB pages
+[  +0.071686] radix-mmu: Mapped 0xc00023e630000000-0xc00023e640000000 with 2.00 MiB pages
+[  +0.071677] radix-mmu: Mapped 0xc00023e640000000-0xc00023e650000000 with 2.00 MiB pages
+[  +0.071672] radix-mmu: Mapped 0xc00023e650000000-0xc00023e660000000 with 2.00 MiB pages
+[  +0.071682] radix-mmu: Mapped 0xc00023e660000000-0xc00023e670000000 with 2.00 MiB pages
+[  +0.071674] radix-mmu: Mapped 0xc00023e670000000-0xc00023e680000000 with 2.00 MiB pages
+[  +0.071734] radix-mmu: Mapped 0xc00023e680000000-0xc00023e690000000 with 2.00 MiB pages
+[  +0.071725] radix-mmu: Mapped 0xc00023e690000000-0xc00023e6a0000000 with 2.00 MiB pages
+[  +0.071729] radix-mmu: Mapped 0xc00023e6a0000000-0xc00023e6b0000000 with 2.00 MiB pages
+[  +0.071750] radix-mmu: Mapped 0xc00023e6b0000000-0xc00023e6c0000000 with 2.00 MiB pages
+[  +0.071723] radix-mmu: Mapped 0xc00023e6c0000000-0xc00023e6d0000000 with 2.00 MiB pages
+[  +0.071727] radix-mmu: Mapped 0xc00023e6d0000000-0xc00023e6e0000000 with 2.00 MiB pages
+[  +0.071696] radix-mmu: Mapped 0xc00023e6e0000000-0xc00023e6f0000000 with 2.00 MiB pages
+[  +0.071717] radix-mmu: Mapped 0xc00023e6f0000000-0xc00023e700000000 with 2.00 MiB pages
+[  +0.071707] radix-mmu: Mapped 0xc00023e700000000-0xc00023e710000000 with 2.00 MiB pages
+[  +0.071709] radix-mmu: Mapped 0xc00023e710000000-0xc00023e720000000 with 2.00 MiB pages
+[  +0.071699] radix-mmu: Mapped 0xc00023e720000000-0xc00023e730000000 with 2.00 MiB pages
+[  +0.072186] radix-mmu: Mapped 0xc00023e730000000-0xc00023e740000000 with 2.00 MiB pages
+[  +0.071747] radix-mmu: Mapped 0xc00023e740000000-0xc00023e750000000 with 2.00 MiB pages
+[  +0.071742] radix-mmu: Mapped 0xc00023e750000000-0xc00023e760000000 with 2.00 MiB pages
+[  +0.071710] radix-mmu: Mapped 0xc00023e760000000-0xc00023e770000000 with 2.00 MiB pages
+[  +0.071732] radix-mmu: Mapped 0xc00023e770000000-0xc00023e780000000 with 2.00 MiB pages
+[  +0.071720] radix-mmu: Mapped 0xc00023e780000000-0xc00023e790000000 with 2.00 MiB pages
+[  +0.071730] radix-mmu: Mapped 0xc00023e790000000-0xc00023e7a0000000 with 2.00 MiB pages
+[  +0.071723] radix-mmu: Mapped 0xc00023e7a0000000-0xc00023e7b0000000 with 2.00 MiB pages
+[  +0.071729] radix-mmu: Mapped 0xc00023e7b0000000-0xc00023e7c0000000 with 2.00 MiB pages
+[  +0.071723] radix-mmu: Mapped 0xc00023e7c0000000-0xc00023e7d0000000 with 2.00 MiB pages
+[  +0.071737] radix-mmu: Mapped 0xc00023e7d0000000-0xc00023e7e0000000 with 2.00 MiB pages
+[  +0.074568] Built 6 zonelists, mobility grouping on.  Total pages: 17755099
+[  +0.000001] Policy zone: DMA
+[  +0.735200] radix-mmu: Mapped 0xc00023c000000000-0xc00023c010000000 with 2.00 MiB pages
+[  +0.073342] radix-mmu: Mapped 0xc00023c010000000-0xc00023c020000000 with 2.00 MiB pages
+[  +0.072649] radix-mmu: Mapped 0xc00023c020000000-0xc00023c030000000 with 2.00 MiB pages
+[  +0.072670] radix-mmu: Mapped 0xc00023c030000000-0xc00023c040000000 with 2.00 MiB pages
+[  +0.072645] radix-mmu: Mapped 0xc00023c040000000-0xc00023c050000000 with 2.00 MiB pages
+[  +0.072637] radix-mmu: Mapped 0xc00023c050000000-0xc00023c060000000 with 2.00 MiB pages
+[  +0.072647] radix-mmu: Mapped 0xc00023c060000000-0xc00023c070000000 with 2.00 MiB pages
+[  +0.072839] radix-mmu: Mapped 0xc00023c070000000-0xc00023c080000000 with 2.00 MiB pages
+[  +0.072691] radix-mmu: Mapped 0xc00023c080000000-0xc00023c090000000 with 2.00 MiB pages
+[  +0.072696] radix-mmu: Mapped 0xc00023c090000000-0xc00023c0a0000000 with 2.00 MiB pages
+[  +0.072676] radix-mmu: Mapped 0xc00023c0a0000000-0xc00023c0b0000000 with 2.00 MiB pages
+[  +0.072683] radix-mmu: Mapped 0xc00023c0b0000000-0xc00023c0c0000000 with 2.00 MiB pages
+[  +0.072712] radix-mmu: Mapped 0xc00023c0c0000000-0xc00023c0d0000000 with 2.00 MiB pages
+[  +0.072662] radix-mmu: Mapped 0xc00023c0d0000000-0xc00023c0e0000000 with 2.00 MiB pages
+[  +0.072728] radix-mmu: Mapped 0xc00023c0e0000000-0xc00023c0f0000000 with 2.00 MiB pages
+[  +0.072665] radix-mmu: Mapped 0xc00023c0f0000000-0xc00023c100000000 with 2.00 MiB pages
+[  +0.072792] radix-mmu: Mapped 0xc00023c100000000-0xc00023c110000000 with 2.00 MiB pages
+[  +0.072806] radix-mmu: Mapped 0xc00023c110000000-0xc00023c120000000 with 2.00 MiB pages
+[  +0.072669] radix-mmu: Mapped 0xc00023c120000000-0xc00023c130000000 with 2.00 MiB pages
+[  +0.072675] radix-mmu: Mapped 0xc00023c130000000-0xc00023c140000000 with 2.00 MiB pages
+[  +0.072675] radix-mmu: Mapped 0xc00023c140000000-0xc00023c150000000 with 2.00 MiB pages
+[  +0.072687] radix-mmu: Mapped 0xc00023c150000000-0xc00023c160000000 with 2.00 MiB pages
+[  +0.072697] radix-mmu: Mapped 0xc00023c160000000-0xc00023c170000000 with 2.00 MiB pages
+[  +0.072677] radix-mmu: Mapped 0xc00023c170000000-0xc00023c180000000 with 2.00 MiB pages
+[  +0.072678] radix-mmu: Mapped 0xc00023c180000000-0xc00023c190000000 with 2.00 MiB pages
+[  +0.072692] radix-mmu: Mapped 0xc00023c190000000-0xc00023c1a0000000 with 2.00 MiB pages
+[  +0.072676] radix-mmu: Mapped 0xc00023c1a0000000-0xc00023c1b0000000 with 2.00 MiB pages
+[  +0.072720] radix-mmu: Mapped 0xc00023c1b0000000-0xc00023c1c0000000 with 2.00 MiB pages
+[  +0.072764] radix-mmu: Mapped 0xc00023c1c0000000-0xc00023c1d0000000 with 2.00 MiB pages
+[  +0.072694] radix-mmu: Mapped 0xc00023c1d0000000-0xc00023c1e0000000 with 2.00 MiB pages
+[  +0.072760] radix-mmu: Mapped 0xc00023c1e0000000-0xc00023c1f0000000 with 2.00 MiB pages
+[  +0.072695] radix-mmu: Mapped 0xc00023c1f0000000-0xc00023c200000000 with 2.00 MiB pages
+[  +0.072687] radix-mmu: Mapped 0xc00023c200000000-0xc00023c210000000 with 2.00 MiB pages
+[  +0.072697] radix-mmu: Mapped 0xc00023c210000000-0xc00023c220000000 with 2.00 MiB pages
+[  +0.072701] radix-mmu: Mapped 0xc00023c220000000-0xc00023c230000000 with 2.00 MiB pages
+[  +0.072706] radix-mmu: Mapped 0xc00023c230000000-0xc00023c240000000 with 2.00 MiB pages
+[  +0.072731] radix-mmu: Mapped 0xc00023c240000000-0xc00023c250000000 with 2.00 MiB pages
+[  +0.072722] radix-mmu: Mapped 0xc00023c250000000-0xc00023c260000000 with 2.00 MiB pages
+[  +0.072731] radix-mmu: Mapped 0xc00023c260000000-0xc00023c270000000 with 2.00 MiB pages
+[  +0.072766] radix-mmu: Mapped 0xc00023c270000000-0xc00023c280000000 with 2.00 MiB pages
+[  +0.072712] radix-mmu: Mapped 0xc00023c280000000-0xc00023c290000000 with 2.00 MiB pages
+[  +0.075505] radix-mmu: Mapped 0xc00023c290000000-0xc00023c2a0000000 with 2.00 MiB pages
+[  +0.072743] radix-mmu: Mapped 0xc00023c2a0000000-0xc00023c2b0000000 with 2.00 MiB pages
+[  +0.072748] radix-mmu: Mapped 0xc00023c2b0000000-0xc00023c2c0000000 with 2.00 MiB pages
+[  +0.072722] radix-mmu: Mapped 0xc00023c2c0000000-0xc00023c2d0000000 with 2.00 MiB pages
+[  +0.072728] radix-mmu: Mapped 0xc00023c2d0000000-0xc00023c2e0000000 with 2.00 MiB pages
+[  +0.072709] radix-mmu: Mapped 0xc00023c2e0000000-0xc00023c2f0000000 with 2.00 MiB pages
+[  +0.072721] radix-mmu: Mapped 0xc00023c2f0000000-0xc00023c300000000 with 2.00 MiB pages
+[  +0.072724] radix-mmu: Mapped 0xc00023c300000000-0xc00023c310000000 with 2.00 MiB pages
+[  +0.072726] radix-mmu: Mapped 0xc00023c310000000-0xc00023c320000000 with 2.00 MiB pages
+[  +0.072714] radix-mmu: Mapped 0xc00023c320000000-0xc00023c330000000 with 2.00 MiB pages
+[  +0.072719] radix-mmu: Mapped 0xc00023c330000000-0xc00023c340000000 with 2.00 MiB pages
+[  +0.072727] radix-mmu: Mapped 0xc00023c340000000-0xc00023c350000000 with 2.00 MiB pages
+[  +0.072795] radix-mmu: Mapped 0xc00023c350000000-0xc00023c360000000 with 2.00 MiB pages
+[  +0.072789] radix-mmu: Mapped 0xc00023c360000000-0xc00023c370000000 with 2.00 MiB pages
+[  +0.072762] radix-mmu: Mapped 0xc00023c370000000-0xc00023c380000000 with 2.00 MiB pages
+[  +0.072767] radix-mmu: Mapped 0xc00023c380000000-0xc00023c390000000 with 2.00 MiB pages
+[  +0.072762] radix-mmu: Mapped 0xc00023c390000000-0xc00023c3a0000000 with 2.00 MiB pages
+[  +0.072770] radix-mmu: Mapped 0xc00023c3a0000000-0xc00023c3b0000000 with 2.00 MiB pages
+[  +0.072741] radix-mmu: Mapped 0xc00023c3b0000000-0xc00023c3c0000000 with 2.00 MiB pages
+[  +0.072754] radix-mmu: Mapped 0xc00023c3c0000000-0xc00023c3d0000000 with 2.00 MiB pages
+[  +0.072750] radix-mmu: Mapped 0xc00023c3d0000000-0xc00023c3e0000000 with 2.00 MiB pages
+[  +0.072752] radix-mmu: Mapped 0xc00023c3e0000000-0xc00023c3f0000000 with 2.00 MiB pages
+[  +0.072762] radix-mmu: Mapped 0xc00023c3f0000000-0xc00023c400000000 with 2.00 MiB pages
+[  +0.072798] radix-mmu: Mapped 0xc00023c400000000-0xc00023c410000000 with 2.00 MiB pages
+[  +0.072775] radix-mmu: Mapped 0xc00023c410000000-0xc00023c420000000 with 2.00 MiB pages
+[  +0.072801] radix-mmu: Mapped 0xc00023c420000000-0xc00023c430000000 with 2.00 MiB pages
+[  +0.072774] radix-mmu: Mapped 0xc00023c430000000-0xc00023c440000000 with 2.00 MiB pages
+[  +0.072769] radix-mmu: Mapped 0xc00023c440000000-0xc00023c450000000 with 2.00 MiB pages
+[  +0.072766] radix-mmu: Mapped 0xc00023c450000000-0xc00023c460000000 with 2.00 MiB pages
+[  +0.072783] radix-mmu: Mapped 0xc00023c460000000-0xc00023c470000000 with 2.00 MiB pages
+[  +0.072783] radix-mmu: Mapped 0xc00023c470000000-0xc00023c480000000 with 2.00 MiB pages
+[  +0.072787] radix-mmu: Mapped 0xc00023c480000000-0xc00023c490000000 with 2.00 MiB pages
+[  +0.072783] radix-mmu: Mapped 0xc00023c490000000-0xc00023c4a0000000 with 2.00 MiB pages
+[  +0.072767] radix-mmu: Mapped 0xc00023c4a0000000-0xc00023c4b0000000 with 2.00 MiB pages
+[  +0.072831] radix-mmu: Mapped 0xc00023c4b0000000-0xc00023c4c0000000 with 2.00 MiB pages
+[  +0.072810] radix-mmu: Mapped 0xc00023c4c0000000-0xc00023c4d0000000 with 2.00 MiB pages
+[  +0.072817] radix-mmu: Mapped 0xc00023c4d0000000-0xc00023c4e0000000 with 2.00 MiB pages
+[  +0.072777] radix-mmu: Mapped 0xc00023c4e0000000-0xc00023c4f0000000 with 2.00 MiB pages
+[  +0.072790] radix-mmu: Mapped 0xc00023c4f0000000-0xc00023c500000000 with 2.00 MiB pages
+[  +0.072785] radix-mmu: Mapped 0xc00023c500000000-0xc00023c510000000 with 2.00 MiB pages
+[  +0.072790] radix-mmu: Mapped 0xc00023c510000000-0xc00023c520000000 with 2.00 MiB pages
+[  +0.072811] radix-mmu: Mapped 0xc00023c520000000-0xc00023c530000000 with 2.00 MiB pages
+[  +0.072803] radix-mmu: Mapped 0xc00023c530000000-0xc00023c540000000 with 2.00 MiB pages
+[  +0.072798] radix-mmu: Mapped 0xc00023c540000000-0xc00023c550000000 with 2.00 MiB pages
+[  +0.072789] radix-mmu: Mapped 0xc00023c550000000-0xc00023c560000000 with 2.00 MiB pages
+[  +0.072858] radix-mmu: Mapped 0xc00023c560000000-0xc00023c570000000 with 2.00 MiB pages
+[  +0.072820] radix-mmu: Mapped 0xc00023c570000000-0xc00023c580000000 with 2.00 MiB pages
+[  +0.072830] radix-mmu: Mapped 0xc00023c580000000-0xc00023c590000000 with 2.00 MiB pages
+[  +0.072800] radix-mmu: Mapped 0xc00023c590000000-0xc00023c5a0000000 with 2.00 MiB pages
+[  +0.072802] radix-mmu: Mapped 0xc00023c5a0000000-0xc00023c5b0000000 with 2.00 MiB pages
+[  +0.072803] radix-mmu: Mapped 0xc00023c5b0000000-0xc00023c5c0000000 with 2.00 MiB pages
+[  +0.072798] radix-mmu: Mapped 0xc00023c5c0000000-0xc00023c5d0000000 with 2.00 MiB pages
+[  +0.072795] radix-mmu: Mapped 0xc00023c5d0000000-0xc00023c5e0000000 with 2.00 MiB pages
+[  +0.072804] radix-mmu: Mapped 0xc00023c5e0000000-0xc00023c5f0000000 with 2.00 MiB pages
+[  +0.072809] radix-mmu: Mapped 0xc00023c5f0000000-0xc00023c600000000 with 2.00 MiB pages
+[  +0.072830] radix-mmu: Mapped 0xc00023c600000000-0xc00023c610000000 with 2.00 MiB pages
+[  +0.072884] radix-mmu: Mapped 0xc00023c610000000-0xc00023c620000000 with 2.00 MiB pages
+[  +0.072870] radix-mmu: Mapped 0xc00023c620000000-0xc00023c630000000 with 2.00 MiB pages
+[  +0.072852] radix-mmu: Mapped 0xc00023c630000000-0xc00023c640000000 with 2.00 MiB pages
+[  +0.072818] radix-mmu: Mapped 0xc00023c640000000-0xc00023c650000000 with 2.00 MiB pages
+[  +0.072826] radix-mmu: Mapped 0xc00023c650000000-0xc00023c660000000 with 2.00 MiB pages
+[  +0.072828] radix-mmu: Mapped 0xc00023c660000000-0xc00023c670000000 with 2.00 MiB pages
+[  +0.072831] radix-mmu: Mapped 0xc00023c670000000-0xc00023c680000000 with 2.00 MiB pages
+[  +0.072835] radix-mmu: Mapped 0xc00023c680000000-0xc00023c690000000 with 2.00 MiB pages
+[  +0.072841] radix-mmu: Mapped 0xc00023c690000000-0xc00023c6a0000000 with 2.00 MiB pages
+[  +0.072834] radix-mmu: Mapped 0xc00023c6a0000000-0xc00023c6b0000000 with 2.00 MiB pages
+[  +0.072843] radix-mmu: Mapped 0xc00023c6b0000000-0xc00023c6c0000000 with 2.00 MiB pages
+[  +0.078143] radix-mmu: Mapped 0xc00023c6c0000000-0xc00023c6d0000000 with 2.00 MiB pages
+[  +0.072021] radix-mmu: Mapped 0xc00023c6d0000000-0xc00023c6e0000000 with 2.00 MiB pages
+[  +0.071797] radix-mmu: Mapped 0xc00023c6e0000000-0xc00023c6f0000000 with 2.00 MiB pages
+[  +0.071827] radix-mmu: Mapped 0xc00023c6f0000000-0xc00023c700000000 with 2.00 MiB pages
+[  +0.071829] radix-mmu: Mapped 0xc00023c700000000-0xc00023c710000000 with 2.00 MiB pages
+[  +0.071819] radix-mmu: Mapped 0xc00023c710000000-0xc00023c720000000 with 2.00 MiB pages
+[  +0.071800] radix-mmu: Mapped 0xc00023c720000000-0xc00023c730000000 with 2.00 MiB pages
+[  +0.071825] radix-mmu: Mapped 0xc00023c730000000-0xc00023c740000000 with 2.00 MiB pages
+[  +0.071816] radix-mmu: Mapped 0xc00023c740000000-0xc00023c750000000 with 2.00 MiB pages
+[  +0.071825] radix-mmu: Mapped 0xc00023c750000000-0xc00023c760000000 with 2.00 MiB pages
+[  +0.071818] radix-mmu: Mapped 0xc00023c760000000-0xc00023c770000000 with 2.00 MiB pages
+[  +0.071842] radix-mmu: Mapped 0xc00023c770000000-0xc00023c780000000 with 2.00 MiB pages
+[  +0.071911] radix-mmu: Mapped 0xc00023c780000000-0xc00023c790000000 with 2.00 MiB pages
+[  +0.071854] radix-mmu: Mapped 0xc00023c790000000-0xc00023c7a0000000 with 2.00 MiB pages
+[  +0.071870] radix-mmu: Mapped 0xc00023c7a0000000-0xc00023c7b0000000 with 2.00 MiB pages
+[  +0.071840] radix-mmu: Mapped 0xc00023c7b0000000-0xc00023c7c0000000 with 2.00 MiB pages
+[  +0.071831] radix-mmu: Mapped 0xc00023c7c0000000-0xc00023c7d0000000 with 2.00 MiB pages
+[  +0.071862] radix-mmu: Mapped 0xc00023c7d0000000-0xc00023c7e0000000 with 2.00 MiB pages
+[  +0.074664] Built 6 zonelists, mobility grouping on.  Total pages: 18270165
+[  +0.000001] Policy zone: DMA
+[Sep22 15:49] docker0: port 1(veth7e58e35) entered blocking state
+[  +0.000004] docker0: port 1(veth7e58e35) entered disabled state
+[  +0.000089] device veth7e58e35 entered promiscuous mode
+[  +0.000174] IPv6: ADDRCONF(NETDEV_UP): veth7e58e35: link is not ready
+[  +0.273121] eth0: renamed from vethd02b862
+[  +0.028491] IPv6: ADDRCONF(NETDEV_CHANGE): veth7e58e35: link becomes ready
+[  +0.000107] docker0: port 1(veth7e58e35) entered blocking state
+[  +0.000002] docker0: port 1(veth7e58e35) entered forwarding state
+[  +0.000067] IPv6: ADDRCONF(NETDEV_CHANGE): docker0: link becomes ready

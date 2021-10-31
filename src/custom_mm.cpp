@@ -2,7 +2,7 @@
  For full documentation:
  https://pytorch.org/tutorials/advanced/cpp_frontend.html
 */
-
+#include <iostream>
 #include <assert.h>
 #include <torch/extension.h>
 #include <cuda_runtime.h>
@@ -49,6 +49,7 @@ void LtIgemmTensor(cublasLtHandle_t ltHandle,
 cublasHandle_t g_cublas_handle = nullptr;
 cusparseHandle_t g_cusparse_handle = nullptr;
 cublasLtHandle_t g_cublaslt_handle = nullptr;
+torch::Device device(torch::kCUDA);
 
 void init_cublas_handle() {
   cublasStatus_t status = cublasCreate(&g_cublas_handle);
@@ -121,17 +122,25 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
 torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
 {
   if (dim == 3) {
+    dummy_kernel_launch();
     int A_rows = A.size(1);
     int B_rows = B.size(1);
     int B_cols = B.size(2);
 
     int batch_dim = A.size(0);
     assert(batch_dim == B.size(0));
-
     torch::Tensor C = torch::zeros({batch_dim, A_rows, B_cols}, torch::kFloat32).contiguous();
+    //C = C.to(device);
+    std::cout << "A C++ Before: " << A.device() << std::endl;
+    std::cout << "B C++ Before: " << B.device() << std::endl;
+    std::cout << "C C++ Before: " << C.device() << std::endl;
     cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim);
-    return C;
+    std::cout << "A C++ After: " << A.device() << std::endl;
+    std::cout << "B C++ After: " << B.device() << std::endl;
+    std::cout << "C C++ After: " << C.device() << std::endl;
+    return C; //return C;
   } else if (dim ==4) {
+    dummy_kernel_launch();
     int A_rows = A.size(2);
     int B_rows = B.size(2);
     int B_cols = B.size(3);
@@ -142,8 +151,15 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, int dim)
     assert(batch_dim2 == B.size(1));
 
     torch::Tensor C = torch::zeros({batch_dim1, batch_dim2, A_rows, B_cols}, torch::kFloat32).contiguous();
+    //C = C.to(device);
+    std::cout << "A C++ Before: " << A.device() << std::endl;
+    std::cout << "B C++ Before: " << B.device() << std::endl;
+    std::cout << "C C++ Before: " << C.device() << std::endl;
     cublas_4d_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, B_cols, B_rows, batch_dim1, batch_dim2);
-    return C;
+    std::cout << "A C++ After: " << A.device() << std::endl;
+    std::cout << "B C++ After: " << B.device() << std::endl;
+    std::cout << "C C++ After: " << C.device() << std::endl;
+    return C; //return C;
   } else if (dim == 2) {
     return cublas_mmul(A, B);
   } else {
@@ -226,4 +242,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("cublas_bmm", &cublas_bmm, "cuBLAS Batched Torch Matrix Multiplication");
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
   m.def("cublaslt_mmul", &cublaslt_mmul, "cuBLASLt Torch Matrix Multiplication");
+  m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
 }

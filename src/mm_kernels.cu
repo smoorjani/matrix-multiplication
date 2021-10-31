@@ -55,6 +55,7 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
+    
 }
 
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
@@ -102,9 +103,8 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
-
     const float alpha = 1.0f, beta = 0.0f;
-       
+    
     cublasStatus_t status = cublasSgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_N
                                        , b_cols, a_rows, b_rows
                                        , &alpha, d_B_arr, b_cols, b_rows * b_cols
