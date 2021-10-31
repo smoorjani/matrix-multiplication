@@ -102,8 +102,8 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
 
-    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T
-    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T
+    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
 
     cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , b_cols, a_rows, b_rows
@@ -145,8 +145,8 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     float *d_C_arr = d_C.data_ptr<float>();
     const float alpha = 1.0f, beta = 0.0f;
 
-    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T
-    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T
+    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
     
     cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , b_cols, a_rows, b_rows
