@@ -70,6 +70,11 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
+
+    float *d_C;
+    gpuErrchk(cudaMalloc(&d_C, a_rows * b_cols * sizeof(float)));
+    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyDeviceToHost);
   
     timestamp_t t1 = get_timestamp();
     double secs = (t1 - t0) / 1000000.0L;
@@ -88,6 +93,9 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
+
+    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyDeviceToHost);
 
     gpuErrchk(cudaStreamSynchronize(0));
     t1 = get_timestamp();
