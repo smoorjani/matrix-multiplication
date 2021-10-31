@@ -28,12 +28,15 @@ def custom_matmul(a: torch.Tensor,
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
     elif len(a_shape) == 3 and len(b_shape) == 2:
-        assert a_shape[-1] == b_shape[0]
+        # TODO fix asserts
+        if not transb and not transa:
+            assert a_shape[-1] == b_shape[0]
         lda, dim1, dim2 = a_shape
         _a = a.reshape(lda * dim1, dim2)
         c = mm_op(_a, b).reshape(lda, dim1, -1)
     elif len(a_shape) == 2 and len(b_shape) == 3:
-        assert a_shape[-1] == b_shape[1]
+        if not transb and not transa:
+            assert a_shape[-1] == b_shape[1]
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
         c = mm_op(a, _b).reshape(ldb, dim1, -1)
@@ -42,7 +45,8 @@ def custom_matmul(a: torch.Tensor,
         b_dim1, b_dim2 = b_shape[-2:]
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
-        assert a_dim2 == b_dim1
+        if not transb and not transa:
+            assert a_dim2 == b_dim1
         if len(a_shape) == 3 and len(b_shape) == 3:
             c = bmm_op(a, b, c, 3, transa, transb)
         elif len(a_shape) == 4 and len(b_shape) == 4:
@@ -51,7 +55,8 @@ def custom_matmul(a: torch.Tensor,
             c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
                              for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
-        assert a_shape[-1] == b_shape[0]
+        if not transb and not transa:
+            assert a_shape[-1] == b_shape[0]
         c = mm_op(a, b)
     else:
         print(
