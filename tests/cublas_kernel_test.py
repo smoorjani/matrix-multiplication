@@ -14,6 +14,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both'):
         t0 = time.time()
         output = function(a, b)
         tf = time.time() - t0
+        print(output.shape)
         print('CUDA after returning: ', output.is_cuda)
         output = output.cpu()
         print(f'Our time: {tf}')
@@ -50,7 +51,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both'):
 def test_matmuls(a_dim, b_dim):
     a = torch.rand(a_dim).to('cuda')
     b = torch.rand(b_dim).to('cuda')
-    tf, result = test_result(matmuls.cublasMM.apply, a, b)
+    tf, result = test_result(matmuls.cublasTransbMM.apply, a, b)
     assert result
     print(a_dim, b_dim, " passed!")
     return tf
@@ -75,6 +76,8 @@ test_matmuls((2, 8, 64, 16), (2, 8, 16, 8))
 #test_matmuls((1, 16, 512, 64), (1, 16, 64, 512))
 #print(get_average_time((2, 3, 2), (2, 2, 4)))
 #print(get_average_time((8, 64, 16), (8, 16, 8)))
-print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))
+#print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))
 #print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), 10))
+print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), 10))
+
 custom_mm.destroy_cublas()
