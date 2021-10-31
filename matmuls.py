@@ -63,26 +63,51 @@ def custom_matmul(a: torch.Tensor,
 
 class cublasMM(InplaceFunction):
     @staticmethod
-    def forward(ctx, m1, m2, transa=False, transb=False):
+    def forward(ctx, m1, m2):
         # swap around for col-major call
         # where row major is expected
-        ctx.save_for_backward(m1, m2, transa, transb)
+        ctx.save_for_backward(m1, m2)
         return custom_matmul(
-            m1, m2, transa=transa, transb=transb)
+            m1, m2)
 
     @staticmethod
     def backward(ctx, grad_output):
-        m1, m2, transa, transb = ctx.saved_variables
+        m1, m2 = ctx.saved_variables
         grad_m1 = grad_m2 = None
 
         if ctx.needs_input_grad[0]:
             grad_m1 = custom_matmul(grad_output, m2.transpose(
-                -1, -2), transa=transa, transb=transb)
+                -1, -2))
 
         if ctx.needs_input_grad[1]:
             grad_m2 = custom_matmul(
                 m1.transpose(-1, -2),
-                grad_output, transa=transa, transb=transb)
+                grad_output)
+
+        return grad_m1, grad_m2
+
+class cublasTransbMM(InplaceFunction):
+    @staticmethod
+    def forward(ctx, m1, m2):
+        # swap around for col-major call
+        # where row major is expected
+        ctx.save_for_backward(m1, m2)
+        return custom_matmul(
+            m1, m2, transb=True)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        m1, m2 = ctx.saved_variables
+        grad_m1 = grad_m2 = None
+
+        if ctx.needs_input_grad[0]:
+            grad_m1 = custom_matmul(grad_output, m2.transpose(
+                -1, -2), transb=True)
+
+        if ctx.needs_input_grad[1]:
+            grad_m2 = custom_matmul(
+                m1.transpose(-1, -2),
+                grad_output, transb=True)
 
         return grad_m1, grad_m2
 
