@@ -1,9 +1,0 @@
-# ninja log v5
-4	19679	1635695439340000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/custom_mm.o	bf477cfd8bcb69f7
-3	35231	1635697933720000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/mm_kernels.o	91268c8610329a84
-7	19578	1635705101352000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/custom_mm.o	bf477cfd8bcb69f7
-9	19576	1635710858252000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/custom_mm.o	bf477cfd8bcb69f7
-7	19861	1635715431360000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/custom_mm.o	bf477cfd8bcb69f7
-4	35492	1635715499312000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/mm_kernels.o	91268c8610329a84
-10	35218	1635717779284000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/mm_kernels.o	91268c8610329a84
-4	35213	1635717904836000000	/home/user/src/kernel/matmul/src/build/temp.linux-ppc64le-3.7/mm_kernels.o	91268c8610329a84
