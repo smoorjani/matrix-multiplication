@@ -75,7 +75,7 @@ __global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols
 
 void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
-               size_t a_rows, size_t b_cols, size_t b_rows,
+               size_t a_rows, size_t a_cols, size_t b_cols, size_t b_rows,
                size_t batch_dim, bool transa, bool transb) {
     
     // ==============
@@ -136,7 +136,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
 
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
-               size_t a_rows, size_t b_cols, size_t b_rows,
+               size_t a_rows, size_t a_cols, size_t b_cols, size_t b_rows,
                size_t batch_dim1, size_t batch_dim2,
                bool transa, bool transb) {
 
@@ -149,12 +149,49 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     printf("transa: %d\n", (int) transa);
     cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
     printf("transb: %d\n", (int) transb);
+    // (64, 512) (64, 256) transa
+    // m = 512, n = 256, k = 64
+    // m = a_cols -> a_cols
+    // n = b_cols -> b_cols
+    // k = b_rows -> b_rows 
+    // (512, 64) (256, 64) transb
+    // m = 512, n = 256, k = 64
+    // m = a_rows -> a_rows
+    // n = b_rows -> b_rows
+    // k = b_cols -> b_cols
+    // (512, 64) (64, 256)
+    // m = 512, n = 256, k = 64
+    // m = a_rows -> b_cols
+    // n = b_cols -> a_rows
+    // k = b_rows -> b_rows
+
+    size_t m = 0;
+    size_t n = 0;
+    size_t k = 0;
+
+    if (trans_a && trans_b) {
+        m = a_rows;
+        n = b_cols;
+        k = b_rows;
+    } else if (trans_a) {
+        m = a_cols;
+        n = b_cols;
+        k = b_rows;
+    } else if (trans_b) {
+        m = a_rows;
+        n = b_rows;
+        k = b_cols;
+    } else {
+        m = b_cols;
+        n = a_rows;
+        k = b_rows;
+    }
     
     cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
-                                       , b_cols, a_rows, b_rows
-                                       , &alpha, d_B_arr, b_cols, b_rows * b_cols
-                                       , d_A_arr, b_rows, a_rows * b_rows
-                                       , &beta, d_C_arr, b_cols, a_rows * b_cols
+                                       , m, n, k
+                                       , &alpha, d_B_arr, m, b_rows * b_cols
+                                       , d_A_arr, k, a_rows * b_rows
+                                       , &beta, d_C_arr, m, a_rows * b_cols
                                        , batch_dim1 * batch_dim2);
     
     if (status != CUBLAS_STATUS_SUCCESS)
