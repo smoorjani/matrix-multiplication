@@ -20,9 +20,9 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', trans
         print(f'Our time: {tf}')
     if 'pytorch' in kernel or 'both' in kernel:
         t0 = time.time()
-        _a = a if not transa else a.t()
-        _b = b if not transb else b.t()
-        expected = torch.matmul().cpu(_a, _b)
+        _a = a if not transa else a.transpose(-1, -2)
+        _b = b if not transb else b.transpose(-1, -2)
+        expected = torch.matmul(_a, _b).cpu()
         pt_tf = time.time() - t0
         print(f'PyTorch time: {pt_tf}')
     '''     
@@ -74,8 +74,8 @@ def get_average_time(a_dim, b_dim, transa=False, transb=False, iters=5):
     return total_time/iters
 
 # BERT Tests
-print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), 1))
-print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), 1, transb=True))
+print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=1))
+print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=1, transb=True))
 
 # Large Tests
 #print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))

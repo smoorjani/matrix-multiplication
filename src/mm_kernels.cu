@@ -145,9 +145,9 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     float *d_C_arr = d_C.data_ptr<float>();
     const float alpha = 1.0f, beta = 0.0f;
 
-    cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
     printf("transa: %d\n", (int) transa);
-    cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
     printf("transb: %d\n", (int) transb);
     // (64, 512) (64, 256) transa
     // m = 512, n = 256, k = 64
@@ -187,17 +187,51 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
         k = b_rows;
     }
     
-    cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
+    size_t a[6][3] = {  
+        {a_rows, b_rows, b_cols},   
+        {a_rows, b_cols, b_rows},
+        {b_rows, a_rows, b_cols},
+        {b_rows, b_cols, a_rows},
+        {b_cols, a_rows, b_rows},
+        {b_cols, b_rows, a_rows},   
+    };
+
+    if (trans_b) {
+        cublasStatus_t status = NULL;
+        for (int i = 0; i < 6; i++) {
+            m = a[i][0];
+            n = a[i][1];
+            k = a[i][2]
+
+            status = cublasSgemmStridedBatched(handle, trans_b, trans_a
+                                       , m, n, k
+                                       , &alpha, d_B_arr, m, b_rows * b_cols
+                                       , d_A_arr, k, a_rows * b_rows
+                                       , &beta, d_C_arr, m, a_rows * b_cols
+                                       , batch_dim1 * batch_dim2);
+
+            if (status == CUBLAS_STATUS_SUCCESS)
+            {
+                std::cerr << "Correct config: " << i;
+                return;
+            }
+        }
+
+    } else {
+        cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_b, trans_a
                                        , m, n, k
                                        , &alpha, d_B_arr, m, b_rows * b_cols
                                        , d_A_arr, k, a_rows * b_rows
                                        , &beta, d_C_arr, m, a_rows * b_cols
                                        , batch_dim1 * batch_dim2);
     
-    if (status != CUBLAS_STATUS_SUCCESS)
-    {
-        std::cerr << "Kernel execution error.";
+        if (status != CUBLAS_STATUS_SUCCESS)
+        {
+            std::cerr << "Kernel execution error.";
+        }
     }
+
+    
 }
 
 /*
