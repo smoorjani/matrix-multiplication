@@ -6,7 +6,7 @@ import time
 custom_mm.init_cublas()
 custom_mm.init_cublaslt()
 
-def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both'):
+def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, transb=False):
     output, expected = None, None
     tf, pt_tf = None, None
     kernel = 'both'
@@ -20,7 +20,9 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both'):
         print(f'Our time: {tf}')
     if 'pytorch' in kernel or 'both' in kernel:
         t0 = time.time()
-        expected = torch.matmul(a, b).cpu()
+        _a = a if not transa else a.t()
+        _b = b if not transb else b.t()
+        expected = torch.matmul().cpu(_a, _b)
         pt_tf = time.time() - t0
         print(f'PyTorch time: {pt_tf}')
     '''     
@@ -48,15 +50,22 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both'):
     return tf if 'both' in kernel or 'ours' in kernel else pt_tf, True
 
 
-def test_matmuls(a_dim, b_dim):
+def test_matmuls(a_dim, b_dim, transa=False, transb=False):
     a = torch.rand(a_dim).to('cuda')
     b = torch.rand(b_dim).to('cuda')
-    tf, result = test_result(matmuls.cublasTransbMM.apply, a, b)
+    if transa and transb:
+        tf, result = test_result(matmuls.cublasTransabMM.apply, a, b, transa=True, transb=True)
+    elif transa:
+        tf, result = test_result(matmuls.cublasTransaMM.apply, a, b, transa=True)
+    elif transb:
+        tf, result = test_result(matmuls.cublasTransbMM.apply, a, b, transb=True)
+    else:
+        tf, result = test_result(matmuls.cublasMM.apply, a, b)
     assert result
     print(a_dim, b_dim, " passed!")
     return tf
 
-def get_average_time(a_dim, b_dim, iters=5):
+def get_average_time(a_dim, b_dim, transa=False, transb=False, iters=5):
     total_time = 0
     for i in range(iters):
         total_time += test_matmuls(a_dim, b_dim)
