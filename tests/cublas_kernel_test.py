@@ -75,7 +75,8 @@ def get_average_time(a_dim, b_dim, transa=False, transb=False, iters=5):
 
 # BERT Tests
 print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=1))
-print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=1, transb=True))
+print(get_average_time((2, 2, 2, 4), (2, 2, 2, 3), iters=1, transb=True))
+#print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=1, transb=True))
 
 # Large Tests
 #print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))

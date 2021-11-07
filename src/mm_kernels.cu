@@ -186,37 +186,22 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
         n = a_rows;
         k = b_rows;
     }
-    
-    size_t a[6][3] = {  
-        {a_rows, b_rows, b_cols},   
-        {a_rows, b_cols, b_rows},
-        {b_rows, a_rows, b_cols},
-        {b_rows, b_cols, a_rows},
-        {b_cols, a_rows, b_rows},
-        {b_cols, b_rows, a_rows},   
-    };
 
     if (trans_b) {
-        cublasStatus_t status = NULL;
-        for (int i = 0; i < 6; i++) {
-            m = a[i][0];
-            n = a[i][1];
-            k = a[i][2]
-
-            status = cublasSgemmStridedBatched(handle, trans_b, trans_a
+        m = a_rows;
+        n = b_rows;
+        k = b_cols;
+        cublasStatus_t status = cublasSgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_T
                                        , m, n, k
-                                       , &alpha, d_B_arr, m, b_rows * b_cols
-                                       , d_A_arr, k, a_rows * b_rows
-                                       , &beta, d_C_arr, m, a_rows * b_cols
+                                       , &alpha, d_B_arr, n, b_rows * b_cols
+                                       , d_A_arr, m, a_rows * a_cols
+                                       , &beta, d_C_arr, a_rows, a_rows * b_rows
                                        , batch_dim1 * batch_dim2);
 
-            if (status == CUBLAS_STATUS_SUCCESS)
-            {
-                std::cerr << "Correct config: " << i;
-                return;
-            }
+        if (status != CUBLAS_STATUS_SUCCESS)
+        {
+            std::cerr << "Kernel execution error.";
         }
-
     } else {
         cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_b, trans_a
                                        , m, n, k
