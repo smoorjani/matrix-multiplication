@@ -26,6 +26,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', trans
         pt_tf = time.time() - t0
         print(f'PyTorch time: {pt_tf}')
     '''     
+    # debugging
     print('A: ', a)
     print('B: ', b)
     print('Expected: ', expected)
@@ -54,13 +55,14 @@ def test_matmuls(a_dim, b_dim, transa=False, transb=False):
     a = torch.rand(a_dim).to('cuda')
     b = torch.rand(b_dim).to('cuda')
     if transa and transb:
-        tf, result = test_result(matmuls.cublasTransabMM.apply, a, b, transa=True, transb=True)
+        operation = matmuls.cublasTransabMM.apply
     elif transa:
-        tf, result = test_result(matmuls.cublasTransaMM.apply, a, b, transa=True)
+        operation = matmuls.cublasTransaMM.apply
     elif transb:
-        tf, result = test_result(matmuls.cublasTransbMM.apply, a, b, transb=True)
+        operation = matmuls.cublasTransbMM.apply
     else:
-        tf, result = test_result(matmuls.cublasMM.apply, a, b)
+        operation = matmuls.cublasMM.apply
+    tf, result = test_result(operation, a, b, transa=transa, transb=transb)
     assert result
     print(a_dim, b_dim, " passed!")
     return tf
@@ -68,25 +70,14 @@ def test_matmuls(a_dim, b_dim, transa=False, transb=False):
 def get_average_time(a_dim, b_dim, transa=False, transb=False, iters=5):
     total_time = 0
     for i in range(iters):
-        total_time += test_matmuls(a_dim, b_dim)
+        total_time += test_matmuls(a_dim, b_dim, transa=transa, transb=transb)
     return total_time/iters
 
-'''
-test_matmuls((8, 64), (64, 8))
-test_matmuls((8, 64, 16), (16, 8))
-test_matmuls((2, 3, 2), (2, 2, 4))
-test_matmuls((8, 64, 16), (8, 16, 8))
-test_matmuls((64, 4096, 4096), (64, 4096, 4096))
-test_matmuls((1, 8, 64, 16), (1, 8, 16, 8))
-test_matmuls((2, 8, 64, 16), (2, 8, 16, 8))
-'''
-#test_matmuls((64, 16, 512, 64), (64, 16, 64, 512))
-#test_matmuls((64, 16, 512, 512), (64, 16, 512, 64))
-#test_matmuls((1, 16, 512, 64), (1, 16, 64, 512))
-#print(get_average_time((2, 3, 2), (2, 2, 4)))
-#print(get_average_time((8, 64, 16), (8, 16, 8)))
+# BERT Tests
+print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), 1))
+print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), 1, transb=True))
+
+# Large Tests
 #print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))
-#print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), 10))
-print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), 10))
 
 custom_mm.destroy_cublas()
