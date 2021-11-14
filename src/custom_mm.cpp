@@ -17,7 +17,7 @@ void dummy_kernel_launch();
 // cublas mm forward declaration   
 void cublas_mm_wrapper(cublasHandle_t handle,
                        torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
-                       int m, int k, int n);
+                       int m, int k, int n, bool transa, bool transb);
 
 // cublas bmm forward declaration
 void cublas_bmm_wrapper(cublasHandle_t handle,
@@ -100,7 +100,7 @@ void destroy_cublaslt_handle() {
   }
 }
 
-torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
+torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B, bool transa, bool transb)
 {
   // torch passes in with column major
   // the current
@@ -115,7 +115,7 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B)
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
   float *C_arr = C.data_ptr<float>();
 
-  cublas_mm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols);
+  cublas_mm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols, transa, transb);
 
   return C;
 }

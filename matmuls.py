@@ -24,19 +24,25 @@ def custom_matmul(a: torch.Tensor,
     #c = torch.zeros(tuple(list(a_shape[:-1]) + [b_shape[-1]])).to('cuda')
     #print(c.shape)
     #c = None
+    
     if len(a_shape) == 1 or len(b_shape) == 1:
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
-    elif len(a_shape) == 3 and len(b_shape) == 2:
-        # TODO fix asserts
-        if not transb and not transa:
-            assert a_shape[-1] == b_shape[0]
+
+    if not transb and not transa:
+        assert a_shape[-1] == b_shape[-2]
+    elif transa:
+        assert a_shape[-2] == b_shape[-2]
+    elif transb:
+        assert a_shape[-1] == b_shape[-1]
+    elif transa and transb:
+        assert a_shape[-2] == b_shape[-1]
+
+    if len(a_shape) == 3 and len(b_shape) == 2:
         lda, dim1, dim2 = a_shape
         _a = a.reshape(lda * dim1, dim2)
         c = mm_op(_a, b).reshape(lda, dim1, -1)
     elif len(a_shape) == 2 and len(b_shape) == 3:
-        if not transb and not transa:
-            assert a_shape[-1] == b_shape[1]
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
         c = mm_op(a, _b).reshape(ldb, dim1, -1)
@@ -45,8 +51,6 @@ def custom_matmul(a: torch.Tensor,
         b_dim1, b_dim2 = b_shape[-2:]
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
-        if not transb and not transa:
-            assert a_dim2 == b_dim1
         if len(a_shape) == 3 and len(b_shape) == 3:
             c = bmm_op(a, b, c, 3, transa, transb)
         elif len(a_shape) == 4 and len(b_shape) == 4:
@@ -55,9 +59,7 @@ def custom_matmul(a: torch.Tensor,
             c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
                              for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
-        if not transb and not transa:
-            assert a_shape[-1] == b_shape[0]
-        c = mm_op(a, b)
+        c = mm_op(a, b, transa, transb)
     else:
         print(
             'Multiplication with matrix dimensions is not implemented in cuBLAS'
