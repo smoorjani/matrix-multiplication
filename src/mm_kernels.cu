@@ -44,13 +44,14 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     float *d_C_arr = d_C.data_ptr<float>();
 
     printf("transa: %d, transb: %d\n", transa, transb);
-    cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
-    cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    printf("a_rows: %d, b_rows: %d, b_cols: %d\n", a_rows, b_rows, b_cols);
+    cublasOperation_t trans_a = (transb == 0) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_b = (transa == 0) ? CUBLAS_OP_N : CUBLAS_OP_T;
 
     float alpha = 1.0;
     float beta = 0.0;
     cublasStatus_t status = cublasSgemm(
-        handle, trans_a, trans_b,
+        handle, CUBLAS_OP_N, CUBLAS_OP_N,
         b_cols, a_rows, b_rows, &alpha,
         d_B_arr, b_cols,
         d_A_arr, b_rows, &beta,
@@ -60,7 +61,6 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
-    
 }
 
 __global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols)

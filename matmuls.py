@@ -20,9 +20,13 @@ def custom_matmul(a: torch.Tensor,
     '''
     a_shape = a.shape
     b_shape = b.shape
-    c = torch.zeros(tuple(list(a_shape[:-1]) + [b_shape[-1]]), device=torch.device('cuda'))
+
+
+    c_rows = a_shape[-2] if not transa else a_shape[-1]
+    c_cols = b_shape[-1] if not transb else b_shape[-2]
+    c = torch.zeros(tuple(list(a_shape[:-2]) + [c_rows, c_cols]), device=torch.device('cuda'))
     #c = torch.zeros(tuple(list(a_shape[:-1]) + [b_shape[-1]])).to('cuda')
-    #print(c.shape)
+    print(c.shape)
     #c = None
     
     if len(a_shape) == 1 or len(b_shape) == 1:
@@ -41,11 +45,11 @@ def custom_matmul(a: torch.Tensor,
     if len(a_shape) == 3 and len(b_shape) == 2:
         lda, dim1, dim2 = a_shape
         _a = a.reshape(lda * dim1, dim2)
-        c = mm_op(_a, b).reshape(lda, dim1, -1)
+        c = mm_op(_a, b, c).reshape(lda, dim1, -1)
     elif len(a_shape) == 2 and len(b_shape) == 3:
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
-        c = mm_op(a, _b).reshape(ldb, dim1, -1)
+        c = mm_op(a, _b, c).reshape(ldb, dim1, -1)
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         a_dim1, a_dim2 = a_shape[-2:]
         b_dim1, b_dim2 = b_shape[-2:]
@@ -59,12 +63,13 @@ def custom_matmul(a: torch.Tensor,
             c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
                              for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
-        c = mm_op(a, b, transa, transb)
+        c = mm_op(a, b, c, transa, transb)
     else:
         print(
             'Multiplication with matrix dimensions is not implemented in cuBLAS'
         )
         return a @ b
+    print(c)
     return c
 
 

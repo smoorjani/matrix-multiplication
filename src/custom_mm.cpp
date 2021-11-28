@@ -10,7 +10,7 @@
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
 #include <cublasLt.h>
-
+#include <ATen/cuda/CUDABlas.h>
 // dummy kernel forward declaration
 void dummy_kernel_launch();
 
@@ -100,23 +100,24 @@ void destroy_cublaslt_handle() {
   }
 }
 
-torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B, bool transa, bool transb)
+torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C, bool transa, bool transb)
 {
   // torch passes in with column major
   // the current
-
+  //cublasHandle_t handle = at::cuda::getCurrentCUDABlasHandle();
+  auto handle = at::cuda::getCurrentCUDABlasHandle();
   int A_rows = A.size(0);
   int A_cols = A.size(1);
   int B_cols = B.size(1);
 
-  torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
-  cublas_mm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols, transa, transb);
+  cublas_mm_wrapper(handle, A, B, C, A_rows, A_cols, B_cols, transa, transb);
 
   return C;
 }
 
 torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim, bool transa, bool transb)
 {
+  auto handle = at::cuda::getCurrentCUDABlasHandle();
   if (dim == 3) {
     int A_rows = A.size(1);
     int A_cols = A.size(2);
@@ -125,7 +126,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
 
     int batch_dim = A.size(0);
     assert(batch_dim == B.size(0));
-    cublas_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols, B_rows, batch_dim, transa, transb);
+    cublas_bmm_wrapper(handle, A, B, C, A_rows, A_cols, B_cols, B_rows, batch_dim, transa, transb);
     return C;
   } else if (dim ==4) {
     int A_rows = A.size(2);
@@ -138,10 +139,10 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
     assert(batch_dim1 == B.size(0));
     assert(batch_dim2 == B.size(1));
 
-    cublas_4d_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols, B_rows, batch_dim1, batch_dim2, transa, transb);
+    cublas_4d_bmm_wrapper(handle, A, B, C, A_rows, A_cols, B_cols, B_rows, batch_dim1, batch_dim2, transa, transb);
     return C;
   } else if (dim == 2) {
-    return cublas_mmul(A, B, transa, transb);
+    return cublas_mmul(A, B, C, transa, transb);
   } else {
     throw std::invalid_argument("Invalid dim argument.");
   }

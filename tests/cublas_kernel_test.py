@@ -2,13 +2,13 @@ import torch
 import custom_mm
 import matmuls
 import time
+import sys
 
 #custom_mm.init_cublas()
 
 def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, transb=False):
     output, expected = None, None
     tf, pt_tf = None, None
-    kernel = 'ours'
     if 'ours' in kernel or 'both' in kernel:
         t0 = time.perf_counter()
         output = function(a, b)
@@ -50,7 +50,7 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', trans
     return tf if 'both' in kernel or 'ours' in kernel else pt_tf, True
 
 
-def test_matmuls(a_dim, b_dim, transa=False, transb=False):
+def test_matmuls(a_dim, b_dim, transa=False, transb=False, kernel="both"):
     a = torch.rand(a_dim).to('cuda')
     b = torch.rand(b_dim).to('cuda')
     if transa and transb:
@@ -61,21 +61,21 @@ def test_matmuls(a_dim, b_dim, transa=False, transb=False):
         operation = matmuls.cublasTransbMM.apply
     else:
         operation = matmuls.cublasMM.apply
-    tf, result = test_result(operation, a, b, transa=transa, transb=transb)
+    tf, result = test_result(operation, a, b, kernel=kernel, transa=transa, transb=transb)
     assert result
     print(a_dim, b_dim, " passed!")
     return tf
 
-def get_average_time(a_dim, b_dim, transa=False, transb=False, iters=5):
+def get_average_time(a_dim, b_dim, transa=False, transb=False, kernel="both", iters=5):
     total_time = 0
     for i in range(iters):
-        total_time += test_matmuls(a_dim, b_dim, transa=transa, transb=transb)
+        total_time += test_matmuls(a_dim, b_dim, transa=transa, transb=transb, kernel=kernel)
     return total_time/iters
 
 # BERT Tests
 
-print(get_average_time((512, 512), (512, 64), iters=1))
-print(get_average_time((2, 4), (2, 3), iters=1, transa=True))
+print(get_average_time((512, 512), (512, 64), iters=1, kernel=sys.argv[1]))
+print(get_average_time((2, 4), (2, 3), iters=1, transa=True, kernel=sys.argv[1]))
 
 # print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=1))
 # print(get_average_time((2, 2, 2, 4), (2, 2, 2, 3), iters=1, transb=True))
