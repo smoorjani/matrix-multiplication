@@ -36,7 +36,7 @@ void dummy_kernel_launch() {
 
 void cublas_mm_wrapper(cublasHandle_t handle,
                        torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
-                       int a_rows, int b_rows, int b_cols,
+                       int a_rows, int a_cols, int b_rows, int b_cols,
                        bool transa, bool transb) {
 
     float *d_A_arr = d_A.data_ptr<float>();
@@ -45,9 +45,35 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
     printf("transa: %d, transb: %d\n", transa, transb);
     printf("a_rows: %d, b_rows: %d, b_cols: %d\n", a_rows, b_rows, b_cols);
-    cublasOperation_t trans_a = (transb == 0) ? CUBLAS_OP_N : CUBLAS_OP_T;
-    cublasOperation_t trans_b = (transa == 0) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
 
+    int m = b_cols;
+    int n = a_rows;
+    int k = b_rows;
+
+    int lda = b_cols;
+    int ldb = b_rows;
+
+    if (transb && transa) {
+        m = b_rows;
+	k = b_cols;
+	lda = b_rows;
+        ldb = b_cols;
+    } else if (transa) {
+        m = b_rows;
+	k = b_cols;
+	lda = k;
+        ldb = k;
+    } else if (transb) {
+        m = b_rows;
+        n = a_cols;
+	k = a_rows;
+	lda = n;
+        ldb = k;
+    }
+
+    int ldc = b_cols;
     float alpha = 1.0;
     float beta = 0.0;
     cublasStatus_t status = cublasSgemm(

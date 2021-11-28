@@ -26,7 +26,6 @@ def custom_matmul(a: torch.Tensor,
     c_cols = b_shape[-1] if not transb else b_shape[-2]
     c = torch.zeros(tuple(list(a_shape[:-2]) + [c_rows, c_cols]), device=torch.device('cuda'))
     #c = torch.zeros(tuple(list(a_shape[:-1]) + [b_shape[-1]])).to('cuda')
-    print(c.shape)
     #c = None
     
     if len(a_shape) == 1 or len(b_shape) == 1:
@@ -69,7 +68,6 @@ def custom_matmul(a: torch.Tensor,
             'Multiplication with matrix dimensions is not implemented in cuBLAS'
         )
         return a @ b
-    print(c)
     return c
 
 

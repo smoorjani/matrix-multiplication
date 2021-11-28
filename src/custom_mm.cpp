@@ -17,7 +17,7 @@ void dummy_kernel_launch();
 // cublas mm forward declaration   
 void cublas_mm_wrapper(cublasHandle_t handle,
                        torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
-                       int m, int k, int n, bool transa, bool transb);
+                       int a_rows, int a_cols, int b_rows, int b_cols, bool transa, bool transb);
 
 // cublas bmm forward declaration
 void cublas_bmm_wrapper(cublasHandle_t handle,
@@ -108,9 +108,10 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C, boo
   auto handle = at::cuda::getCurrentCUDABlasHandle();
   int A_rows = A.size(0);
   int A_cols = A.size(1);
+  int B_rows = B.size(0);
   int B_cols = B.size(1);
 
-  cublas_mm_wrapper(handle, A, B, C, A_rows, A_cols, B_cols, transa, transb);
+  cublas_mm_wrapper(handle, A, B, C, A_rows, A_cols, B_rows, B_cols, transa, transb);
 
   return C;
 }
