@@ -43,6 +43,7 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
 
+    printf("transa: %d, transb: %d\n", transa, transb);
     cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
     cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
 
@@ -375,7 +376,8 @@ void LtIgemmTensor(cublasLtHandle_t ltHandle,
                    const float *B,
                    int ldb,
                    float *C,
-                   int ldc) {
+                   int ldc) {return;}
+    /*
     cublasLtMatmulDesc_t matmulDesc = NULL;
     cublasLtMatrixLayout_t Adesc = NULL, Bdesc = NULL, Cdesc = NULL;
     int32_t alpha = 1, beta = 0;
@@ -475,5 +477,5 @@ void LtIgemmTensor(cublasLtHandle_t ltHandle,
     if (Btransform) checkCudaStatus(cudaFree(Btransform));
     if (Atransform) checkCudaStatus(cudaFree(Atransform));
 }
-
+*/
 #endif // __MM_KERNEL_H__

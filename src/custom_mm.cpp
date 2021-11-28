@@ -105,16 +105,11 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B, bool transa, bool tr
   // torch passes in with column major
   // the current
 
-  float *A_arr = A.data_ptr<float>();
-  float *B_arr = B.data_ptr<float>();
-
   int A_rows = A.size(0);
   int A_cols = A.size(1);
   int B_cols = B.size(1);
 
   torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kFloat32);
-  float *C_arr = C.data_ptr<float>();
-
   cublas_mm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols, transa, transb);
 
   return C;
@@ -146,7 +141,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
     cublas_4d_bmm_wrapper(g_cublas_handle, A, B, C, A_rows, A_cols, B_cols, B_rows, batch_dim1, batch_dim2, transa, transb);
     return C;
   } else if (dim == 2) {
-    return cublas_mmul(A, B);
+    return cublas_mmul(A, B, transa, transb);
   } else {
     throw std::invalid_argument("Invalid dim argument.");
   }
