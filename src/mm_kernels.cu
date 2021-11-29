@@ -52,36 +52,44 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     int n = a_rows;
     int k = b_rows;
 
-    int lda = b_cols;
-    int ldb = b_rows;
+    int ldb = b_cols;
+    int lda = b_rows;
+    int ldc = b_cols;
 
     if (transb && transa) {
         m = b_rows;
 	k = b_cols;
-	lda = b_rows;
-        ldb = b_cols;
+	ldb = b_rows;
+        lda = b_cols;
+	ldc = lda;
     } else if (transa) {
-        m = b_rows;
-	k = b_cols;
+        n = a_cols;
+	m = b_cols;
+	k = b_rows;
 	lda = k;
-        ldb = k;
+        ldb = m;
+	ldc = m;
     } else if (transb) {
         m = b_rows;
         n = a_cols;
 	k = a_rows;
-	lda = n;
-        ldb = k;
+	ldb = n;
+        lda = k;
+	ldc = lda;
     }
 
-    int ldc = b_cols;
+
+    printf("m: %d, n: %d, k: %d\n", m, n, k);
+    printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
+
     float alpha = 1.0;
     float beta = 0.0;
     cublasStatus_t status = cublasSgemm(
-        handle, CUBLAS_OP_N, CUBLAS_OP_N,
-        b_cols, a_rows, b_rows, &alpha,
-        d_B_arr, b_cols,
-        d_A_arr, b_rows, &beta,
-        d_C_arr, b_cols);
+        handle, trans_a, trans_b,
+        m, n, k, &alpha,
+        d_B_arr, ldb,
+        d_A_arr, lda, &beta,
+        d_C_arr, ldc);
 
     if (status != CUBLAS_STATUS_SUCCESS)
     {
