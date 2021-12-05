@@ -50,32 +50,31 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     int m = b_cols;
     int n = a_rows;
     int k = b_rows;
-
     int ldb = b_cols;
     int lda = b_rows;
     int ldc = b_cols;
 
     if (transb && transa) {
         m = b_rows;
-	n = a_cols;
-	k = b_cols;
-	lda = n;
+        n = a_cols;
+        k = b_cols;
+        lda = n;
         ldb = k;
-	ldc = m;
+	    ldc = m;
     } else if (transa) {
         m = b_cols;
-	n = a_cols;
-	k = b_rows;
-	lda = n;
+        n = a_cols;
+        k = b_rows;
+        lda = n;
         ldb = m;
-	ldc = m;
+	    ldc = m;
     } else if (transb) {
         m = b_rows;
         n = a_rows;
-	k = b_cols;
-	lda = k;
+        k = b_cols;
+        lda = k;
         ldb = k;
-	ldc = m;
+	    ldc = m;
     }
 
     float alpha = 1.0;
@@ -182,6 +181,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
+    
     /*
     gpuErrchk(cudaDeviceSynchronize());
     printf("chkpt4\n");
