@@ -138,8 +138,6 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     t0 = get_timestamp();
     const float alpha = 1.0f, beta = 0.0f;
 
-    printf("transa: %d, transb: %d\n", transa, transb);
-    printf("a_rows: %d, b_rows: %d, b_cols: %d\n", a_rows, b_rows, b_cols);
     cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
     cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
 
@@ -173,45 +171,6 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
         ldb = k;
 	    ldc = m;
     }
-     
-    printf("m: %d, n: %d, k: %d\n", m, n, k);
-    printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
-
-    /* 
-    std::array<int, 4> dims { a_rows, b_rows, a_cols, b_cols };
-    for (auto& m : dims) {
-    for (auto& n : dims) {
-    for (auto& k : dims) {
-    for (auto& lda : dims) {
-	for (auto& ldb : dims) {
-	    for (auto& ldc : dims) {
-
-                printf("m: %d, n: %d, k: %d\n", m, n, k);
-                printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
- 
-                float alpha = 1.0;
-                float beta = 0.0;
-                cublasStatus_t status = cublasSgemm(
-                    handle, trans_a, trans_b,
-                    m, n, k, &alpha,
-                    d_B_arr, ldb,
-                    d_A_arr, lda, &beta,
-                    d_C_arr, ldc);
-
-                if (status != CUBLAS_STATUS_SUCCESS)
-                {
-                    std::cerr << "Kernel execution error.";
-		    continue;
-                }
-                cuda_print_arr(d_C_arr, 4,3);
-
-	    }
-	}
-    }
-    }
-    }
-    }
-    */
 
     cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , m, n, k
@@ -251,80 +210,93 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
-    const float alpha = 1.0f, beta = 0.0f;
 
     cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
     cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
-    printf("transa: %d\n", (int) transa);
-    printf("transb: %d\n", (int) transb);
-    // (64, 512) (64, 256) transa
-    // m = 512, n = 256, k = 64
-    // m = a_cols -> a_cols
-    // n = b_cols -> b_cols
-    // k = b_rows -> b_rows 
-    // (512, 64) (256, 64) transb
-    // m = 512, n = 256, k = 64
-    // m = a_rows -> a_rows
-    // n = b_rows -> b_rows
-    // k = b_cols -> b_cols
-    // (512, 64) (64, 256)
-    // m = 512, n = 256, k = 64
-    // m = a_rows -> b_cols
-    // n = b_cols -> a_rows
-    // k = b_rows -> b_rows
+    printf("transa: %d, transb: %d\n", transa, transb);
+    printf("a_rows: %d, b_rows: %d, b_cols: %d\n", a_rows, b_rows, b_cols);
 
-    size_t m = 0;
-    size_t n = 0;
-    size_t k = 0;
+    int m = b_cols;
+    int n = a_rows;
+    int k = b_rows;
 
-    if (trans_a && trans_b) {
-        m = a_rows;
-        n = b_cols;
-        k = b_rows;
-    } else if (trans_a) {
-        m = a_cols;
-        n = b_cols;
-        k = b_rows;
-    } else if (trans_b) {
-        m = a_rows;
-        n = b_rows;
+    int ldb = b_cols;
+    int lda = b_rows;
+    int ldc = b_cols;
+
+    if (transb && transa) {
+        m = b_rows;
+        n = a_cols;
         k = b_cols;
-    } else {
+        lda = n;
+        ldb = k;
+        ldc = m;
+    } else if (transa) {
         m = b_cols;
-        n = a_rows;
+        n = a_cols;
         k = b_rows;
-    }
-
-    if (trans_b) {
-        m = a_rows;
-        n = b_rows;
+        lda = n;
+        ldb = m;
+	    ldc = m;
+    } else if (transb) {
+        m = b_rows;
+        n = a_rows;
         k = b_cols;
-        cublasStatus_t status = cublasSgemmStridedBatched(handle, CUBLAS_OP_N, CUBLAS_OP_T
-                                       , m, n, k
-                                       , &alpha, d_B_arr, n, b_rows * b_cols
-                                       , d_A_arr, m, a_rows * a_cols
-                                       , &beta, d_C_arr, a_rows, a_rows * b_rows
-                                       , batch_dim1 * batch_dim2);
-
-        if (status != CUBLAS_STATUS_SUCCESS)
-        {
-            std::cerr << "Kernel execution error.";
-        }
-    } else {
-        cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_b, trans_a
-                                       , m, n, k
-                                       , &alpha, d_B_arr, m, b_rows * b_cols
-                                       , d_A_arr, k, a_rows * b_rows
-                                       , &beta, d_C_arr, m, a_rows * b_cols
-                                       , batch_dim1 * batch_dim2);
-    
-        if (status != CUBLAS_STATUS_SUCCESS)
-        {
-            std::cerr << "Kernel execution error.";
-        }
+        lda = k;
+        ldb = k;
+	    ldc = m;
     }
 
-    
+    const float alpha = 1.0f, beta = 0.0f;
+    cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
+                                       , m, n, k
+                                       , &alpha, d_B_arr, ldb, m * k
+                                       , d_A_arr, lda, n * k
+                                       , &beta, d_C_arr, ldc, m * n
+                                       , batch_dim1 * batch_dim2);
+    if (status != CUBLAS_STATUS_SUCCESS)
+    {
+        std::cerr << "Kernel execution error.";
+    }
+
+    printf("m: %d, n: %d, k: %d\n", m, n, k);
+    printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
+
+    /* 
+    std::array<int, 4> dims { a_rows, b_rows, a_cols, b_cols };
+    for (auto& m : dims) {
+    for (auto& n : dims) {
+    for (auto& k : dims) {
+    for (auto& lda : dims) {
+	for (auto& ldb : dims) {
+	    for (auto& ldc : dims) {
+
+                printf("m: %d, n: %d, k: %d\n", m, n, k);
+                printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
+ 
+                float alpha = 1.0;
+                float beta = 0.0;
+                cublasStatus_t status = cublasSgemm(
+                    handle, trans_a, trans_b,
+                    m, n, k, &alpha,
+                    d_B_arr, ldb,
+                    d_A_arr, lda, &beta,
+                    d_C_arr, ldc);
+
+                if (status != CUBLAS_STATUS_SUCCESS)
+                {
+                    std::cerr << "Kernel execution error.";
+		    continue;
+                }
+                cuda_print_arr(d_C_arr, 4,3);
+
+	    }
+	}
+    }
+    }
+    }
+    }
+    */
 }
 
 /*
