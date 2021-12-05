@@ -34,12 +34,12 @@ def custom_matmul(a: torch.Tensor,
 
     if not transb and not transa:
         assert a_shape[-1] == b_shape[-2]
+    elif transa and transb:
+        assert a_shape[-2] == b_shape[-1]
     elif transa:
         assert a_shape[-2] == b_shape[-2]
     elif transb:
         assert a_shape[-1] == b_shape[-1]
-    elif transa and transb:
-        assert a_shape[-2] == b_shape[-1]
 
     if len(a_shape) == 3 and len(b_shape) == 2:
         lda, dim1, dim2 = a_shape

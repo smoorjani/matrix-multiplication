@@ -2,6 +2,7 @@
 #define __MM_KERNEL_H__
 
 #include <iostream>
+#include <array>
 #include <torch/extension.h>
 #include "Utilities.cuh"
 
@@ -58,27 +59,62 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
     if (transb && transa) {
         m = b_rows;
+	n = a_cols;
 	k = b_cols;
-	ldb = b_rows;
-        lda = b_cols;
-	ldc = lda;
+	lda = n;
+        ldb = k;
+	ldc = m;
     } else if (transa) {
-        n = a_cols;
-	m = b_cols;
+        m = b_cols;
+	n = a_cols;
 	k = b_rows;
-	lda = k;
+	lda = n;
         ldb = m;
 	ldc = m;
     } else if (transb) {
         m = b_rows;
-        n = a_cols;
-	k = a_rows;
-	ldb = n;
-        lda = k;
-	ldc = lda;
+        n = a_rows;
+	k = b_cols;
+	lda = k;
+        ldb = k;
+	ldc = m;
     }
+    /* 
+    std::array<int, 4> dims { a_rows, b_rows, a_cols, b_cols };
+    for (auto& m : dims) {
+    for (auto& n : dims) {
+    for (auto& k : dims) {
+    for (auto& lda : dims) {
+	for (auto& ldb : dims) {
+	    for (auto& ldc : dims) {
 
+                printf("m: %d, n: %d, k: %d\n", m, n, k);
+                printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
+ 
+                float alpha = 1.0;
+                float beta = 0.0;
+                cublasStatus_t status = cublasSgemm(
+                    handle, trans_a, trans_b,
+                    m, n, k, &alpha,
+                    d_B_arr, ldb,
+                    d_A_arr, lda, &beta,
+                    d_C_arr, ldc);
 
+                if (status != CUBLAS_STATUS_SUCCESS)
+                {
+                    std::cerr << "Kernel execution error.";
+		    continue;
+                }
+                cuda_print_arr(d_C_arr, 4,3);
+
+	    }
+	}
+    }
+    }
+    }
+    }
+    */
+     
     printf("m: %d, n: %d, k: %d\n", m, n, k);
     printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
 
@@ -95,6 +131,7 @@ void cublas_mm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
+   
 }
 
 __global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols)
