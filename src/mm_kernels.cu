@@ -114,7 +114,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
                size_t batch_dim, bool transa, bool transb) {
     
     // ==============
-    timestamp_t t0 = get_timestamp();
+    //timestamp_t t0 = get_timestamp();
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
@@ -130,11 +130,13 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     printf("chkpt3\n");
     gpuErrchk(cudaDeviceSynchronize());
     */
+    /*
     timestamp_t t1 = get_timestamp();
     double secs = (t1 - t0) / 1000000.0L;
     printf("Preprocessing: %f\n", secs);
 
     t0 = get_timestamp();
+    */
     const float alpha = 1.0f, beta = 0.0f;
 
     cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
@@ -194,11 +196,12 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     gpuErrchk(cudaDeviceSynchronize());
     printf("chkpt6\n");
     */
-
+    /*
     gpuErrchk(cudaStreamSynchronize(0));
     t1 = get_timestamp();
     secs = (t1 - t0) / 1000000.0L;
     printf("Batch GEMM: %f\n", secs);
+    */
 }
 
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
@@ -211,10 +214,8 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
 
-    cublasOperation_t trans_a = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
-    cublasOperation_t trans_b = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
-    printf("transa: %d, transb: %d\n", transa, transb);
-    printf("a_rows: %d, b_rows: %d, b_cols: %d\n", a_rows, b_rows, b_cols);
+    cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
+    cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
 
     int m = b_cols;
     int n = a_rows;
@@ -237,16 +238,17 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
         k = b_rows;
         lda = n;
         ldb = m;
-	    ldc = m;
+	ldc = m;
     } else if (transb) {
         m = b_rows;
         n = a_rows;
         k = b_cols;
         lda = k;
         ldb = k;
-	    ldc = m;
+	ldc = m;
     }
 
+    
     const float alpha = 1.0f, beta = 0.0f;
     cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , m, n, k
@@ -258,45 +260,6 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
-
-    printf("m: %d, n: %d, k: %d\n", m, n, k);
-    printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
-
-    /* 
-    std::array<int, 4> dims { a_rows, b_rows, a_cols, b_cols };
-    for (auto& m : dims) {
-    for (auto& n : dims) {
-    for (auto& k : dims) {
-    for (auto& lda : dims) {
-	for (auto& ldb : dims) {
-	    for (auto& ldc : dims) {
-
-                printf("m: %d, n: %d, k: %d\n", m, n, k);
-                printf("lda: %d, ldb: %d, ldc: %d\n", lda, ldb, ldc);
- 
-                float alpha = 1.0;
-                float beta = 0.0;
-                cublasStatus_t status = cublasSgemm(
-                    handle, trans_a, trans_b,
-                    m, n, k, &alpha,
-                    d_B_arr, ldb,
-                    d_A_arr, lda, &beta,
-                    d_C_arr, ldc);
-
-                if (status != CUBLAS_STATUS_SUCCESS)
-                {
-                    std::cerr << "Kernel execution error.";
-		    continue;
-                }
-                cuda_print_arr(d_C_arr, 4,3);
-
-	    }
-	}
-    }
-    }
-    }
-    }
-    */
 }
 
 /*

@@ -14,7 +14,6 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', trans
         output = function(a, b)
         tf = time.perf_counter() - t0
         print(output.shape)
-        print('CUDA after returning: ', output.is_cuda)
         output = output.cpu()
         print(f'Our time: {tf}')
     if 'pytorch' in kernel or 'both' in kernel:
@@ -25,12 +24,12 @@ def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', trans
         pt_tf = time.perf_counter() - t0
         print(f'PyTorch time: {pt_tf}')
          
+    '''
     # debugging
     print('A: ', a)
     print('B: ', b)
     #print('Expected: ', expected)
     print('Output: ', output)
-    '''
     if len(a.size()) == 3 and len(b.size()) == 3:
 
         if (a.size()[1] == b.size()[2]):
@@ -76,10 +75,10 @@ def get_average_time(a_dim, b_dim, transa=False, transb=False, kernel="both", it
 
 #print(get_average_time((512, 512), (512, 64), iters=1, kernel=sys.argv[1]))
 
-#print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=1))
-print(get_average_time((2, 4, 2), (2, 3, 2), iters=1, transb=True))
+print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=1))
+#print(get_average_time((2, 4, 2), (2, 3, 2), iters=1, transb=True))
 #print(get_average_time((2, 2, 4, 2), (2, 2, 3, 2), iters=1, transb=True))
-#print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=1, transb=True))
+print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=1, transb=True))
 
 # Large Tests
 #print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))
