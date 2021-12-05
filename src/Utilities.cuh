@@ -67,6 +67,20 @@ void cuda_print_arr(float *d_arr, int m, int n) {
     }
 }
 
+void cuda_print_batched_arr(float *d_arr, int batch_size, int m, int n) {
+    float *h_arr = (float *) malloc(batch_size * m * n * sizeof(float));
+    gpuErrchk(cudaMemcpy(h_arr, d_arr, batch_size * m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    for (int k = 0; k < batch_size; k++) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%.4f ", h_arr[i * n + j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+    }
+}
+
 /**********************/
 /* CUBLAS ERROR CHECK */
 /**********************/

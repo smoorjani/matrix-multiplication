@@ -191,19 +191,19 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
  
                 float alpha = 1.0;
                 float beta = 0.0;
-                cublasStatus_t status = cublasSgemm(
-                    handle, trans_a, trans_b,
-                    m, n, k, &alpha,
-                    d_B_arr, ldb,
-                    d_A_arr, lda, &beta,
-                    d_C_arr, ldc);
+                cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
+                                       , m, n, k
+                                       , &alpha, d_B_arr, ldb, m * k
+                                       , d_A_arr, lda, n * k
+                                       , &beta, d_C_arr, ldc, m * n
+                                       , batch_dim);
 
                 if (status != CUBLAS_STATUS_SUCCESS)
                 {
                     std::cerr << "Kernel execution error.";
 		    continue;
                 }
-                cuda_print_arr(d_C_arr, 4,3);
+                cuda_print_batched_arr(d_C_arr, batch_dim, m, n);
 
 	    }
 	}
@@ -212,6 +212,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     }
     }
     */
+    
 
     cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , m, n, k
@@ -223,6 +224,7 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
     {
         std::cerr << "Kernel execution error.";
     }
+    
     /*
     gpuErrchk(cudaDeviceSynchronize());
     printf("chkpt4\n");
