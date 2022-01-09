@@ -33,12 +33,12 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
 // cusparse mm forward declaration
 void cusparse_mm_wrapper(cusparseHandle_t handle,
                          float *dA_values, int *dA_columns, int *dA_csrOffsets,
-                         int A_nnz, int A_rowptr_size, int A_num_rows, int A_num_cols,
+                         int A_nnz, int A_num_rows, int A_num_cols,
                          torch::Tensor B, int B_num_rows, int B_num_cols,
-                         torch::Tensor C)
+                         torch::Tensor C);
 void dense_to_csr(cusparseHandle_t handle, 
                   torch::Tensor dense, const int num_rows, const int num_cols,
-                  float *d_csr_values, int *d_csr_columns, int *d_csr_offsets, int *nnz)
+                  float *d_csr_values, int *d_csr_columns, int *d_csr_offsets, int *nnz);
 
 // cublasLT forward declaration
 void LtIgemmTensor(cublasLtHandle_t ltHandle,
@@ -157,7 +157,7 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C)
   int B_rows = B.size(0);
   int B_cols = B.size(1);;
 
-  double *d_A_values = nullptr;
+  float *d_A_values = nullptr;
   int *d_A_columns = nullptr;
   int *d_A_offsets = nullptr;
   int nnzA = 0;

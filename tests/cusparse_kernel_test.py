@@ -25,7 +25,7 @@ b_coords = gen_coords(n_vals, n)
 
 
 def sparsify(coords, dim):
-    mat = torch.zeros(n, n, dtype=torch.double)
+    mat = torch.zeros(n, n)
     for x in range(0, dim):
         for y in range(0, dim):
             if (x, y) in coords:

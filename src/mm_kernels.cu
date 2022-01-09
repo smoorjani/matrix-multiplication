@@ -14,16 +14,6 @@
 #include <sys/time.h>
 typedef unsigned long long timestamp_t;
 
-#define CHECK_CUSPARSE(func)                                                   \
-{                                                                              \
-    cusparseStatus_t status = (func);                                          \
-    if (status != CUSPARSE_STATUS_SUCCESS) {                                   \
-        printf("CUSPARSE API failed at line %d with error: %s (%d)\n",         \
-               __LINE__, cusparseGetErrorString(status), status);              \
-        return EXIT_FAILURE;                                                   \
-    }                                                                          \
-}
-
 static timestamp_t get_timestamp () {
     struct timeval now;
     gettimeofday (&now, NULL);
@@ -246,39 +236,39 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     void* dBuffer = NULL;
     size_t bufferSize = 0;
     // Create sparse matrix A in CSR format
-    CHECK_CUSPARSE(cusparseCreateCsr(&matA, A_num_rows, A_num_cols, A_nnz,
+    cusparseSafeCall(cusparseCreateCsr(&matA, A_num_rows, A_num_cols, A_nnz,
                                       dA_csrOffsets, dA_columns, dA_values,
                                       CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
-                                      CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F))
+                                      CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));
     // Create dense matrix B
-    CHECK_CUSPARSE(cusparseCreateDnMat(&matB, A_num_cols, B_num_cols, ldb, dB,
-                                        CUDA_R_32F, CUSPARSE_ORDER_COL))
+    cusparseSafeCall(cusparseCreateDnMat(&matB, A_num_cols, B_num_cols, ldb, dB,
+                                        CUDA_R_32F, CUSPARSE_ORDER_COL));
     // Create dense matrix C
-    CHECK_CUSPARSE(cusparseCreateDnMat(&matC, A_num_rows, B_num_cols, ldc, dC,
-                                        CUDA_R_32F, CUSPARSE_ORDER_COL))
+    cusparseSafeCall(cusparseCreateDnMat(&matC, A_num_rows, B_num_cols, ldc, dC,
+                                        CUDA_R_32F, CUSPARSE_ORDER_COL));
     // allocate an external buffer if needed
     float alpha = 1.0f;
     float beta = 0.0f;
-    CHECK_CUSPARSE(cusparseSpMM_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                           &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize))
-    CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize))
+    cusparseSafeCall(cusparseSpMM_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                           &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize));
+    checkCudaStatus(cudaMalloc(&dBuffer, bufferSize));
 
     // execute SpMM
-    CHECK_CUSPARSE(cusparseSpMM(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer))
+    cusparseSafeCall(cusparseSpMM(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer));
 
     // destroy matrix/vector descriptors
-    CHECK_CUSPARSE(cusparseDestroySpMat(matA))
-    CHECK_CUSPARSE(cusparseDestroyDnMat(matB))
-    CHECK_CUSPARSE(cusparseDestroyDnMat(matC))
+    cusparseSafeCall(cusparseDestroySpMat(matA));
+    cusparseSafeCall(cusparseDestroyDnMat(matB));
+    cusparseSafeCall(cusparseDestroyDnMat(matC));
 
     // device memory deallocation
-    // CHECK_CUDA(cudaFree(dBuffer))
-    // CHECK_CUDA(cudaFree(dA_csrOffsets))
-    // CHECK_CUDA(cudaFree(dA_columns))
-    // CHECK_CUDA(cudaFree(dA_values))
-    // CHECK_CUDA(cudaFree(dB))
-    CHECK_CUDA( cudaFree(dC) )
+    // checkCudaStatus(cudaFree(dBuffer))
+    // checkCudaStatus(cudaFree(dA_csrOffsets))
+    // checkCudaStatus(cudaFree(dA_columns))
+    // checkCudaStatus(cudaFree(dA_values))
+    // checkCudaStatus(cudaFree(dB))
+    checkCudaStatus( cudaFree(dC) );
     return;
 }
 
@@ -296,38 +286,38 @@ void dense_to_csr(cusparseHandle_t handle,
     size_t bufferSize = 0;
 
     // Allocate memory for offsets
-    CHECK_CUDA(cudaMalloc((void**) &d_csr_offsets, (num_rows + 1) * sizeof(int)))
+    checkCudaStatus(cudaMalloc((void**) &d_csr_offsets, (num_rows + 1) * sizeof(int)));
 
     // Create dense matrix A
-    CHECK_CUSPARSE(cusparseCreateDnMat(&matA, num_rows, num_cols, ld, d_dense, CUDA_R_32F, CUSPARSE_ORDER_ROW))
+    cusparseSafeCall(cusparseCreateDnMat(&matA, num_rows, num_cols, ld, d_dense, CUDA_R_32F, CUSPARSE_ORDER_ROW));
     // Create sparse matrix B in CSR format
-    CHECK_CUSPARSE(cusparseCreateCsr(&matB, num_rows, num_cols, 0, d_csr_offsets, NULL, NULL,
-                                     CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F))
+    cusparseSafeCall(cusparseCreateCsr(&matB, num_rows, num_cols, 0, d_csr_offsets, NULL, NULL,
+                                     CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));
 
     // allocate an external buffer if needed
-    CHECK_CUSPARSE(cusparseDenseToSparse_bufferSize(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, &bufferSize))
-    CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize))
+    cusparseSafeCall(cusparseDenseToSparse_bufferSize(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, &bufferSize));
+    checkCudaStatus(cudaMalloc(&dBuffer, bufferSize));
 
     // execute Sparse to Dense conversion
-    CHECK_CUSPARSE(cusparseDenseToSparse_analysis(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, dBuffer))
+    cusparseSafeCall(cusparseDenseToSparse_analysis(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, dBuffer));
 
     // get number of non-zero elements
     int64_t num_rows_tmp, num_cols_tmp, nnz_tmp;
-    CHECK_CUSPARSE(cusparseSpMatGetSize(matB, &num_rows_tmp, &num_cols_tmp, &nnz_tmp))
+    cusparseSafeCall(cusparseSpMatGetSize(matB, &num_rows_tmp, &num_cols_tmp, &nnz_tmp));
     *nnz = nnz_tmp;
 
     // allocate CSR column indices and values
-    CHECK_CUDA(cudaMalloc((void**) &d_csr_columns, nnz_tmp * sizeof(int)))
-    CHECK_CUDA(cudaMalloc((void**) &d_csr_values,  nnz_tmp * sizeof(float)))
+    checkCudaStatus(cudaMalloc((void**) &d_csr_columns, nnz_tmp * sizeof(int)));
+    checkCudaStatus(cudaMalloc((void**) &d_csr_values,  nnz_tmp * sizeof(float)));
     // reset offsets, column indices, and values pointers
-    CHECK_CUSPARSE(cusparseCsrSetPointers(matB, d_csr_offsets, d_csr_columns, d_csr_values))
+    cusparseSafeCall(cusparseCsrSetPointers(matB, d_csr_offsets, d_csr_columns, d_csr_values));
     // execute Sparse to Dense conversion
-    CHECK_CUSPARSE(cusparseDenseToSparse_convert(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, dBuffer))
+    cusparseSafeCall(cusparseDenseToSparse_convert(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, dBuffer));
     // destroy matrix/vector descriptors
-    CHECK_CUSPARSE(cusparseDestroyDnMat(matA))
-    CHECK_CUSPARSE(cusparseDestroySpMat(matB))
+    cusparseSafeCall(cusparseDestroyDnMat(matA));
+    cusparseSafeCall(cusparseDestroySpMat(matB));
     // device memory deallocation
-    CHECK_CUDA(cudaFree(dBuffer))
+    checkCudaStatus(cudaFree(dBuffer));
 }
 
 
