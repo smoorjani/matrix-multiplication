@@ -56,7 +56,7 @@ void print_arr_ptr(float **arr, int m, int n) {
 
 void cuda_print_arr(float *d_arr, int m, int n) {
     float *h_arr = (float *) malloc(m * n * sizeof(float));
-    gpuErrchk(cudaMemcpy(h_arr, d_arr, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    checkCudaStatus(cudaMemcpy(h_arr, d_arr, m * n * sizeof(float), cudaMemcpyDeviceToHost));
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
             printf("%.4f ", h_arr[i * n + j]);
@@ -67,7 +67,7 @@ void cuda_print_arr(float *d_arr, int m, int n) {
 
 void cuda_print_batched_arr(float *d_arr, int batch_size, int m, int n) {
     float *h_arr = (float *) malloc(batch_size * m * n * sizeof(float));
-    gpuErrchk(cudaMemcpy(h_arr, d_arr, batch_size * m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    checkCudaStatus(cudaMemcpy(h_arr, d_arr, batch_size * m * n * sizeof(float), cudaMemcpyDeviceToHost));
     for (int k = 0; k < batch_size; k++) {
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
@@ -108,17 +108,6 @@ inline void checkCublasStatus(cublasStatus_t status) {
         throw std::logic_error("cuBLAS API failed");
     }
 }
-
-#define CHECK_CUSPARSE(func)                                                   \
-{                                                                              \
-    cusparseStatus_t status = (func);                                          \
-    if (status != CUSPARSE_STATUS_SUCCESS) {                                   \
-        printf("CUSPARSE API failed at line %d with error: %s (%d)\n",         \
-               __LINE__, cusparseGetErrorString(status), status);              \
-        return EXIT_FAILURE;                                                   \
-    }                                                                          \
-}
-
 
 /***************************/
 /* CUSPARSE ERROR CHECKING */

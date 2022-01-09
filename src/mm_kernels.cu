@@ -14,6 +14,16 @@
 #include <sys/time.h>
 typedef unsigned long long timestamp_t;
 
+#define CHECK_CUSPARSE(func)                                                   \
+{                                                                              \
+    cusparseStatus_t status = (func);                                          \
+    if (status != CUSPARSE_STATUS_SUCCESS) {                                   \
+        printf("CUSPARSE API failed at line %d with error: %s (%d)\n",         \
+               __LINE__, cusparseGetErrorString(status), status);              \
+        return EXIT_FAILURE;                                                   \
+    }                                                                          \
+}
+
 static timestamp_t get_timestamp () {
     struct timeval now;
     gettimeofday (&now, NULL);
@@ -32,7 +42,7 @@ void dummy_kernel_launch() {
     dim3 threads_per_block(NUM_THREADS);
     dim3 blocks_per_grid(NUM_THREADS);
     dummyKernel<<<blocks_per_grid, threads_per_block>>>();
-    CHECK_CUDA(cudaDeviceSynchronize());
+    checkCudaStatus(cudaDeviceSynchronize());
 }
 
 __global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols)
@@ -227,9 +237,8 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     float *dB = B.data_ptr<float>();
     float *dC = C.data_ptr<float>();
 
-    int lda = A_num_rows;
-    int ldb = B_num_rows
-    int ldc = lda;
+    int ldb = B_num_rows;
+    int ldc = A_num_rows;
 
     // CUSPARSE APIs
     cusparseSpMatDescr_t matA;
@@ -248,6 +257,8 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     CHECK_CUSPARSE(cusparseCreateDnMat(&matC, A_num_rows, B_num_cols, ldc, dC,
                                         CUDA_R_32F, CUSPARSE_ORDER_COL))
     // allocate an external buffer if needed
+    float alpha = 1.0f;
+    float beta = 0.0f;
     CHECK_CUSPARSE(cusparseSpMM_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                            &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize))
     CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize))
@@ -303,7 +314,7 @@ void dense_to_csr(cusparseHandle_t handle,
     // get number of non-zero elements
     int64_t num_rows_tmp, num_cols_tmp, nnz_tmp;
     CHECK_CUSPARSE(cusparseSpMatGetSize(matB, &num_rows_tmp, &num_cols_tmp, &nnz_tmp))
-    *nnz = nnz_tmp
+    *nnz = nnz_tmp;
 
     // allocate CSR column indices and values
     CHECK_CUDA(cudaMalloc((void**) &d_csr_columns, nnz_tmp * sizeof(int)))
