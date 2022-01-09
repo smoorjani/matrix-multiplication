@@ -73,7 +73,7 @@ void cuda_print_batched_arr(float *d_arr, int batch_size, int m, int n) {
     for (int k = 0; k < batch_size; k++) {
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            printf("%.4f ", h_arr[i * n + j]);
+            printf("%.4f ", h_arr[k * m * n + i * n + j]);
         }
         printf("\n");
     }

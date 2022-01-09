@@ -32,6 +32,7 @@ def custom_matmul(a: torch.Tensor,
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
 
+    '''
     if not transb and not transa:
         assert a_shape[-1] == b_shape[-2]
     elif transa and transb:
@@ -40,6 +41,7 @@ def custom_matmul(a: torch.Tensor,
         assert a_shape[-2] == b_shape[-2]
     elif transb:
         assert a_shape[-1] == b_shape[-1]
+    '''
 
     if len(a_shape) == 3 and len(b_shape) == 2:
         lda, dim1, dim2 = a_shape

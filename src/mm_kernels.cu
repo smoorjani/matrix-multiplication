@@ -248,7 +248,6 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
 	ldc = m;
     }
 
-    
     const float alpha = 1.0f, beta = 0.0f;
     cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , m, n, k
