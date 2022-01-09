@@ -32,13 +32,13 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
 
 // cusparse mm forward declaration
 void cusparse_mm_wrapper(cusparseHandle_t handle,
-                         double *h_A, int *h_A_ColIndices, int *h_A_RowIndices,
-                         int nnzA, int h_A_rowptr_size,
-                         double *h_B_dense, int h_B_rows, int h_B_cols,
-                         double *h_C_dense);
+                         float *dA_values, int *dA_columns, int *dA_csrOffsets,
+                         int A_nnz, int A_rowptr_size, int A_num_rows, int A_num_cols,
+                         torch::Tensor B, int B_num_rows, int B_num_cols,
+                         torch::Tensor C)
 void dense_to_csr(cusparseHandle_t handle, 
-                  double *h_A_dense, const int Nrows, const int Ncols,
-                  double **h_A_val, int **h_A_colind, int **h_A_rowptr, int *nnzA);
+                  torch::Tensor dense, const int num_rows, const int num_cols,
+                  float *d_csr_values, int *d_csr_columns, int *d_csr_offsets, int *nnz)
 
 // cublasLT forward declaration
 void LtIgemmTensor(cublasLtHandle_t ltHandle,
@@ -149,39 +149,33 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
   }
 }
 
-torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B)
+torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C)
 {
-  double *A_arr = A.data_ptr<double>();
-  double *B_arr = B.data_ptr<double>();
 
   int A_rows = A.size(0);
   int A_cols = A.size(1);
   int B_rows = B.size(0);
   int B_cols = B.size(1);;
 
-  torch::Tensor C = torch::zeros({A_rows, B_cols}, torch::kDouble);
-  double *C_arr = C.data_ptr<double>();
-
-  double *h_A_val = nullptr;
-  int *h_A_colind = nullptr;
-  int *h_A_rowptr = nullptr;
+  double *d_A_values = nullptr;
+  int *d_A_columns = nullptr;
+  int *d_A_offsets = nullptr;
   int nnzA = 0;
-  int h_A_rowptr_size = A_rows + 1;
 
-  dense_to_csr(g_cusparse_handle, A_arr, A_rows, A_cols, &h_A_val, &h_A_colind, &h_A_rowptr, &nnzA);
+  dense_to_csr(g_cusparse_handle, A, A_rows, A_cols, d_A_values, d_A_columns, d_A_offsets, &nnzA);
 
-  for (int i = 0; i < nnzA; i++)
-  {
-    h_A_colind[i] += 1;
-  }
+  // for (int i = 0; i < nnzA; i++)
+  // {
+  //   h_A_colind[i] += 1;
+  // }
 
-  for (int i = 0; i < h_A_rowptr_size; i++)
-  {
-    h_A_rowptr[i] += 1;
-  }
+  // for (int i = 0; i < h_A_rowptr_size; i++)
+  // {
+  //   h_A_rowptr[i] += 1;
+  // }
 
-  cusparse_mm_wrapper(g_cusparse_handle, h_A_val, h_A_colind, h_A_rowptr, nnzA,
-                      h_A_rowptr_size, B_arr, B_rows, B_cols, C_arr);
+  cusparse_mm_wrapper(g_cusparse_handle, d_A_values, d_A_columns, d_A_offsets, nnzA,
+                      A_rows, A_cols, B, B_rows, B_cols, C);
 
 
   return C;

@@ -14,23 +14,21 @@
 /********************/
 /* CUDA ERROR CHECK */
 /********************/
-// --- Credit to http://stackoverflow.com/questions/14038589/what-is-the-canonical-way-to-check-for-errors-using-the-cuda-runtime-api
-void gpuAssert(cudaError_t code, char *file, int line, bool abort=true)
-{
-   if (code != cudaSuccess)
-   {
-      fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-      if (abort) { exit(code); }
-   }
-}
-
-extern "C" void gpuErrchk(cudaError_t ans) { gpuAssert((ans), __FILE__, __LINE__); }
-
 inline void checkCudaStatus(cudaError_t status) {
     if (status != cudaSuccess) {
         printf("cuda API failed with status %d: %s\n", status, cudaGetErrorString(status));
         throw std::logic_error("cuda API failed");
     }
+}
+
+#define CHECK_CUDA(func)                                                       \
+{                                                                              \
+    cudaError_t status = (func);                                               \
+    if (status != cudaSuccess) {                                               \
+        printf("CUDA API failed at line %d with error: %s (%d)\n",             \
+               __LINE__, cudaGetErrorString(status), status);                  \
+        return EXIT_FAILURE;                                                   \
+    }                                                                          \
 }
 
 /******************/
@@ -109,6 +107,16 @@ inline void checkCublasStatus(cublasStatus_t status) {
         printf("%s\n", cublasGetErrorString(status));
         throw std::logic_error("cuBLAS API failed");
     }
+}
+
+#define CHECK_CUSPARSE(func)                                                   \
+{                                                                              \
+    cusparseStatus_t status = (func);                                          \
+    if (status != CUSPARSE_STATUS_SUCCESS) {                                   \
+        printf("CUSPARSE API failed at line %d with error: %s (%d)\n",         \
+               __LINE__, cusparseGetErrorString(status), status);              \
+        return EXIT_FAILURE;                                                   \
+    }                                                                          \
 }
 
 

@@ -32,7 +32,21 @@ void dummy_kernel_launch() {
     dim3 threads_per_block(NUM_THREADS);
     dim3 blocks_per_grid(NUM_THREADS);
     dummyKernel<<<blocks_per_grid, threads_per_block>>>();
-    gpuErrchk(cudaDeviceSynchronize());
+    CHECK_CUDA(cudaDeviceSynchronize());
+}
+
+__global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols)
+{
+    int tid = threadIdx.x+blockIdx.x*blockDim.x;
+    if (tid >= rows * cols) {
+        return;
+    }
+
+    if (d_Arr[tid] == h_Arr[tid]) {
+        printf("Equal %d\n", tid);
+    } else {
+        printf("Not Equal %d\n", tid);
+    }
 }
 
 void cublas_mm_wrapper(cublasHandle_t handle,
@@ -79,64 +93,24 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 
     float alpha = 1.0;
     float beta = 0.0;
-    cublasStatus_t status = cublasSgemm(
+    checkCublasStatus(cublasSgemm(
         handle, trans_a, trans_b,
         m, n, k, &alpha,
         d_B_arr, ldb,
         d_A_arr, lda, &beta,
-        d_C_arr, ldc);
-
-    if (status != CUBLAS_STATUS_SUCCESS)
-    {
-        std::cerr << "Kernel execution error.";
-    }
-   
+        d_C_arr, ldc));
 }
 
-__global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols)
-{
-    int tid = threadIdx.x+blockIdx.x*blockDim.x;
-    if (tid >= rows * cols) {
-        return;
-    }
 
-    if (d_Arr[tid] == h_Arr[tid]) {
-        printf("Equal %d\n", tid);
-    } else {
-        printf("Not Equal %d\n", tid);
-    }
-}
 // https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
-
 void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t a_cols, size_t b_cols, size_t b_rows,
                size_t batch_dim, bool transa, bool transb) {
-    
-    // ==============
-    //timestamp_t t0 = get_timestamp();
     float *d_A_arr = d_A.data_ptr<float>();
     float *d_B_arr = d_B.data_ptr<float>();
     float *d_C_arr = d_C.data_ptr<float>();
-    /*
-    printf("chkpt1\n");
-    float *C;
-    gpuErrchk(cudaMalloc(&C, a_rows * b_cols * sizeof(float)));
-    gpuErrchk(cudaMemcpy(C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice));
-    printf("chkpt2\n");
-    dim3 threads_per_block(NUM_THREADS);
-    dim3 C_blocks_per_grid((a_rows * b_cols + NUM_THREADS - 1)/NUM_THREADS);
-    check_equal<<<threads_per_block, C_blocks_per_grid>>>(C, d_C_arr, a_rows, b_cols);
-    printf("chkpt3\n");
-    gpuErrchk(cudaDeviceSynchronize());
-    */
-    /*
-    timestamp_t t1 = get_timestamp();
-    double secs = (t1 - t0) / 1000000.0L;
-    printf("Preprocessing: %f\n", secs);
 
-    t0 = get_timestamp();
-    */
     const float alpha = 1.0f, beta = 0.0f;
 
     cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
@@ -173,35 +147,12 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
 	    ldc = m;
     }
 
-    cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
+    checkCublasStatus(cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , m, n, k
                                        , &alpha, d_B_arr, ldb, m * k
                                        , d_A_arr, lda, n * k
                                        , &beta, d_C_arr, ldc, m * n
-                                       , batch_dim);
-    if (status != CUBLAS_STATUS_SUCCESS)
-    {
-        std::cerr << "Kernel execution error.";
-    }
-    
-    /*
-    gpuErrchk(cudaDeviceSynchronize());
-    printf("chkpt4\n");
-    //gpuErrchk(cudaMemcpy(C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyHostToDevice));
-    //check_equal<<<threads_per_block, C_blocks_per_grid>>>(C, d_C_arr, a_rows, b_cols);
-    //gpuErrchk(cudaDeviceSynchronize());
-    printf("chkpt5\n");
-    gpuErrchk(cudaMemcpy(C, d_C_arr, a_rows * b_cols * sizeof(float), cudaMemcpyDeviceToDevice));
-    check_equal<<<threads_per_block, C_blocks_per_grid>>>(C, d_C_arr, a_rows, b_cols);
-    gpuErrchk(cudaDeviceSynchronize());
-    printf("chkpt6\n");
-    */
-    /*
-    gpuErrchk(cudaStreamSynchronize(0));
-    t1 = get_timestamp();
-    secs = (t1 - t0) / 1000000.0L;
-    printf("Batch GEMM: %f\n", secs);
-    */
+                                       , batch_dim));
 }
 
 void cublas_4d_bmm_wrapper(cublasHandle_t handle,
@@ -249,16 +200,12 @@ void cublas_4d_bmm_wrapper(cublasHandle_t handle,
     }
 
     const float alpha = 1.0f, beta = 0.0f;
-    cublasStatus_t status = cublasSgemmStridedBatched(handle, trans_a, trans_b
+    checkCublasStatus(cublasSgemmStridedBatched(handle, trans_a, trans_b
                                        , m, n, k
                                        , &alpha, d_B_arr, ldb, m * k
                                        , d_A_arr, lda, n * k
                                        , &beta, d_C_arr, ldc, m * n
-                                       , batch_dim1 * batch_dim2);
-    if (status != CUBLAS_STATUS_SUCCESS)
-    {
-        std::cerr << "Kernel execution error.";
-    }
+                                       , batch_dim1 * batch_dim2));
 }
 
 /*
@@ -272,133 +219,108 @@ A * B = C
 note: row_ind.len = lda + 1
 */
 void cusparse_mm_wrapper(cusparseHandle_t handle,
-                         double *d_A, int *d_A_ColIndices, int *d_A_RowIndices,
-                         int nnzA, int A_rowptr_size,
-                         double *d_B_dense, int B_rows, int B_cols,
-                         double *d_C_dense)
+                         float *dA_values, int *dA_columns, int *dA_csrOffsets,
+                         int A_nnz, int A_num_rows, int A_num_cols,
+                         torch::Tensor B, int B_num_rows, int B_num_cols,
+                         torch::Tensor C)
 {
-    // Initialize cuSPARSE
-    // cusparseHandle_t handle;
-    // cusparseSafeCall(cusparseCreate(&handle));
-    const int m = A_rowptr_size - 1;
-    const int k = B_rows;
-    const int n = B_cols;
+    float *dB = B.data_ptr<float>();
+    float *dC = C.data_ptr<float>();
 
-    // Descriptor for sparse matrix A
-    cusparseMatDescr_t descrA;
-    cusparseSafeCall(cusparseCreateMatDescr(&descrA));
-    cusparseSafeCall(cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL));
-    cusparseSafeCall(cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ONE));
-    // Descriptor for sparse matrix B
-    cusparseMatDescr_t descrB;
-    cusparseSafeCall(cusparseCreateMatDescr(&descrB));
-    cusparseSafeCall(cusparseSetMatType(descrB, CUSPARSE_MATRIX_TYPE_GENERAL));
-    cusparseSafeCall(cusparseSetMatIndexBase(descrB, CUSPARSE_INDEX_BASE_ONE));
-    // Descriptor for sparse matrix C
-    cusparseMatDescr_t descrC;
-    cusparseSafeCall(cusparseCreateMatDescr(&descrC));
-    cusparseSafeCall(cusparseSetMatType(descrC, CUSPARSE_MATRIX_TYPE_GENERAL));
-    cusparseSafeCall(cusparseSetMatIndexBase(descrC, CUSPARSE_INDEX_BASE_ONE));
+    int lda = A_num_rows;
+    int ldb = B_num_rows
+    int ldc = lda;
 
-    int nnzB = 0; //   Number of nonzero elements in dense matrix B
-    // Device side number of nonzero elements per row of matrix B
-    int *d_nnzPerVectorB;
-    gpuErrchk(cudaMalloc(&d_nnzPerVectorB, k * sizeof(*d_nnzPerVectorB)));
-    //cusparseSafeCall(cusparseDnnz(handle, CUSPARSE_DIRECTION_ROW, k, n, descrB, d_B_dense, k, d_nnzPerVectorB, &nnzB));
+    // CUSPARSE APIs
+    cusparseSpMatDescr_t matA;
+    cusparseDnMatDescr_t matB, matC;
+    void* dBuffer = NULL;
+    size_t bufferSize = 0;
+    // Create sparse matrix A in CSR format
+    CHECK_CUSPARSE(cusparseCreateCsr(&matA, A_num_rows, A_num_cols, A_nnz,
+                                      dA_csrOffsets, dA_columns, dA_values,
+                                      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
+                                      CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F))
+    // Create dense matrix B
+    CHECK_CUSPARSE(cusparseCreateDnMat(&matB, A_num_cols, B_num_cols, ldb, dB,
+                                        CUDA_R_32F, CUSPARSE_ORDER_COL))
+    // Create dense matrix C
+    CHECK_CUSPARSE(cusparseCreateDnMat(&matC, A_num_rows, B_num_cols, ldc, dC,
+                                        CUDA_R_32F, CUSPARSE_ORDER_COL))
+    // allocate an external buffer if needed
+    CHECK_CUSPARSE(cusparseSpMM_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                           &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize))
+    CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize))
 
-    // Device side sparse matrix B
-    double *d_B;
-    gpuErrchk(cudaMalloc(&d_B, nnzB * sizeof(*d_B)));
-    int *d_B_RowIndices;
-    gpuErrchk(cudaMalloc(&d_B_RowIndices, (k + 1) * sizeof(*d_B_RowIndices)));
-    int *d_B_ColIndices;
-    gpuErrchk(cudaMalloc(&d_B_ColIndices, nnzB * sizeof(*d_B_ColIndices)));
-    // Dense B to Sparse B
-    //cusparseSafeCall(cusparseDdense2csr(handle, k, n, descrB, d_B_dense, k, d_nnzPerVectorB, d_B, d_B_RowIndices, d_B_ColIndices));
+    // execute SpMM
+    CHECK_CUSPARSE(cusparseSpMM(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer))
 
-    // Device side sparse matrix C
-    int *d_C_RowIndices;
-    gpuErrchk(cudaMalloc(&d_C_RowIndices, (m + 1) * sizeof(*d_C_RowIndices)));
+    // destroy matrix/vector descriptors
+    CHECK_CUSPARSE(cusparseDestroySpMat(matA))
+    CHECK_CUSPARSE(cusparseDestroyDnMat(matB))
+    CHECK_CUSPARSE(cusparseDestroyDnMat(matC))
 
-    // Performing the matrix - matrix multiplication
-    int baseC, nnzC = 0;
-    // nnzTotalDevHostPtr points to host memory
-    int *nnzTotalDevHostPtr = &nnzC;
-
-    //cusparseSafeCall(cusparseSetPointerMode(handle, CUSPARSE_POINTER_MODE_HOST));
-
-    //cusparseSafeCall(cusparseXcsrgemmNnz(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, k, descrA, nnzA,
-    //                                     d_A_RowIndices, d_A_ColIndices, descrB, nnzB, d_B_RowIndices, d_B_ColIndices, descrC, d_C_RowIndices,
-    //                                     nnzTotalDevHostPtr));
-    if (nnzTotalDevHostPtr != NULL)
-        nnzC = *nnzTotalDevHostPtr;
-    else
-    {
-        cudaMemcpy(&nnzC, d_C_RowIndices + m, sizeof(int), cudaMemcpyDeviceToHost);
-        cudaMemcpy(&baseC, d_C_RowIndices, sizeof(int), cudaMemcpyDeviceToHost);
-        nnzC -= baseC;
-    }
-
-    // device side sparse matrix C
-    double *d_C;
-    gpuErrchk(cudaMalloc(&d_C, nnzC * sizeof(double)));
-    int *d_C_ColIndices;
-    gpuErrchk(cudaMalloc(&d_C_ColIndices, nnzC * sizeof(int)));
-
-    //cusparseSafeCall(cusparseDcsrgemm(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, k, descrA, nnzA,
-    //                                  d_A, d_A_RowIndices, d_A_ColIndices, descrB, nnzB, d_B, d_B_RowIndices, d_B_ColIndices, descrC,
-    //                                  d_C, d_C_RowIndices, d_C_ColIndices));
-
-    //cusparseSafeCall(cusparseDcsr2dense(handle, m, n, descrC, d_C, d_C_RowIndices, d_C_ColIndices, d_C_dense, m));
-
-    cudaFree(d_nnzPerVectorB);
-
-    cudaFree(d_B);
-    cudaFree(d_B_RowIndices);
-    cudaFree(d_B_ColIndices);
-
-    cudaFree(d_C);
-    cudaFree(d_C_RowIndices);
-    cudaFree(d_C_ColIndices);
-
+    // device memory deallocation
+    // CHECK_CUDA(cudaFree(dBuffer))
+    // CHECK_CUDA(cudaFree(dA_csrOffsets))
+    // CHECK_CUDA(cudaFree(dA_columns))
+    // CHECK_CUDA(cudaFree(dA_values))
+    // CHECK_CUDA(cudaFree(dB))
+    CHECK_CUDA( cudaFree(dC) )
     return;
 }
 
 void dense_to_csr(cusparseHandle_t handle, 
-                  double *d_A_dense, const int Nrows, const int Ncols,
-                  double **d_A_val, int **d_A_colind, int **d_A_rowptr, int *nnzA)
+                  torch::Tensor dense, const int num_rows, const int num_cols,
+                  float *d_csr_values, int *d_csr_columns, int *d_csr_offsets, int *nnz)
 {
-    // Descriptor for sparse matrix A
-    cusparseMatDescr_t descrA;
-    cusparseSafeCall(cusparseCreateMatDescr(&descrA));
-    cusparseSetMatType(descrA, CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descrA, CUSPARSE_INDEX_BASE_ZERO);
+    int ld = num_cols;
+    float *d_dense = dense.data_ptr<float>();
+                           
+    // CUSPARSE APIs
+    cusparseSpMatDescr_t matB;
+    cusparseDnMatDescr_t matA;
+    void* dBuffer = NULL;
+    size_t bufferSize = 0;
 
-    int nnz = 0;           //   Number of nonzero elements in dense matrix
-    const int lda = Nrows; //   Leading dimension of dense matrix
-    // Device side number of nonzero elements per row
-    int *d_nnzPerVector;
-    gpuErrchk(cudaMalloc(&d_nnzPerVector, Nrows * sizeof(*d_nnzPerVector)));
-    //cusparseSafeCall(cusparseDnnz(handle, CUSPARSE_DIRECTION_ROW, Nrows, Ncols, descrA, d_A_dense, lda, d_nnzPerVector, &nnz));
+    // Allocate memory for offsets
+    CHECK_CUDA(cudaMalloc((void**) &d_csr_offsets, (num_rows + 1) * sizeof(int)))
 
-    // Device side sparse matrix
-    double *d_A;
-    gpuErrchk(cudaMalloc(&d_A, nnz * sizeof(*d_A)));
-    int *d_A_RowIndices;
-    gpuErrchk(cudaMalloc(&d_A_RowIndices, (Nrows + 1) * sizeof(*d_A_RowIndices)));
-    int *d_A_ColIndices;
-    gpuErrchk(cudaMalloc(&d_A_ColIndices, nnz * sizeof(*d_A_ColIndices)));
+    // Create dense matrix A
+    CHECK_CUSPARSE(cusparseCreateDnMat(&matA, num_rows, num_cols, ld, d_dense, CUDA_R_32F, CUSPARSE_ORDER_ROW))
+    // Create sparse matrix B in CSR format
+    CHECK_CUSPARSE(cusparseCreateCsr(&matB, num_rows, num_cols, 0, d_csr_offsets, NULL, NULL,
+                                     CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F))
 
-    //cusparseSafeCall(cusparseDdense2csr(handle, Nrows, Ncols, descrA, d_A_dense, lda, d_nnzPerVector, d_A, d_A_RowIndices, d_A_ColIndices));
+    // allocate an external buffer if needed
+    CHECK_CUSPARSE(cusparseDenseToSparse_bufferSize(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, &bufferSize))
+    CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize))
 
-    *d_A_val = d_A;
-    *d_A_rowptr = d_A_RowIndices;
-    *d_A_colind = d_A_ColIndices;
-    *nnzA = nnz;
+    // execute Sparse to Dense conversion
+    CHECK_CUSPARSE(cusparseDenseToSparse_analysis(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, dBuffer))
 
-    gpuErrchk(cudaFree(d_nnzPerVector));
-    return;
+    // get number of non-zero elements
+    int64_t num_rows_tmp, num_cols_tmp, nnz_tmp;
+    CHECK_CUSPARSE(cusparseSpMatGetSize(matB, &num_rows_tmp, &num_cols_tmp, &nnz_tmp))
+    *nnz = nnz_tmp
+
+    // allocate CSR column indices and values
+    CHECK_CUDA(cudaMalloc((void**) &d_csr_columns, nnz_tmp * sizeof(int)))
+    CHECK_CUDA(cudaMalloc((void**) &d_csr_values,  nnz_tmp * sizeof(float)))
+    // reset offsets, column indices, and values pointers
+    CHECK_CUSPARSE(cusparseCsrSetPointers(matB, d_csr_offsets, d_csr_columns, d_csr_values))
+    // execute Sparse to Dense conversion
+    CHECK_CUSPARSE(cusparseDenseToSparse_convert(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, dBuffer))
+    // destroy matrix/vector descriptors
+    CHECK_CUSPARSE(cusparseDestroyDnMat(matA))
+    CHECK_CUSPARSE(cusparseDestroySpMat(matB))
+    // device memory deallocation
+    CHECK_CUDA(cudaFree(dBuffer))
 }
+
+
+
 
 int roundoff(int v, int d) {
     return (v + d - 1) / d * d;
