@@ -56,6 +56,21 @@ It may help to define a wrapper as well for your matrix multiplication to deal w
 
 Once you write the InplaceFunction, all you need to call it is `inplaceFunctionMatMul.apply(A,B)` where `inplaceFunctionMatMul` is the name of your extended InplaceFunction and `A` and `B` are your tensors.
 
+## How to use with Huggingface Transformers
+For a BERT model, you can replace the multiplications in the attention mechanism as follows:
 
+```python
+# store the tensors as contiguous in memory for the data_ptr<float>() method.
+query_layer = query_layer.contiguous()
+key_layer = key_layer.contiguous()
+
+# original torch matrix multiplication
+attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
+
+# our matrix multiplication
+attention_scores = matmuls.cublasTransbMM.apply(query_layer, key_layer)
+```
+
+Ensure that there is an existing cuBLAS handle.
 
 
