@@ -36,11 +36,14 @@ def sparsify(coords, dim):
 a = sparsify(a_coords, n)
 b = sparsify(b_coords, n)
 
+c = torch.zeros((n, n), device=torch.device('cuda'))
+
 print('a: ', a)
 print('b: ', b)
 
 exp = a@b
-our = custom_mm.cusparse_mmul(a, b)
+custom_mm.cusparse_mmul(a, b, c)
+our = c
 
 diff = torch.nonzero(torch.subtract(exp, our))
 
