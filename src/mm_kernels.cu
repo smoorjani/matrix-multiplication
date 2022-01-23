@@ -220,15 +220,20 @@ note: row_ind.len = lda + 1
 */
 void cusparse_mm_wrapper(cusparseHandle_t handle,
                          float *dA_values, int *dA_columns, int *dA_csrOffsets,
-                         int A_nnz, int A_num_rows, int A_num_cols,
-                         torch::Tensor B, int B_num_rows, int B_num_cols,
+                         int A_nnz, int A_rows, int A_cols,
+                         torch::Tensor B, int B_rows, int B_cols,
                          torch::Tensor C)
 {
     float *dB = B.data_ptr<float>();
     float *dC = C.data_ptr<float>();
 
-    int ldb = B_num_rows;
-    int ldc = A_num_rows;
+    //cuda_print_arr<float>(dA_values, 1, A_nnz);
+    //cuda_print_arr<int>(dA_columns, 1, A_nnz);
+    //cuda_print_arr<int>(dA_csrOffsets, 1, A_rows + 1);
+    //cuda_print_arr<float>(dB, B_rows, B_cols);
+    printf("A_rows: %d, A_cols: %d, B_rows: %d, B_cols: %d", A_rows, A_cols, B_rows, B_cols);
+    int ldb = B_rows;
+    int ldc = A_cols;
 
     // CUSPARSE APIs
     cusparseSpMatDescr_t matA;
@@ -236,25 +241,29 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     void* dBuffer = NULL;
     size_t bufferSize = 0;
     // Create sparse matrix A in CSR format
-    cusparseSafeCall(cusparseCreateCsr(&matA, A_num_rows, A_num_cols, A_nnz,
+    cusparseSafeCall(cusparseCreateCsr(&matA, A_rows, A_cols, A_nnz,
                                       dA_csrOffsets, dA_columns, dA_values,
                                       CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
                                       CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));
     // Create dense matrix B
-    cusparseSafeCall(cusparseCreateDnMat(&matB, A_num_cols, B_num_cols, ldb, dB,
+    cusparseSafeCall(cusparseCreateDnMat(&matB, B_rows, B_cols, ldb, dB,
                                         CUDA_R_32F, CUSPARSE_ORDER_COL));
     // Create dense matrix C
-    cusparseSafeCall(cusparseCreateDnMat(&matC, A_num_rows, B_num_cols, ldc, dC,
+    cusparseSafeCall(cusparseCreateDnMat(&matC, A_cols, B_cols, ldc, dC,
                                         CUDA_R_32F, CUSPARSE_ORDER_COL));
     // allocate an external buffer if needed
     float alpha = 1.0f;
     float beta = 0.0f;
-    cusparseSafeCall(cusparseSpMM_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+
+    cusparseOperation_t transA = CUSPARSE_OPERATION_TRANSPOSE;
+    cusparseOperation_t transB = CUSPARSE_OPERATION_NON_TRANSPOSE;
+
+    cusparseSafeCall(cusparseSpMM_bufferSize(handle, transA, transB,
                                            &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize));
     checkCudaStatus(cudaMalloc(&dBuffer, bufferSize));
 
     // execute SpMM
-    cusparseSafeCall(cusparseSpMM(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, CUSPARSE_OPERATION_NON_TRANSPOSE,
+    cusparseSafeCall(cusparseSpMM(handle, transA, transB,
                                 &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer));
 
     // destroy matrix/vector descriptors
@@ -268,17 +277,17 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     // checkCudaStatus(cudaFree(dA_columns))
     // checkCudaStatus(cudaFree(dA_values))
     // checkCudaStatus(cudaFree(dB))
-    checkCudaStatus( cudaFree(dC) );
+    //checkCudaStatus( cudaFree(dC) );
     return;
 }
 
 void dense_to_csr(cusparseHandle_t handle, 
                   torch::Tensor dense, const int num_rows, const int num_cols,
-                  float *d_csr_values, int *d_csr_columns, int *d_csr_offsets, int *nnz)
+                  float **d_csr_values, int **d_csr_columns, int **d_csr_offsets, int *nnz)
 {
+
     int ld = num_cols;
     float *d_dense = dense.data_ptr<float>();
-                           
     // CUSPARSE APIs
     cusparseSpMatDescr_t matB;
     cusparseDnMatDescr_t matA;
@@ -286,12 +295,12 @@ void dense_to_csr(cusparseHandle_t handle,
     size_t bufferSize = 0;
 
     // Allocate memory for offsets
-    checkCudaStatus(cudaMalloc((void**) &d_csr_offsets, (num_rows + 1) * sizeof(int)));
+    checkCudaStatus(cudaMalloc((void**) &(*d_csr_offsets), (num_rows + 1) * sizeof(int)));
 
     // Create dense matrix A
     cusparseSafeCall(cusparseCreateDnMat(&matA, num_rows, num_cols, ld, d_dense, CUDA_R_32F, CUSPARSE_ORDER_ROW));
     // Create sparse matrix B in CSR format
-    cusparseSafeCall(cusparseCreateCsr(&matB, num_rows, num_cols, 0, d_csr_offsets, NULL, NULL,
+    cusparseSafeCall(cusparseCreateCsr(&matB, num_rows, num_cols, 0, *d_csr_offsets, NULL, NULL,
                                      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));
 
     // allocate an external buffer if needed
@@ -307,10 +316,10 @@ void dense_to_csr(cusparseHandle_t handle,
     *nnz = nnz_tmp;
 
     // allocate CSR column indices and values
-    checkCudaStatus(cudaMalloc((void**) &d_csr_columns, nnz_tmp * sizeof(int)));
-    checkCudaStatus(cudaMalloc((void**) &d_csr_values,  nnz_tmp * sizeof(float)));
+    checkCudaStatus(cudaMalloc((void**) &(*d_csr_columns), nnz_tmp * sizeof(int)));
+    checkCudaStatus(cudaMalloc((void**) &(*d_csr_values),  nnz_tmp * sizeof(float)));
     // reset offsets, column indices, and values pointers
-    cusparseSafeCall(cusparseCsrSetPointers(matB, d_csr_offsets, d_csr_columns, d_csr_values));
+    cusparseSafeCall(cusparseCsrSetPointers(matB, *d_csr_offsets, *d_csr_columns, *d_csr_values));
     // execute Sparse to Dense conversion
     cusparseSafeCall(cusparseDenseToSparse_convert(handle, matA, matB, CUSPARSE_DENSETOSPARSE_ALG_DEFAULT, dBuffer));
     // destroy matrix/vector descriptors

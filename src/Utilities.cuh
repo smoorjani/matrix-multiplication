@@ -44,13 +44,14 @@ void print_arr_ptr(float **arr, int m, int n) {
     }
 }
 
-
-void cuda_print_arr(float *d_arr, int m, int n) {
-    float *h_arr = (float *) malloc(m * n * sizeof(float));
-    checkCudaStatus(cudaMemcpy(h_arr, d_arr, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+template <typename T>
+void cuda_print_arr(T *d_arr, int m, int n) {
+    T *h_arr = (T *) malloc(m * n * sizeof(T));
+    checkCudaStatus(cudaMemcpy(h_arr, d_arr, m * n * sizeof(T), cudaMemcpyDeviceToHost));
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            printf("%.4f ", h_arr[i * n + j]);
+            //printf("%.4f ", h_arr[i * n + j]);
+	    std::cout << h_arr[i * n + j] << " ";
         }
         printf("\n");
     }
@@ -145,7 +146,7 @@ static const char *_cusparseGetErrorEnum(cusparseStatus_t error)
 inline void __cusparseSafeCall(cusparseStatus_t err, const char *file, const int line)
 {
     if(CUSPARSE_STATUS_SUCCESS != err) {
-        fprintf(stderr, "CUSPARSE error in file '%s', line %Ndims\nobjs %d\nerror %Ndims: %d\nterminating!\nobjs",__FILE__, __LINE__,err, \
+        fprintf(stderr, "CUSPARSE error in file '%s', line %Ndims\nobjs %d\nerror %Ndims: %d, %s\nterminating!\n",__FILE__, __LINE__,err, \
                                 _cusparseGetErrorEnum(err)); \
         cudaDeviceReset(); assert(0); \
     }
