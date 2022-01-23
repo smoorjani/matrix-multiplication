@@ -230,10 +230,7 @@ class naiveMM(InplaceFunction):
         # swap around for col-major call
         # where row major is expected
         ctx.save_for_backward(m1, m2)
-        return custom_matmul(
-            m1, m2, 
-            mm_op=custom_mm.naive_bmm,
-            bmm_op=custom_mm.naive_bmm)
+        return custom_mm.naive_bmm(m1, m2)
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -241,16 +238,12 @@ class naiveMM(InplaceFunction):
         grad_m1 = grad_m2 = None
 
         if ctx.needs_input_grad[0]:
-            grad_m1 = custom_matmul(grad_output, m2.transpose(
-                -1, -2),
-                mm_op=custom_mm.naive_bmm,
-                bmm_op=custom_mm.naive_bmm)
+            grad_m1 = custom_mm.naive_bmm(grad_output, m2.transpose(
+                -1, -2))
 
         if ctx.needs_input_grad[1]:
-            grad_m2 = custom_matmul(
+            grad_m2 = custom_mm.naive_bmm(
                 m1.transpose(-1, -2),
-                grad_output,
-                mm_op=custom_mm.naive_bmm,
-                bmm_op=custom_mm.naive_bmm)
+                grad_output)
 
         return grad_m1, grad_m2
