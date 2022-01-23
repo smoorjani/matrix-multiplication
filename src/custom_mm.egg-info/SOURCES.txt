@@ -1,4 +1,5 @@
 custom_mm.cpp
+default_mm.cu
 mm_kernels.cu
 setup.py
 custom_mm.egg-info/PKG-INFO

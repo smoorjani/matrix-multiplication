@@ -46,7 +46,7 @@ void LtIgemmTensor(cublasLtHandle_t ltHandle,
 void naive_batched_matmul(
               torch::Tensor A, torch::Tensor B, torch::Tensor C,
               int a_rows, int a_cols, int b_rows, int b_cols,
-              int batch_dim1, int batch_dim2)
+              int batch_dim);
 
 cublasHandle_t g_cublas_handle = nullptr;
 cusparseHandle_t g_cusparse_handle = nullptr;
@@ -161,7 +161,7 @@ torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int d
 
     int batch_dim = A.size(0);
     assert(batch_dim == B.size(0));
-    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim)
+    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim);
     return C;
   } else if (dim ==4) {
     int A_rows = A.size(2);
@@ -174,7 +174,7 @@ torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int d
     assert(batch_dim1 == B.size(0));
     assert(batch_dim2 == B.size(1));
 
-    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim1 * batch_dim2)
+    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim1 * batch_dim2);
     return C;
   } else if (dim == 2) {
     int A_rows = A.size(0);
@@ -182,7 +182,7 @@ torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int d
     int B_rows = B.size(0);
     int B_cols = B.size(1);
 
-    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, 1)
+    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, 1);
   } else {
     throw std::invalid_argument("Invalid dim argument.");
   }
@@ -259,5 +259,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
   m.def("cublaslt_mmul", &cublaslt_mmul, "cuBLASLt Torch Matrix Multiplication");
   m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
-  m.def("naive_bmm", &naive_bmm, "A naive implementation of Batched Matrix Multiplication")
+  m.def("naive_bmm", &naive_bmm, "A naive implementation of Batched Matrix Multiplication");
 }
