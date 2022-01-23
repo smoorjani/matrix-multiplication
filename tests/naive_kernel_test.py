@@ -6,14 +6,14 @@ import sys
 
 #custom_mm.init_cublas()
 
-def test_result(function, a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, transb=False):
+def test_result(a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, transb=False):
     output, expected = None, None
     tf, pt_tf = None, None
     if 'ours' in kernel or 'both' in kernel:
         _a = a if not transa else a.transpose(-1, -2)
         _b = b if not transb else b.transpose(-1, -2)
         t0 = time.perf_counter()
-        output = function(a, b)
+        output = matmuls.naiveMM.apply(a, b)
         tf = time.perf_counter() - t0
         output = output.cpu()
         print(f'Our time: {tf}')
@@ -41,8 +41,7 @@ def test_matmuls(a_dim, b_dim, transa=False, transb=False, kernel="both"):
     a = torch.rand(a_dim).to('cuda')
     b = torch.rand(b_dim).to('cuda')
 
-    operation = matmuls.naiveMM.apply
-    tf, result = test_result(operation, a, b, kernel=kernel, transa=transa, transb=transb)
+    tf, result = test_result(a, b, kernel=kernel, transa=transa, transb=transb)
     assert result
     print(a_dim, b_dim, " passed!")
     return tf
@@ -55,13 +54,11 @@ def get_average_time(a_dim, b_dim, transa=False, transb=False, kernel="both", it
 
 # BERT Tests
 
-#print(get_average_time((512, 512), (512, 64), iters=1, kernel=sys.argv[1]))
-#from transformers import BertForQuestionAnswering
-#model = BertForQuestionAnswering.from_pretrained('bert-large-uncased').cuda()
-print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=3))
-#print(get_average_time((2, 4, 2), (2, 3, 2), iters=1, transb=True))
+print(get_average_time((512, 512), (512, 64), iters=1))
+#print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=3))
+print(get_average_time((2, 4, 2), (2, 3, 2), iters=1, transb=True))
 #print(get_average_time((2, 2, 4, 2), (2, 2, 3, 2), iters=1, transb=True))
-print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=3, transb=True))
+#print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=3, transb=True))
 
 # Large Tests
 #print(get_average_time((64, 4096, 4096), (64, 4096, 4096), 2))

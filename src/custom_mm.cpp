@@ -150,7 +150,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
   }
 }
 
-torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim, bool transa, bool transb)
+torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim)
 {
   auto handle = at::cuda::getCurrentCUDABlasHandle();
   if (dim == 3) {
@@ -163,7 +163,7 @@ torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int d
     assert(batch_dim == B.size(0));
     naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim);
     return C;
-  } else if (dim ==4) {
+  } else if (dim == 4) {
     int A_rows = A.size(2);
     int A_cols = A.size(3);
     int B_rows = B.size(2);
