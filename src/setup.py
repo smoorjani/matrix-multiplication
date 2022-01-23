@@ -12,6 +12,7 @@ setup(
         CUDAExtension('custom_mm', [
             'custom_mm.cpp',
             'mm_kernels.cu',
+            'default_mm.cu'
         ])
     ],
     cmdclass={

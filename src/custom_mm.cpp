@@ -24,11 +24,6 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor A, torch::Tensor B, torch::Tensor C,
                size_t a_rows, size_t a_cols, size_t b_cols, size_t b_rows,
                size_t batch_dim, bool transa, bool transb);
-void cublas_4d_bmm_wrapper(cublasHandle_t handle,
-               torch::Tensor A, torch::Tensor B, torch::Tensor C,
-               size_t a_rows, size_t a_cols, size_t b_cols, size_t b_rows,
-               size_t batch_dim1, size_t batch_dim2,
-               bool transa, bool transb);
 
 // cusparse mm forward declaration
 void cusparse_mm_wrapper(cusparseHandle_t handle,
@@ -46,6 +41,12 @@ void LtIgemmTensor(cublasLtHandle_t ltHandle,
                    const float *A, int lda,
                    const float *B, int ldb,
                    float *C, int ldc);
+
+// naive mm forward declaration
+void naive_batched_matmul(
+              torch::Tensor A, torch::Tensor B, torch::Tensor C,
+              int a_rows, int a_cols, int b_rows, int b_cols,
+              int batch_dim1, int batch_dim2)
 
 cublasHandle_t g_cublas_handle = nullptr;
 cusparseHandle_t g_cusparse_handle = nullptr;
@@ -140,7 +141,7 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
     assert(batch_dim1 == B.size(0));
     assert(batch_dim2 == B.size(1));
 
-    cublas_4d_bmm_wrapper(handle, A, B, C, A_rows, A_cols, B_cols, B_rows, batch_dim1, batch_dim2, transa, transb);
+    cublas_bmm_wrapper(handle, A, B, C, A_rows, A_cols, B_cols, B_rows, batch_dim1 *batch_dim2, transa, transb);
     return C;
   } else if (dim == 2) {
     return cublas_mmul(A, B, C, transa, transb);
@@ -148,6 +149,45 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
     throw std::invalid_argument("Invalid dim argument.");
   }
 }
+
+torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim, bool transa, bool transb)
+{
+  auto handle = at::cuda::getCurrentCUDABlasHandle();
+  if (dim == 3) {
+    int A_rows = A.size(1);
+    int A_cols = A.size(2);
+    int B_rows = B.size(1);
+    int B_cols = B.size(2);
+
+    int batch_dim = A.size(0);
+    assert(batch_dim == B.size(0));
+    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim)
+    return C;
+  } else if (dim ==4) {
+    int A_rows = A.size(2);
+    int A_cols = A.size(3);
+    int B_rows = B.size(2);
+    int B_cols = B.size(3);
+
+    int batch_dim1 = A.size(0);
+    int batch_dim2 = A.size(1);
+    assert(batch_dim1 == B.size(0));
+    assert(batch_dim2 == B.size(1));
+
+    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim1 * batch_dim2)
+    return C;
+  } else if (dim == 2) {
+    int A_rows = A.size(0);
+    int A_cols = A.size(1);
+    int B_rows = B.size(0);
+    int B_cols = B.size(1);
+
+    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, 1)
+  } else {
+    throw std::invalid_argument("Invalid dim argument.");
+  }
+}
+
 
 torch::Tensor cusparse_mmul(torch::Tensor B, torch::Tensor A, torch::Tensor C)
 {
@@ -219,4 +259,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
   m.def("cublaslt_mmul", &cublaslt_mmul, "cuBLASLt Torch Matrix Multiplication");
   m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
+  m.def("naive_bmm", &naive_bmm, "A naive implementation of Batched Matrix Multiplication")
 }

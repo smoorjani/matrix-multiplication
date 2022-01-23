@@ -223,3 +223,34 @@ class cusparseMM(InplaceFunction):
                     "cuda" if torch.cuda.is_available() else "cpu")
 
         return grad_m1, grad_m2
+
+class naiveMM(InplaceFunction):
+    @staticmethod
+    def forward(ctx, m1, m2):
+        # swap around for col-major call
+        # where row major is expected
+        ctx.save_for_backward(m1, m2)
+        return custom_matmul(
+            m1, m2, 
+            mm_op=custom_mm.naive_bmm,
+            bmm_op=custom_mm.naive_bmm)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        m1, m2 = ctx.saved_variables
+        grad_m1 = grad_m2 = None
+
+        if ctx.needs_input_grad[0]:
+            grad_m1 = custom_matmul(grad_output, m2.transpose(
+                -1, -2),
+                mm_op=custom_mm.naive_bmm,
+                bmm_op=custom_mm.naive_bmm)
+
+        if ctx.needs_input_grad[1]:
+            grad_m2 = custom_matmul(
+                m1.transpose(-1, -2),
+                grad_output,
+                mm_op=custom_mm.naive_bmm,
+                bmm_op=custom_mm.naive_bmm)
+
+        return grad_m1, grad_m2

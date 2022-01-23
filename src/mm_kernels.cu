@@ -155,59 +155,6 @@ void cublas_bmm_wrapper(cublasHandle_t handle,
                                        , batch_dim));
 }
 
-void cublas_4d_bmm_wrapper(cublasHandle_t handle,
-               torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
-               size_t a_rows, size_t a_cols, size_t b_cols, size_t b_rows,
-               size_t batch_dim1, size_t batch_dim2,
-               bool transa, bool transb) {
-
-    float *d_A_arr = d_A.data_ptr<float>();
-    float *d_B_arr = d_B.data_ptr<float>();
-    float *d_C_arr = d_C.data_ptr<float>();
-
-    cublasOperation_t trans_a = (!transb) ? CUBLAS_OP_N : CUBLAS_OP_T;
-    cublasOperation_t trans_b = (!transa) ? CUBLAS_OP_N : CUBLAS_OP_T;
-
-    int m = b_cols;
-    int n = a_rows;
-    int k = b_rows;
-
-    int ldb = b_cols;
-    int lda = b_rows;
-    int ldc = b_cols;
-
-    if (transb && transa) {
-        m = b_rows;
-        n = a_cols;
-        k = b_cols;
-        lda = n;
-        ldb = k;
-        ldc = m;
-    } else if (transa) {
-        m = b_cols;
-        n = a_cols;
-        k = b_rows;
-        lda = n;
-        ldb = m;
-	ldc = m;
-    } else if (transb) {
-        m = b_rows;
-        n = a_rows;
-        k = b_cols;
-        lda = k;
-        ldb = k;
-	ldc = m;
-    }
-
-    const float alpha = 1.0f, beta = 0.0f;
-    checkCublasStatus(cublasSgemmStridedBatched(handle, trans_a, trans_b
-                                       , m, n, k
-                                       , &alpha, d_B_arr, ldb, m * k
-                                       , d_A_arr, lda, n * k
-                                       , &beta, d_C_arr, ldc, m * n
-                                       , batch_dim1 * batch_dim2));
-}
-
 /*
 cuSPARSE Kernels
 https://stackoverflow.com/questions/29688627/sparse-matrix-matrix-multiplication-in-cuda-using-cusparse
