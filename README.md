@@ -3,6 +3,10 @@ Sparse Matrix Multiplication Kernels incorporated into Pytorch.
 
 ## Setup instructions
 
+Run `python setup.py install` in both the master and the `src` directories.
+This will build the overhead logic and baseline multiplications (i.e. cuBLAS), respectively.
+
+**Deprecated. Only use for Yellowzone**
 All necessary steps are covered in the `install_deps.sh` script.
 Run the script using `bash install_deps.sh`.
 
@@ -11,7 +15,7 @@ Run the script using `bash install_deps.sh`.
 
 ```python
 import torch
-from matmuls import cublas_matmul, cublasMM
+from matmuls import cublasMM
 from custom_mm import init_cublas, destroy_cublas
 
 # create cublas handle (one-time overhead)
@@ -23,9 +27,6 @@ b = torch.rand(64, 8)
 # cublasMM is a torch.InplaceFunction with a forward and backward pass
 # You should use this when the gradient needs to be calculate
 c = cublasMM.apply(a, b)
-
-# cublas_matmul is a helper that can be used as is
-c = cublas_matmul(a, b, torch_=False)
 
 # destroy cublas handle
 destroy_cublas()
@@ -60,6 +61,10 @@ Once you write the InplaceFunction, all you need to call it is `inplaceFunctionM
 For a BERT model, you can replace the multiplications in the attention mechanism as follows:
 
 ```python
+import matmuls
+
+...
+
 # store the tensors as contiguous in memory for the data_ptr<float>() method.
 query_layer = query_layer.contiguous()
 key_layer = key_layer.contiguous()
@@ -71,6 +76,6 @@ attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
 attention_scores = matmuls.cublasTransbMM.apply(query_layer, key_layer)
 ```
 
-Ensure that there is an existing cuBLAS handle.
+Ensure that there is an existing cuBLAS handle. You do not need to recreate the handle as our module will find it.
 
 

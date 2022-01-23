@@ -37,6 +37,7 @@ void dummy_kernel_launch() {
 
 __global__ void check_equal(float *d_Arr, float *h_Arr, size_t rows, size_t cols)
 {
+    // checks two values are equal between two arrays
     int tid = threadIdx.x+blockIdx.x*blockDim.x;
     if (tid >= rows * cols) {
         return;
@@ -102,7 +103,6 @@ void cublas_mm_wrapper(cublasHandle_t handle,
 }
 
 
-// https://stackoverflow.com/questions/23743384/how-performing-multiple-matrix-multiplications-in-cuda/23743838#23743838
 void cublas_bmm_wrapper(cublasHandle_t handle,
                torch::Tensor d_A, torch::Tensor d_B, torch::Tensor d_C,
                size_t a_rows, size_t a_cols, size_t b_cols, size_t b_rows,

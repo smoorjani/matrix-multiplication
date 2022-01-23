@@ -19,12 +19,8 @@ def gen_coords(num_vals, dim1, dim2):
         coords.add((x, y))
     return coords
 
-
-a_coords = gen_coords(n_vals, n, n)
-b_coords = gen_coords(n_vals, n, n)
-
-
 def sparsify(coords, dim1, dim2):
+    # return a sparse randomly generated tensor
     mat = torch.zeros(dim1, dim2, device=torch.device('cuda'))
     for x in range(0, dim1):
         for y in range(0, dim2):
@@ -38,25 +34,33 @@ shapes = [
           ((2*n, n), (n, int(n/2)))
         ]
 
-for (a_rows, a_cols), (b_rows, b_cols) in shapes:
-    a = sparsify(a_coords, a_rows, a_cols)
-    #b = sparsify(b_coords, n)
-    b = torch.rand((b_rows, b_cols), device=torch.device('cuda'))
+# use these for sparse-sparse matrix multiplication
+# b_coords = gen_coords(n_vals, b_rows, b_cols)
+# b = sparsify(b_coords, n)
 
+for i, (a_rows, a_cols), (b_rows, b_cols) in enumerate(shapes):
+    # sparse dense matrix multiplication
+    a_n_vals = (a_rows * a_cols) / n_vals # scales number of values to be (1/n_vals)% sparsity
+    a_coords = gen_coords(a_n_vals, a_rows, a_cols)
+    a = sparsify(a_coords, a_rows, a_cols)
+    
+    b = torch.rand((b_rows, b_cols), device=torch.device('cuda'))
     c = torch.zeros((a_rows, b_cols), device=torch.device('cuda'))
 
-    #print('a: ', a)
-    #print('b: ', b)
-
     exp = a@b
-    _a = a.t()
-    _b = b.t()
     custom_mm.cusparse_mmul(a,b,c)
     our = c
-    print('expected: ', exp)
-    print('ours(sparse): ', our)
-    print('same? ', torch.allclose(exp, our))
+
+    if torch.allclose(exp, our):
+        print(f'Test {i} passed!')
+    else:
+        print('expected: ', exp)
+        print('ours(sparse): ', our)
+        print('# nonzero in exp:', torch.nonzero(exp).shape)
+        print('# nonzero in ours:', torch.nonzero(our).shape)
+
 '''
+# piece of code to try all combinations of transpose/non-transpose
 flag = False
 for ela in [a, _a, b, _b]:
     if flag:
@@ -73,21 +77,5 @@ for ela in [a, _a, b, _b]:
             flag=True
             break
 '''
-'''
-diff = torch.nonzero(torch.subtract(exp, our))
-
-print('# nonzero in exp:', torch.nonzero(exp).shape)
-print('# nonzero in ours:', torch.nonzero(our).shape)
-
-for x, y in diff:
-    print(exp[x][y], our[x][y])
-'''
-
-#print('a.t() @ b.t(): ', a.t() @ b.t())
-#print('a.t() @ b: ', a.t() @ b)
-#print('a @ b.t(): ', a @ b.t())
-#print('b.t() @ a.t(): ', b.t() @ a.t())
-#print('b.t() @ a: ', b.t() @ a)
-#print('b @ a.t(): ', b @ a.t())
 
 custom_mm.destroy_cusparse()
