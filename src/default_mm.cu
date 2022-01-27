@@ -292,10 +292,13 @@ void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 	auto batch_size = B.numel() / (n * k);
 
 	std::string reduce = "sum";
-	auto out = torch::empty(sizes, mat.options());
+
+	auto sizes = B.sizes().vec();
+	sizes[B.dim() - 2] = m;
+	auto out = torch::empty(sizes, B.options());
 	int64_t *arg_out_data = nullptr;
 	if (reduce2REDUCE.at(reduce) == MIN || reduce2REDUCE.at(reduce) == MAX) {
-		arg_out = torch::full_like(out, nnzA, A_rows + 1);
+		arg_out = torch::full_like(out, nnzA, B.options());
 		arg_out_data = arg_out.value().data_ptr<int64_t>();
 	}
   
