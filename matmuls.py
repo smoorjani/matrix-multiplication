@@ -44,12 +44,12 @@ def custom_matmul(a: torch.Tensor,
         # flatten A into a 2d tensor
         lda, dim1, dim2 = a_shape
         _a = a.reshape(lda * dim1, dim2)
-        c = mm_op(_a, b, c).reshape(lda, dim1, -1)
+        c = mm_op(_a, b, c, transa, transb).reshape(lda, dim1, -1)
     elif len(a_shape) == 2 and len(b_shape) == 3:
         # flatten B into a 2d tensor
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
-        c = mm_op(a, _b, c).reshape(ldb, dim1, -1)
+        c = mm_op(a, _b, c, transa, transb).reshape(ldb, dim1, -1)
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
