@@ -304,6 +304,10 @@ void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 		arg_out_data = arg_out.value().data_ptr<int64_t>();
 	}
   
-	spmm_kernel<float, REDUCE, true><<<BLOCKS, THREADS, 0, stream>>>(dA_csrOffsets, dA_columns, dA_values, dB, dC, arg_out_data, batch_size, m, n, k);
+	AT_DISPATCH_REDUCTION_TYPES(reduce, [&] {
+      spmm_kernel<float, REDUCE, true><<<BLOCKS, THREADS, 0, stream>>>(dA_csrOffsets, dA_columns, dA_values, dB, dC, arg_out_data, batch_size, m, n, k);
+    });
+
+	
 
 }
