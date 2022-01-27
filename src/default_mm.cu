@@ -200,7 +200,7 @@ void naive_batched_matmul(torch::Tensor d_A, torch::Tensor d_B,
 // Paper: Design Principles for Sparse Matrix Multiplication on the GPU
 // Code:  https://github.com/owensgroup/merge-spmm
 template <typename scalar_t, ReductionType REDUCE, bool HAS_VALUE>
-__global__ void spmm_kernel(const int64_t *rowptr_data, const int64_t *col_data,
+__global__ void spmm_kernel(const int *rowptr_data, const int *col_data,
                             const scalar_t *value_data,
                             const scalar_t *mat_data, scalar_t *out_data,
                             int64_t *arg_out_data, int B, int M, int N, int K) {
@@ -289,7 +289,10 @@ void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 	auto m = A_rows;
 	auto n = B_rows;
 	auto k = B_cols;
-	auto batch_size = B.numel() / (n * k);
+	int batch_size = B.numel() / (n * k);
+
+	auto BLOCKS = dim3((32 * batch_size * m + THREADS - 1) / THREADS, (k + 31) / 32);
+	auto stream = at::cuda::getCurrentCUDAStream();
 
 	std::string reduce = "sum";
 
