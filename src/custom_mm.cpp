@@ -48,10 +48,14 @@ void LtIgemmTensor(cublasLtHandle_t ltHandle,
                    float *C, int ldc);
 
 // naive mm forward declaration
-void naive_batched_matmul(
-              torch::Tensor A, torch::Tensor B, torch::Tensor C,
-              int a_rows, int a_cols, int b_rows, int b_cols,
-              int batch_dim);
+void naive_batched_matmul(torch::Tensor A, torch::Tensor B, torch::Tensor C,
+                          int a_rows, int a_cols, int b_rows, int b_cols,
+                          int batch_dim);
+
+void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
+				int A_rows, int A_cols,
+				torch::Tensor B, int B_rows, int B_cols,
+				torch::Tensor C);
 
 // manual handles in case none exist.
 // initialization/destruction functions are near the bottom
@@ -160,6 +164,26 @@ torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int d
   }
 }
 
+torch::Tensor naive_spmm(torch::Tensor A, torch::Tensor B, torch::Tensor C)
+{
+  // handles 2d sparse-dense matrix multiplications with cuSPARSE
+  // this function takes two dense matrices, and sparsifies A.
+  int A_rows = A.size(0);
+  int A_cols = A.size(1);
+  int B_rows = B.size(0);
+  int B_cols = B.size(1);;
+
+  float *d_A_values = nullptr;
+  int *d_A_columns = nullptr;
+  int *d_A_offsets = nullptr;
+  int nnzA = 0;
+
+  dense_to_csr(g_cusparse_handle, A, A_rows, A_cols, &d_A_values, &d_A_columns, &d_A_offsets, &nnzA);
+
+  naive_spmm(dA_values, dA_columns, dA_csrOffsets, A_rows, A_cols, B, B_rows, B_cols, C);
+
+  return C;
+}
 
 torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C)
 {
@@ -274,4 +298,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("cublaslt_mmul", &cublaslt_mmul, "cuBLASLt Torch Matrix Multiplication");
   m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
   m.def("naive_bmm", &naive_bmm, "A naive implementation of Batched Matrix Multiplication");
+  m.def("naive_spmm", &naive_spmm, "A naive implementation of Sparse Matrix Multiplication");
 }

@@ -274,7 +274,6 @@ def naive_matmul(a: torch.Tensor,
         return a @ b
     return c
 
-
 class naiveMM(InplaceFunction):
     @staticmethod
     def forward(ctx, m1, m2):
@@ -296,5 +295,36 @@ class naiveMM(InplaceFunction):
             grad_m2 = naive_matmul(
                 m1.transpose(-1, -2),
                 grad_output)
+
+        return grad_m1, grad_m2
+
+
+class naiveSpMM(InplaceFunction):
+    @staticmethod
+    def forward(ctx, m1, m2):
+        # swap around for col-major call
+        # where row major is expected
+        ctx.save_for_backward(m1, m2)
+        return naive_matmul(m1, m2,
+                            mm_op=custom_mm.naive_spmm,
+                            bmm_op=custom_mm.naive_spmm)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        m1, m2 = ctx.saved_variables
+        grad_m1 = grad_m2 = None
+
+        if ctx.needs_input_grad[0]:
+            grad_m1 = naive_matmul(grad_output, m2.transpose(
+                -1, -2),
+                mm_op=custom_mm.naive_spmm,
+                bmm_op=custom_mm.naive_spmm)
+
+        if ctx.needs_input_grad[1]:
+            grad_m2 = naive_matmul(
+                m1.transpose(-1, -2),
+                grad_output,
+                mm_op=custom_mm.naive_spmm,
+                bmm_op=custom_mm.naive_spmm)
 
         return grad_m1, grad_m2

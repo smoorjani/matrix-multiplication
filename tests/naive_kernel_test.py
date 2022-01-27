@@ -11,7 +11,7 @@ def test_result(a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, t
         _a = a if not transa else a.transpose(-1, -2)
         _b = b if not transb else b.transpose(-1, -2)
         t0 = time.perf_counter()
-        output = matmuls.naiveMM.apply(a, b)
+        output = matmuls.naiveSpMM.apply(a, b)
         tf = time.perf_counter() - t0
         output = output.cpu()
         print(f'Our time: {tf}')
