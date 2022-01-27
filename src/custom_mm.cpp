@@ -65,11 +65,11 @@ torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C, boo
   // handles 2d matrix multiplications with cuBLAS
   // remember that cuBLAS is column-major while torch passes in with row-major
   auto handle = at::cuda::getCurrentCUDABlasHandle();
-  if (handle == nullptr && g_cublas_handle != nullptr) {
-    handle = g_cublas_handle;
-  } else {
-    throw std::invalid_argument("No initialized cuBLAS handle");
-  }
+  // if (handle == nullptr && g_cublas_handle != nullptr) {
+  //   handle = g_cublas_handle;
+  // } else {
+  //   throw std::invalid_argument("No initialized cuBLAS handle");
+  // }
 
   int A_rows = A.size(0);
   int A_cols = A.size(1);
@@ -86,11 +86,11 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
   // handles batched matrix multiplications with cuBLAS
   // remember that cuBLAS is column-major while torch passes in with row-major
   auto handle = at::cuda::getCurrentCUDABlasHandle();
-  if (handle == nullptr && g_cublas_handle != nullptr) {
-    handle = g_cublas_handle;
-  } else {
-    throw std::invalid_argument("No initialized cuBLAS handle");
-  }
+  // if (handle == nullptr && g_cublas_handle != nullptr) {
+  //   handle = g_cublas_handle;
+  // } else {
+  //   throw std::invalid_argument("No initialized cuBLAS handle");
+  // }
 
   if (dim == 3) {
     int A_rows = A.size(1);
