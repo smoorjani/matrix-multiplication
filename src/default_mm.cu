@@ -279,7 +279,7 @@ __global__ void spmm_kernel(const int *rowptr_data, const int *col_data,
 }
 
 
-void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
+void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 				int nnzA, int A_rows, int A_cols,
 				torch::Tensor B, int B_rows, int B_cols,
 				torch::Tensor C) {
@@ -292,7 +292,7 @@ void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 	int batch_size = B.numel() / (n * k);
 
 	auto BLOCKS = dim3((32 * batch_size * m + THREADS - 1) / THREADS, (k + 31) / 32);
-	auto stream = at::cuda::getCurrentCUDAStream();
+	// auto stream = aten::cuda::getCurrentCUDAStream();
 
 	std::string reduce = "sum";
 
@@ -308,7 +308,7 @@ void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 	}
   
 	AT_DISPATCH_REDUCTION_TYPES(reduce, [&] {
-      spmm_kernel<float, REDUCE, true><<<BLOCKS, THREADS, 0, stream>>>(dA_csrOffsets, dA_columns, dA_values, dB, dC, arg_out_data, batch_size, m, n, k);
+      spmm_kernel<float, REDUCE, true><<<BLOCKS, THREADS, 0>>>(dA_csrOffsets, dA_columns, dA_values, dB, dC, arg_out_data, batch_size, m, n, k);
     });
 
 	

@@ -52,7 +52,7 @@ void naive_batched_matmul(torch::Tensor A, torch::Tensor B, torch::Tensor C,
                           int a_rows, int a_cols, int b_rows, int b_cols,
                           int batch_dim);
 
-void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
+void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 				int nnzA, int A_rows, int A_cols,
 				torch::Tensor B, int B_rows, int B_cols,
 				torch::Tensor C);
@@ -180,7 +180,7 @@ torch::Tensor naive_spmm(torch::Tensor A, torch::Tensor B, torch::Tensor C)
 
   dense_to_csr(g_cusparse_handle, A, A_rows, A_cols, &d_A_values, &d_A_columns, &d_A_offsets, &nnzA);
 
-  naive_spmm(d_A_values, d_A_columns, d_A_offsets, nnzA, A_rows, A_cols, B, B_rows, B_cols, C);
+  naive_spmm_wrapper(d_A_values, d_A_columns, d_A_offsets, nnzA, A_rows, A_cols, B, B_rows, B_cols, C);
 
   return C;
 }
