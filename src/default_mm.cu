@@ -11,8 +11,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#include "reducer.cuh"
-#include "utils.cuh"
+#include "naive_reducer.cuh"
 
 #define THREADS 256
 #define FULL_MASK 0xffffffff
@@ -281,25 +280,27 @@ __global__ void spmm_kernel(const int64_t *rowptr_data, const int64_t *col_data,
 
 
 void naive_spmm(float *dA_values, int *dA_columns, int *dA_csrOffsets,
-				int A_rows, int A_cols,
+				int nnzA, int A_rows, int A_cols,
 				torch::Tensor B, int B_rows, int B_cols,
 				torch::Tensor C) {
 	float *dB = B.data_ptr<float>();
     float *dC = C.data_ptr<float>();
 
-	auto M = A_rows;
-	auto N = B_rows;
-	auto K = B_cols;
-	auto B = B.numel() / (N * K);
+	auto m = A_rows;
+	auto n = B_rows;
+	auto k = B_cols;
+	auto batch_size = B.numel() / (n * k);
 
+	std::string reduce = "sum";
+	auto out = torch::empty(sizes, mat.options());
 	int64_t *arg_out_data = nullptr;
 	if (reduce2REDUCE.at(reduce) == MIN || reduce2REDUCE.at(reduce) == MAX) {
-		arg_out = torch::full_like(out, col.numel(), rowptr.options());
+		arg_out = torch::full_like(out, nnzA, A_rows + 1);
 		arg_out_data = arg_out.value().data_ptr<int64_t>();
 	}
   
 	spmm_kernel<float, REDUCE, true><<<BLOCKS, THREADS, 0, stream>>>(
 		dA_csrOffsets, dA_columns, dA_values, dB, dC, arg_out_data,
-		B, M, N, K);
+		batch_size, m, n, k);
 
 }
