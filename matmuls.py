@@ -222,15 +222,13 @@ class cusparseMM(InplaceFunction):
 
 def naive_matmul(a: torch.Tensor,
                  b: torch.Tensor,
-                 mm_op=custom_mm.naive_bmm,
-                 bmm_op=custom_mm.naive_bmm) -> torch.Tensor:
+                 mm_op=custom_mm.naive_bmm) -> torch.Tensor:
     '''
     Uses our naive kernel to perform matrix multiplication.
 
     :param a:
     :param b:
     :param mm_op: kernel to perform basic matrix multiplication
-    :param bmm_op: kernel to perform batched matrix multiplication
     :returns: Matrix multiplication output
     '''
     a_shape = a.shape
@@ -258,13 +256,8 @@ def naive_matmul(a: torch.Tensor,
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
-        if len(a_shape) == 3 and len(b_shape) == 3:
-            c = bmm_op(a, b, c, 3)
-        elif len(a_shape) == 4 and len(b_shape) == 4:
-            c = bmm_op(a, b, c, 4)
-        else:
-            c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
-                             for i in range(lda)])
+        c = torch.stack([naive_matmul(a[i], b[i], mm_op)
+                         for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
         c = mm_op(a, b, c, 2)
     else:
@@ -306,8 +299,7 @@ class naiveSpMM(InplaceFunction):
         # where row major is expected
         ctx.save_for_backward(m1, m2)
         return naive_matmul(m1, m2,
-                            mm_op=custom_mm.naive_spmm,
-                            bmm_op=custom_mm.naive_spmm)
+                            mm_op=custom_mm.naive_spmm)
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -317,14 +309,12 @@ class naiveSpMM(InplaceFunction):
         if ctx.needs_input_grad[0]:
             grad_m1 = naive_matmul(grad_output, m2.transpose(
                 -1, -2),
-                mm_op=custom_mm.naive_spmm,
-                bmm_op=custom_mm.naive_spmm)
+                mm_op=custom_mm.naive_spmm)
 
         if ctx.needs_input_grad[1]:
             grad_m2 = naive_matmul(
                 m1.transpose(-1, -2),
                 grad_output,
-                mm_op=custom_mm.naive_spmm,
-                bmm_op=custom_mm.naive_spmm)
+                mm_op=custom_mm.naive_spmm)
 
         return grad_m1, grad_m2
