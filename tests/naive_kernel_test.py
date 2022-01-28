@@ -2,6 +2,9 @@ import torch
 import matmuls
 import time
 import sys
+import custom_mm
+
+custom_mm.init_cusparse()
 
 def test_result(a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, transb=False):
     output, expected = None, None
@@ -11,7 +14,7 @@ def test_result(a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, t
         _a = a if not transa else a.transpose(-1, -2)
         _b = b if not transb else b.transpose(-1, -2)
         t0 = time.perf_counter()
-        output = matmuls.naiveSpMM.apply(a, b)
+        output = matmuls.naiveSpMM.apply(_a, _b)
         tf = time.perf_counter() - t0
         output = output.cpu()
         print(f'Our time: {tf}')
@@ -52,9 +55,12 @@ def get_average_time(a_dim, b_dim, transa=False, transb=False, kernel="both", it
 # specify the kernel argument with sys.argv[1]
 
 # Small tests
-print(get_average_time((2, 4, 2), (2, 3, 2), iters=1, transb=True))
+print(get_average_time((4, 2), (2, 3), iters=1))
+print(get_average_time((2, 4, 2), (2, 2, 3), iters=1))
 print(get_average_time((2, 2, 4, 2), (2, 2, 3, 2), iters=1, transb=True))
 
 # BERT Tests
 # print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=3))
 # print(get_average_time((16, 16, 512, 64), (16, 16, 512, 64), iters=3, transb=True))
+
+custom_mm.destroy_cusparse()

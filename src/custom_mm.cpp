@@ -164,7 +164,7 @@ torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int d
   }
 }
 
-torch::Tensor naive_spmm(torch::Tensor A, torch::Tensor B, torch::Tensor C)
+torch::Tensor naive_spmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim)
 {
   // handles 2d sparse-dense matrix multiplications with cuSPARSE
   // this function takes two dense matrices, and sparsifies A.
