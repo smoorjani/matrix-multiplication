@@ -21,8 +21,9 @@ from custom_mm import init_cublas, destroy_cublas
 # create cublas handle (one-time overhead)
 init_cublas()
 
-a = torch.rand(8, 64)
-b = torch.rand(64, 8)
+# IMPORTANT: ensure that your tensors are on the gpu before doing the multiplication
+a = torch.rand(8, 64).cuda()
+b = torch.rand(64, 8).cuda()
 
 # cublasMM is a torch.InplaceFunction with a forward and backward pass
 # You should use this when the gradient needs to be calculate

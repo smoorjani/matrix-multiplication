@@ -131,6 +131,6 @@ void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
       spmm_kernel<float, REDUCE, true><<<BLOCKS, THREADS, 0>>>(dA_csrOffsets, dA_columns, dA_values, dB, dC, arg_out_data, batch_size, m, n, k);
     });
 
-	
-
 }
+
+void naive_batched_matmul(torch::Tensor A, torch::Tensor B, torch::Tensor C, int a_rows, int a_cols, int b_rows, int b_cols, int batch_dim) {return;}

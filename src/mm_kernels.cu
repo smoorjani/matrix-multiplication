@@ -276,6 +276,11 @@ void dense_to_csr(cusparseHandle_t handle,
     checkCudaStatus(cudaFree(dBuffer));
 }
 
+void free_csr(float **d_csr_values, int **d_csr_columns, int **d_csr_offsets) {
+    checkCudaStatus(cudaFree(d_csr_values));
+    checkCudaStatus(cudaFree(d_csr_columns));
+    checkCudaStatus(cudaFree(d_csr_offsets));
+}
 
 
 
