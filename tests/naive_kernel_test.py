@@ -13,6 +13,8 @@ def test_result(a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, t
     if 'ours' in kernel or 'both' in kernel:
         _a = a if not transa else a.transpose(-1, -2)
         _b = b if not transb else b.transpose(-1, -2)
+        _a = _a.contiguous()
+        _b = _b.contiguous()
         t0 = time.perf_counter()
         output = matmuls.naiveSpMM.apply(_a, _b)
         tf = time.perf_counter() - t0
@@ -22,6 +24,8 @@ def test_result(a: torch.Tensor, b: torch.Tensor, kernel='both', transa=False, t
     if 'pytorch' in kernel or 'both' in kernel:
         _a = a if not transa else a.transpose(-1, -2)
         _b = b if not transb else b.transpose(-1, -2)
+        _a = _a.contiguous()
+        _b = _b.contiguous()
         t0 = time.perf_counter()
         expected = torch.matmul(_a, _b).cpu()
         pt_tf = time.perf_counter() - t0
@@ -57,6 +61,7 @@ def get_average_time(a_dim, b_dim, transa=False, transb=False, kernel="both", it
 # Small tests
 print(get_average_time((4, 2), (2, 3), iters=1))
 print(get_average_time((2, 4, 2), (2, 2, 3), iters=1))
+print(get_average_time((2, 4, 2), (2, 4, 2), iters=1, transb=True))
 
 # BERT Tests
 print(get_average_time((256, 16, 512, 512), (256, 16, 512, 64), iters=3))
