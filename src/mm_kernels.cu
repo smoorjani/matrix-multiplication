@@ -180,7 +180,7 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     //cuda_print_arr<float>(dB, B_rows, B_cols);
     printf("A_rows: %d, A_cols: %d, B_rows: %d, B_cols: %d", A_rows, A_cols, B_rows, B_cols);
     int ldb = B_rows;
-    int ldc = A_cols;
+    int ldc = A_rows;
 
     // CUSPARSE APIs
     cusparseSpMatDescr_t matA;
@@ -194,15 +194,15 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
                                       CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));
     // Create dense matrix B
     cusparseSafeCall(cusparseCreateDnMat(&matB, B_rows, B_cols, ldb, dB,
-                                        CUDA_R_32F, CUSPARSE_ORDER_COL));
+                                        CUDA_R_32F, CUSPARSE_ORDER_ROW));
     // Create dense matrix C
-    cusparseSafeCall(cusparseCreateDnMat(&matC, A_cols, B_cols, ldc, dC,
-                                        CUDA_R_32F, CUSPARSE_ORDER_COL));
+    cusparseSafeCall(cusparseCreateDnMat(&matC, A_rows, B_cols, ldc, dC,
+                                        CUDA_R_32F, CUSPARSE_ORDER_ROW));
     // allocate an external buffer if needed
     float alpha = 1.0f;
     float beta = 0.0f;
 
-    cusparseOperation_t transA = CUSPARSE_OPERATION_TRANSPOSE;
+    cusparseOperation_t transA = CUSPARSE_OPERATION_NON_TRANSPOSE;
     cusparseOperation_t transB = CUSPARSE_OPERATION_NON_TRANSPOSE;
 
     cusparseSafeCall(cusparseSpMM_bufferSize(handle, transA, transB,
