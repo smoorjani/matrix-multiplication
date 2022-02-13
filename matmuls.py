@@ -62,6 +62,7 @@ def custom_matmul(a: torch.Tensor,
             c = torch.stack([custom_matmul(a[i], b[i], mm_op, bmm_op)
                              for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
+        print('matmul python call.')
         c = mm_op(a, b, c, transa, transb)
     else:
         print(

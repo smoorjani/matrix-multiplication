@@ -30,6 +30,7 @@ def sparsify(coords, dim1, dim2):
 
 shapes = [
           ((n, n), (n, n)),
+          ((n, 2*n), (2*n, n)),
           ((n, n), (n, int(n/2))),
           ((2*n, n), (n, int(n/2)))
         ]
@@ -49,6 +50,7 @@ for i, ((a_rows, a_cols), (b_rows, b_cols)) in enumerate(shapes):
 
     print(f'a: {a}\nb: {b}')
     exp = a@b
+    print(f'exp: {exp}')
     custom_mm.cusparse_mmul(a,b,c)
     our = c
 

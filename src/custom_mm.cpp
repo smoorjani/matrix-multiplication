@@ -39,7 +39,7 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
 void dense_to_csr(cusparseHandle_t handle, 
                   torch::Tensor dense, const int num_rows, const int num_cols,
                   float **d_csr_values, int **d_csr_columns, int **d_csr_offsets, int *nnz);
-void free_csr(float **d_csr_values, int **d_csr_columns, int **d_csr_offsets);
+void free_csr(float *d_csr_values, int *d_csr_columns, int *d_csr_offsets);
 
 // cublasLT forward declaration
 void LtIgemmTensor(cublasLtHandle_t ltHandle,
@@ -183,7 +183,7 @@ torch::Tensor naive_spmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
 
   naive_spmm_wrapper(d_A_values, d_A_columns, d_A_offsets, nnzA, A_rows, A_cols, B, B_rows, B_cols, C);
 
-  free_csr(&d_A_values, &d_A_columns, &d_A_offsets);
+  free_csr(d_A_values, d_A_columns, d_A_offsets);
   return C;
 }
 
@@ -206,7 +206,7 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C)
   cusparse_mm_wrapper(g_cusparse_handle, d_A_values, d_A_columns, d_A_offsets, nnzA,
                       A_rows, A_cols, B, B_rows, B_cols, C);
       
-  free_csr(&d_A_values, &d_A_columns, &d_A_offsets);
+  free_csr(d_A_values, d_A_columns, d_A_offsets);
   return C;
 }
 
