@@ -11,8 +11,9 @@ setup(
     ext_modules=[
         CUDAExtension('custom_mm', [
             'custom_mm.cpp',
-            'mm_kernels.cu',
-            'default_mm.cu'
+            'baseline_mm.cu',
+            'sparse_mm.cu',
+            'naive_sparse_mm.cu'
         ])
     ],
     cmdclass={

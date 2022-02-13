@@ -1,4 +1,6 @@
 // Taken from https://github.com/salehjg/batch-matmul-cuda
+#ifndef __NAIVE_SPARSE_MM_H_
+#define __NAIVE_SPARSE_MM_H_
 
 #include <stdio.h>
 #include <assert.h>
@@ -134,3 +136,5 @@ void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 }
 
 void naive_batched_matmul(torch::Tensor A, torch::Tensor B, torch::Tensor C, int a_rows, int a_cols, int b_rows, int b_cols, int batch_dim) {return;}
+
+#endif // __NAIVE_SPARSE_MM_H_

@@ -175,31 +175,6 @@ class cublasTransabMM(InplaceFunction):
 
         return grad_m1, grad_m2
 
-
-class cublasltMM(InplaceFunction):
-    @staticmethod
-    def forward(ctx, m1, m2):
-        ctx.save_for_backward(m1, m2)
-        return custom_matmul(
-            m1, m2, custom_mm.cublaslt_mmul)
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        m1, m2 = ctx.saved_variables
-        grad_m1 = grad_m2 = None
-
-        if ctx.needs_input_grad[0]:
-            grad_m1 = custom_matmul(grad_output, m2.transpose(
-                -1, -2), custom_mm.cublaslt_mmul)
-
-        if ctx.needs_input_grad[1]:
-            grad_m2 = custom_matmul(
-                m1.transpose(-1, -2),
-                grad_output, custom_mm.cublaslt_mmul)
-
-        return grad_m1, grad_m2
-
-
 class cusparseMM(InplaceFunction):
     @staticmethod
     def forward(ctx, m1, m2):

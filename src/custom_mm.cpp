@@ -13,7 +13,6 @@
 
 #include <cublas_v2.h>
 #include <cusparse_v2.h>
-#include <cublasLt.h>
 #include <ATen/cuda/CUDABlas.h>
 
 // dummy kernel forward declaration
@@ -41,13 +40,6 @@ void dense_to_csr(cusparseHandle_t handle,
                   float **d_csr_values, int **d_csr_columns, int **d_csr_offsets, int *nnz);
 void free_csr(float *d_csr_values, int *d_csr_columns, int *d_csr_offsets);
 
-// cublasLT forward declaration
-void LtIgemmTensor(cublasLtHandle_t ltHandle,
-                   int m, int n, int k,
-                   const float *A, int lda,
-                   const float *B, int ldb,
-                   float *C, int ldc);
-
 // naive mm forward declaration
 void naive_batched_matmul(torch::Tensor A, torch::Tensor B, torch::Tensor C,
                           int a_rows, int a_cols, int b_rows, int b_cols,
@@ -62,7 +54,6 @@ void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 // initialization/destruction functions are near the bottom
 cublasHandle_t g_cublas_handle = nullptr;
 cusparseHandle_t g_cusparse_handle = nullptr;
-cublasLtHandle_t g_cublaslt_handle = nullptr;
 torch::Device device(torch::kCUDA);
 
 torch::Tensor cublas_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C, bool transa, bool transb)
@@ -210,33 +201,6 @@ torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C)
   return C;
 }
 
-torch::Tensor cublaslt_mmul(torch::Tensor A, torch::Tensor B)
-{
-  // uses cuBLASLt to do a 2-d matrix multiplications
-  // currently is not working, do not use.
-
-  throw std::logic_error("Function not yet implemented");
-
-  float *A_arr = A.data_ptr<float>();
-  float *B_arr = B.data_ptr<float>();
-
-  int A_dim = A.dim();
-  int B_dim = B.dim();
-  int lda = A.size(0);
-  int ldb = B.size(0);
-  int ldc = B.size(0);
-  int m = A.size(A_dim - 2);
-  int k = A.size(A_dim - 1);
-  int n = B.size(B_dim - 1);   
-
-  torch::Tensor C = torch::zeros({m,n}, torch::kFloat32);
-  float *C_arr = C.data_ptr<float>();
-
-  LtIgemmTensor(g_cublaslt_handle, m, n, k, A_arr, lda, B_arr, ldb, C_arr, ldc);
-
-  return C;
-}
-
 // handle initialization/destruction functions
 
 void init_cublas_handle() {
@@ -271,34 +235,15 @@ void destroy_cusparse_handle() {
   }
 }
 
-void init_cublaslt_handle() {
-  cublasStatus_t status = cublasLtCreate(&g_cublaslt_handle);
-  if (status != CUBLAS_STATUS_SUCCESS)
-  {
-    std::cerr << "cuBLASLt initialization error.";
-  }
-}
-
-void destroy_cublaslt_handle() {
-  cublasStatus_t status = cublasLtDestroy(g_cublaslt_handle);
-  if (status != CUBLAS_STATUS_SUCCESS)
-  {
-    std::cerr << "Shutdown error!";
-  }
-}
-
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
   m.def("init_cublas", &init_cublas_handle, "Create cuBLAS handle.");
   m.def("destroy_cublas", &destroy_cublas_handle, "Destroy cuBLAS handle.");
-  m.def("init_cublaslt", &init_cublaslt_handle, "Create cuBLASLt handle.");
-  m.def("destroy_cublaslt", &destroy_cublaslt_handle, "Destroy cuBLASLt handle.");
   m.def("init_cusparse", &init_cusparse_handle, "Create cuSPARSE handle.");
   m.def("destroy_cusparse", &destroy_cusparse_handle, "Destroy cuSPARSE handle.");
   m.def("cublas_mmul", &cublas_mmul, "cuBLAS Torch Matrix Multiplication");
   m.def("cublas_bmm", &cublas_bmm, "cuBLAS Batched Torch Matrix Multiplication");
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
-  m.def("cublaslt_mmul", &cublaslt_mmul, "cuBLASLt Torch Matrix Multiplication");
   m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
   m.def("naive_bmm", &naive_bmm, "A naive implementation of Batched Matrix Multiplication");
   m.def("naive_spmm", &naive_spmm, "A naive implementation of Sparse Matrix Multiplication");
