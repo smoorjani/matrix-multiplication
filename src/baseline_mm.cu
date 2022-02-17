@@ -173,13 +173,8 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     float *dB = B.data_ptr<float>();
     float *dC = C.data_ptr<float>();
 
-    cuda_print_arr<float>(dA_values, 1, A_nnz);
-    cuda_print_arr<int>(dA_columns, 1, A_nnz);
-    cuda_print_arr<int>(dA_csrOffsets, 1, A_rows + 1);
-    cuda_print_arr<float>(dB, B_rows, B_cols);
-    printf("A_rows: %d, A_cols: %d, B_rows: %d, B_cols: %d, nnz: %d\n", A_rows, A_cols, B_rows, B_cols, A_nnz);
-    int ldb = B_rows;
-    int ldc = A_rows;
+    int ldb = B_cols;
+    int ldc = B_cols;
 
     // CUSPARSE APIs
     cusparseSpMatDescr_t matA;
@@ -212,7 +207,6 @@ void cusparse_mm_wrapper(cusparseHandle_t handle,
     cusparseSafeCall(cusparseSpMM(handle, transA, transB,
                                 &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_SPMM_CSR_ALG2, dBuffer));
 
-    cuda_print_arr<float>(dC, A_rows, B_cols);
     // destroy matrix/vector descriptors
     cusparseSafeCall(cusparseDestroySpMat(matA));
     cusparseSafeCall(cusparseDestroyDnMat(matB));
@@ -238,7 +232,7 @@ void dense_to_csr(cusparseHandle_t handle,
     checkCudaStatus(cudaMalloc((void**) &(*d_csr_offsets), (num_rows + 1) * sizeof(int)));
 
     // Create dense matrix A
-    cusparseSafeCall(cusparseCreateDnMat(&matA, num_rows, num_cols, ld, d_dense, CUDA_R_32F, CUSPARSE_ORDER_COL));
+    cusparseSafeCall(cusparseCreateDnMat(&matA, num_rows, num_cols, ld, d_dense, CUDA_R_32F, CUSPARSE_ORDER_ROW));
     // Create sparse matrix B in CSR format
     cusparseSafeCall(cusparseCreateCsr(&matB, num_rows, num_cols, 0, *d_csr_offsets, NULL, NULL,
                                      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));
