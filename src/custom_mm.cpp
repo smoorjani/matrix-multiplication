@@ -118,52 +118,29 @@ torch::Tensor cublas_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
   }
 }
 
-torch::Tensor naive_bmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim)
+torch::Tensor naive_spmm(torch::Tensor A_values, torch::Tensor A_columns, torch::Tensor A_offsets, int nnzA, int A_rows, int A_cols, torch::Tensor B, torch::Tensor C)
 {
-  // handles matrix multiplications (2-d and batched) with a naive kernel
-  if (dim == 3) {
-    int A_rows = A.size(1);
-    int A_cols = A.size(2);
-    int B_rows = B.size(1);
-    int B_cols = B.size(2);
+  // handles 2d sparse-dense matrix multiplications with cuSPARSE
+  // this function takes two dense matrices, and sparsifies A.
+  int B_rows = B.size(0);
+  int B_cols = B.size(1);
 
-    int batch_dim = A.size(0);
-    assert(batch_dim == B.size(0));
-    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim);
-    return C;
-  } else if (dim == 4) {
-    int A_rows = A.size(2);
-    int A_cols = A.size(3);
-    int B_rows = B.size(2);
-    int B_cols = B.size(3);
+  float *d_A_values = A_values.data_ptr<float>();
+  int *d_A_columns = A_columns.data_ptr<int>();
+  int *d_A_offsets = A_offsets.data_ptr<int>();
 
-    int batch_dim1 = A.size(0);
-    int batch_dim2 = A.size(1);
-    assert(batch_dim1 == B.size(0));
-    assert(batch_dim2 == B.size(1));
-
-    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, batch_dim1 * batch_dim2);
-    return C;
-  } else if (dim == 2) {
-    int A_rows = A.size(0);
-    int A_cols = A.size(1);
-    int B_rows = B.size(0);
-    int B_cols = B.size(1);
-
-    naive_batched_matmul(A, B, C, A_rows, A_cols, B_rows, B_cols, 1);
-  } else {
-    throw std::invalid_argument("Invalid dim argument.");
-  }
+  naive_spmm_wrapper(d_A_values, d_A_columns, d_A_offsets, nnzA, A_rows, A_cols, B, B_rows, B_cols, C);
+  return C;
 }
 
-torch::Tensor naive_spmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int dim)
+torch::Tensor naive_spmm_csr_conversion(torch::Tensor A, torch::Tensor B, torch::Tensor C)
 {
   // handles 2d sparse-dense matrix multiplications with cuSPARSE
   // this function takes two dense matrices, and sparsifies A.
   int A_rows = A.size(0);
   int A_cols = A.size(1);
   int B_rows = B.size(0);
-  int B_cols = B.size(1);;
+  int B_cols = B.size(1);
 
   float *d_A_values = nullptr;
   int *d_A_columns = nullptr;
@@ -178,7 +155,23 @@ torch::Tensor naive_spmm(torch::Tensor A, torch::Tensor B, torch::Tensor C, int 
   return C;
 }
 
-torch::Tensor cusparse_mmul(torch::Tensor A, torch::Tensor B, torch::Tensor C)
+torch::Tensor cusparse_mmul(torch::Tensor A_values, torch::Tensor A_columns, torch::Tensor A_offsets, int nnzA, int A_rows, int A_cols, torch::Tensor B, torch::Tensor C)
+{
+  // handles 2d sparse-dense matrix multiplications with cuSPARSE
+  // this function takes two dense matrices, and sparsifies A.
+  int B_rows = B.size(0);
+  int B_cols = B.size(1);;
+
+  float *d_A_values = A_values.data_ptr<float>();
+  int *d_A_columns = A_columns.data_ptr<int>();
+  int *d_A_offsets = A_offsets.data_ptr<int>();
+
+  cusparse_mm_wrapper(g_cusparse_handle, d_A_values, d_A_columns, d_A_offsets, nnzA,
+                      A_rows, A_cols, B, B_rows, B_cols, C);
+  return C;
+}
+
+torch::Tensor cusparse_mmul_csr_conversion(torch::Tensor A, torch::Tensor B, torch::Tensor C)
 {
   // handles 2d sparse-dense matrix multiplications with cuSPARSE
   // this function takes two dense matrices, and sparsifies A.
@@ -245,6 +238,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("cublas_bmm", &cublas_bmm, "cuBLAS Batched Torch Matrix Multiplication");
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
   m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
-  m.def("naive_bmm", &naive_bmm, "A naive implementation of Batched Matrix Multiplication");
   m.def("naive_spmm", &naive_spmm, "A naive implementation of Sparse Matrix Multiplication");
 }

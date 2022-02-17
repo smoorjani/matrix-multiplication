@@ -1,5 +1,6 @@
 import torch
 import random
+import matmuls
 import custom_mm
 import numpy as np
 
@@ -43,16 +44,13 @@ for i, ((a_rows, a_cols), (b_rows, b_cols)) in enumerate(shapes):
     # sparse dense matrix multiplication
     a_n_vals = (a_rows * a_cols) / n_vals # scales number of values to be (1/n_vals)% sparsity
     a_coords = gen_coords(a_n_vals, a_rows, a_cols)
-    a = sparsify(a_coords, a_rows, a_cols)
+    a = sparsify(a_coords, a_rows, a_cols).to_sparse_csr()
     
     b = torch.rand((b_rows, b_cols), device=torch.device('cuda'))
-    c = torch.zeros((a_rows, b_cols), device=torch.device('cuda'))
+    #c = torch.zeros((a_rows, b_cols), device=torch.device('cuda'))
 
-    print(f'a: {a}\nb: {b}')
     exp = a@b
-    print(f'exp: {exp}')
-    custom_mm.cusparse_mmul(a,b,c)
-    our = c
+    our = matmuls.cusparseMM.apply(a,b)
 
     if torch.allclose(exp, our):
         print(f'\nTest {i} passed!\n')
@@ -62,24 +60,5 @@ for i, ((a_rows, a_cols), (b_rows, b_cols)) in enumerate(shapes):
         print('ours(sparse): ', our)
         print('# nonzero in exp:', torch.nonzero(exp).shape)
         print('# nonzero in ours:', torch.nonzero(our).shape)
-
-'''
-# piece of code to try all combinations of transpose/non-transpose
-flag = False
-for ela in [a, _a, b, _b]:
-    if flag:
-        break
-    for elb in [a, _a, b, _b]:
-        if torch.allclose(ela, elb) or torch.allclose(ela.t(), elb):
-            continue
-        custom_mm.cusparse_mmul(ela, elb, c)
-        our = c
-
-        if torch.allclose(our, exp):
-            print(ela, elb)
-            print('success')
-            flag=True
-            break
-'''
 
 custom_mm.destroy_cusparse()

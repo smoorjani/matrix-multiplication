@@ -106,7 +106,41 @@ void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 				torch::Tensor B, int B_rows, int B_cols,
 				torch::Tensor C) {
 	float *dB = B.data_ptr<float>();
-    float *dC = C.data_ptr<float>();
+  float *dC = C.data_ptr<float>();
+
+	auto m = A_rows;
+	auto n = B_rows;
+	auto k = B_cols;
+	int batch_size = B.numel() / (n * k);
+
+	auto BLOCKS = dim3((32 * batch_size * m + THREADS - 1) / THREADS, (k + 31) / 32);
+	// auto stream = aten::cuda::getCurrentCUDAStream();
+
+	std::string reduce = "sum";
+
+	auto sizes = B.sizes().vec();
+	sizes[B.dim() - 2] = m;
+	auto out = torch::empty(sizes, B.options());
+
+	torch::optional<torch::Tensor> arg_out = torch::nullopt;
+	int64_t *arg_out_data = nullptr;
+	if (reduce2REDUCE.at(reduce) == MIN || reduce2REDUCE.at(reduce) == MAX) {
+		arg_out = torch::full_like(out, nnzA, B.options());
+		arg_out_data = arg_out.value().data_ptr<int64_t>();
+	}
+  
+	AT_DISPATCH_REDUCTION_TYPES(reduce, [&] {
+      spmm_kernel<float, REDUCE, true><<<BLOCKS, THREADS, 0>>>(dA_csrOffsets, dA_columns, dA_values, dB, dC, arg_out_data, batch_size, m, n, k);
+    });
+
+}
+
+void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
+				int nnzA, int A_rows, int A_cols,
+				torch::Tensor B, int B_rows, int B_cols,
+				torch::Tensor C) {
+	float *dB = B.data_ptr<float>();
+  float *dC = C.data_ptr<float>();
 
 	auto m = A_rows;
 	auto n = B_rows;

@@ -175,38 +175,28 @@ class cublasTransabMM(InplaceFunction):
 
         return grad_m1, grad_m2
 
-class cusparseMM(InplaceFunction):
-    @staticmethod
-    def forward(ctx, m1, m2):
-        ctx.save_for_backward(m1, m2)
-        return custom_matmul(m1, m2, custom_mm.cusparse_mmul)
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        m1, m2 = ctx.saved_variables
-        grad_m1 = grad_m2 = None
-
-        if ctx.needs_input_grad[0]:
-            grad_m1 = custom_matmul(grad_output, m2.transpose(
-                -1, -2), custom_mm.cusparse_mmul)
-        if ctx.needs_input_grad[1]:
-            grad_m2 = custom_matmul(m1.transpose(
-                -1, -2), grad_output, custom_mm.cusparse_mmul)
-
-        return grad_m1, grad_m2
-
-
-def naive_matmul(a: torch.Tensor,
-                 b: torch.Tensor,
-                 mm_op=custom_mm.naive_bmm) -> torch.Tensor:
+def get_sparse_tensor_properties(a: torch.Tensor):
     '''
-    Uses our naive kernel to perform matrix multiplication.
+    Retrieve properties of CSR tensor.
+    :param a: CSR Tensor
+    :returns: Row indices, col indices, values, number of nonzeros, and shape of a
+    '''
+    assert torch.Tensor.is_sparse_csr(a)
+    return torch.Tensor.values(a), torch.Tensor.col_indices(a), torch.Tensor.crow_indices(a), \
+            len(torch.Tensor.values(a)), tuple(a.shape[-2]), tuple(a.shape[-1])
 
-    :param a:
+def sparse_matmul(a: torch.Tensor,
+                 b: torch.Tensor,
+                 mm_op=custom_mm.cusparse_mmul) -> torch.Tensor:
+    '''
+    Uses a sparse kernel to perform matrix multiplication.
+
+    :param a: This should be a CSR tensor
     :param b:
     :param mm_op: kernel to perform basic matrix multiplication
     :returns: Matrix multiplication output
     '''
+    assert torch.Tensor.is_sparse_csr(a)
     a_shape = a.shape
     b_shape = b.shape
 
@@ -223,19 +213,19 @@ def naive_matmul(a: torch.Tensor,
         # flatten A into a 2d tensor
         lda, dim1, dim2 = a_shape
         _a = a.reshape(lda * dim1, dim2)
-        c = mm_op(_a, b, c, 2).reshape(lda, dim1, -1)
+        c = mm_op(*get_sparse_tensor_properties(_a), b, c).reshape(lda, dim1, -1)
     elif len(a_shape) == 2 and len(b_shape) == 3:
         # flatten B into a 2d tensor
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
-        c = mm_op(a, _b, c, 2).reshape(ldb, dim1, -1)
+        c = mm_op(*get_sparse_tensor_properties(a), _b, c).reshape(ldb, dim1, -1)
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
         c = torch.stack([naive_matmul(a[i], b[i], mm_op)
                          for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
-        c = mm_op(a, b, c, 2)
+        c = mm_op(*get_sparse_tensor_properties(a), b, c)
     else:
         print(
             'Multiplication with matrix dimensions is not implemented in cuBLAS'
@@ -243,7 +233,76 @@ def naive_matmul(a: torch.Tensor,
         return a @ b
     return c
 
-class naiveMM(InplaceFunction):
+
+class cusparseMM(InplaceFunction):
+    @staticmethod
+    def forward(ctx, m1, m2):
+        ctx.save_for_backward(m1, m2)
+        return sparse_matmul(m1, m2)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        m1, m2 = ctx.saved_variables
+        grad_m1 = grad_m2 = None
+
+        if ctx.needs_input_grad[0]:
+            grad_m1 = sparse_matmul(grad_output, m2.transpose(
+                -1, -2))
+        if ctx.needs_input_grad[1]:
+            grad_m2 = sparse_matmul(m1.transpose(
+                -1, -2), grad_output)
+
+        return grad_m1, grad_m2
+
+def naive_matmul(a: torch.Tensor,
+                 b: torch.Tensor,
+                 mm_op=custom_mm.naive_spmm) -> torch.Tensor:
+    '''
+    Uses a sparse kernel to perform matrix multiplication.
+
+    :param a: Torch CSR matrix
+    :param b:
+    :param mm_op: kernel to perform basic matrix multiplication
+    :returns: Matrix multiplication output
+    '''
+    assert torch.Tensor.is_sparse_csr(a)
+    a_shape = a.shape
+    b_shape = b.shape
+
+    c_rows = a_shape[-2]
+    c_cols = b_shape[-1]
+    c = torch.zeros(
+        tuple(list(a_shape[:-2]) + [c_rows, c_cols]), device=torch.device('cuda'))
+
+    if len(a_shape) == 1 or len(b_shape) == 1:
+        print('Matrix-vector multiplication is not implemented in cuBLAS')
+        return a @ b
+
+    if len(a_shape) == 3 and len(b_shape) == 2:
+        # flatten A into a 2d tensor
+        lda, dim1, dim2 = a_shape
+        _a = a.reshape(lda * dim1, dim2)
+        c = mm_op(*get_sparse_tensor_properties(_a), b, c).reshape(lda, dim1, -1)
+    elif len(a_shape) == 2 and len(b_shape) == 3:
+        # flatten B into a 2d tensor
+        ldb, dim1, dim2 = b_shape
+        _b = b.reshape(ldb * dim1, dim2)
+        c = mm_op(*get_sparse_tensor_properties(a), _b, c).reshape(ldb, dim1, -1)
+    elif len(a_shape) >= 3 and len(b_shape) >= 3:
+        lda, ldb = a_shape[0], b_shape[0]
+        assert lda == ldb
+        c = torch.stack([naive_matmul(a[i], b[i], mm_op)
+                         for i in range(lda)])
+    elif len(a_shape) == 2 and len(b_shape) == 2:
+        c = mm_op(*get_sparse_tensor_properties(a), b, c)
+    else:
+        print(
+            'Multiplication with matrix dimensions is not implemented in cuBLAS'
+        )
+        return a @ b
+    return c
+
+class naiveSpMM(InplaceFunction):
     @staticmethod
     def forward(ctx, m1, m2):
         # swap around for col-major call
@@ -264,33 +323,5 @@ class naiveMM(InplaceFunction):
             grad_m2 = naive_matmul(
                 m1.transpose(-1, -2),
                 grad_output)
-
-        return grad_m1, grad_m2
-
-
-class naiveSpMM(InplaceFunction):
-    @staticmethod
-    def forward(ctx, m1, m2):
-        # swap around for col-major call
-        # where row major is expected
-        ctx.save_for_backward(m1, m2)
-        return naive_matmul(m1, m2,
-                            mm_op=custom_mm.naive_spmm)
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        m1, m2 = ctx.saved_variables
-        grad_m1 = grad_m2 = None
-
-        if ctx.needs_input_grad[0]:
-            grad_m1 = naive_matmul(grad_output, m2.transpose(
-                -1, -2),
-                mm_op=custom_mm.naive_spmm)
-
-        if ctx.needs_input_grad[1]:
-            grad_m2 = naive_matmul(
-                m1.transpose(-1, -2),
-                grad_output,
-                mm_op=custom_mm.naive_spmm)
 
         return grad_m1, grad_m2
