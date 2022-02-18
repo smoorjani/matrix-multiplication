@@ -49,7 +49,7 @@ def custom_matmul(a: torch.Tensor,
         # flatten B into a 2d tensor
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
-        c = mm_op(a, _b, c, transa, transb).reshape(ldb, dim1, -1)
+        c = mm_op(a, _b, c, transa, transb).reshape(ldb, -1, dim2)
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
@@ -181,9 +181,10 @@ def get_sparse_tensor_properties(a: torch.Tensor):
     :param a: CSR Tensor
     :returns: Row indices, col indices, values, number of nonzeros, and shape of a
     '''
-    assert torch.Tensor.is_sparse_csr(a)
-    return torch.Tensor.values(a), torch.Tensor.col_indices(a), torch.Tensor.crow_indices(a), \
-            len(torch.Tensor.values(a)), tuple(a.shape[-2]), tuple(a.shape[-1])
+    assert a.is_sparse_csr
+    return torch.Tensor.values(a).cuda(), torch.Tensor.col_indices(a).type(torch.IntTensor).cuda(), \
+           torch.Tensor.crow_indices(a).type(torch.IntTensor).cuda(), len(torch.Tensor.values(a)), \
+           a.shape[-2], a.shape[-1]
 
 def sparse_matmul(a: torch.Tensor,
                  b: torch.Tensor,
@@ -196,7 +197,6 @@ def sparse_matmul(a: torch.Tensor,
     :param mm_op: kernel to perform basic matrix multiplication
     :returns: Matrix multiplication output
     '''
-    assert torch.Tensor.is_sparse_csr(a)
     a_shape = a.shape
     b_shape = b.shape
 
@@ -209,22 +209,22 @@ def sparse_matmul(a: torch.Tensor,
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
 
-    if len(a_shape) == 3 and len(b_shape) == 2:
-        # flatten A into a 2d tensor
-        lda, dim1, dim2 = a_shape
-        _a = a.reshape(lda * dim1, dim2)
-        c = mm_op(*get_sparse_tensor_properties(_a), b, c).reshape(lda, dim1, -1)
-    elif len(a_shape) == 2 and len(b_shape) == 3:
+    # a_shape can't be 3 because csr tensor only supports 2d
+    if len(a_shape) == 2 and len(b_shape) == 3:
+        if not a.is_sparse_csr:
+            a = a.to_sparse_csr()
         # flatten B into a 2d tensor
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
-        c = mm_op(*get_sparse_tensor_properties(a), _b, c).reshape(ldb, dim1, -1)
+        c = mm_op(*get_sparse_tensor_properties(a), _b, c).reshape(ldb, -1, dim2)
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
         c = torch.stack([naive_matmul(a[i], b[i], mm_op)
                          for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
+        if not a.is_sparse_csr:
+            a = a.to_sparse_csr()
         c = mm_op(*get_sparse_tensor_properties(a), b, c)
     else:
         print(
@@ -265,7 +265,6 @@ def naive_matmul(a: torch.Tensor,
     :param mm_op: kernel to perform basic matrix multiplication
     :returns: Matrix multiplication output
     '''
-    assert torch.Tensor.is_sparse_csr(a)
     a_shape = a.shape
     b_shape = b.shape
 
@@ -278,22 +277,22 @@ def naive_matmul(a: torch.Tensor,
         print('Matrix-vector multiplication is not implemented in cuBLAS')
         return a @ b
 
-    if len(a_shape) == 3 and len(b_shape) == 2:
-        # flatten A into a 2d tensor
-        lda, dim1, dim2 = a_shape
-        _a = a.reshape(lda * dim1, dim2)
-        c = mm_op(*get_sparse_tensor_properties(_a), b, c).reshape(lda, dim1, -1)
-    elif len(a_shape) == 2 and len(b_shape) == 3:
+    # a_shape can't be 3 because csr tensor only supports 2d
+    if len(a_shape) == 2 and len(b_shape) == 3:
+        if not a.is_sparse_csr:
+            a = a.to_sparse_csr()
         # flatten B into a 2d tensor
         ldb, dim1, dim2 = b_shape
         _b = b.reshape(ldb * dim1, dim2)
-        c = mm_op(*get_sparse_tensor_properties(a), _b, c).reshape(ldb, dim1, -1)
+        c = mm_op(*get_sparse_tensor_properties(a), _b, c).reshape(ldb, -1, dim2)
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         lda, ldb = a_shape[0], b_shape[0]
         assert lda == ldb
         c = torch.stack([naive_matmul(a[i], b[i], mm_op)
                          for i in range(lda)])
     elif len(a_shape) == 2 and len(b_shape) == 2:
+        if not a.is_sparse_csr:
+            a = a.to_sparse_csr()
         c = mm_op(*get_sparse_tensor_properties(a), b, c)
     else:
         print(
