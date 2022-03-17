@@ -50,6 +50,11 @@ void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 				torch::Tensor B, int B_rows, int B_cols,
 				torch::Tensor C);
 
+// tiledspmm naive mm forward declaration
+void TiledSpMM_inspect(int M, int N, int K, int *rowdispl, int *colindex, T *nnzvalue, TiledSpMM_handle *handle);
+void TiledSpMM_multiply(T *B, T *C, TiledSpMM_handle handle);
+void TiledSpMM_free(TiledSpMM_handle handle);
+
 // manual handles in case none exist.
 // initialization/destruction functions are near the bottom
 cublasHandle_t g_cublas_handle = nullptr;
@@ -158,7 +163,7 @@ torch::Tensor naive_spmm_csr_conversion(torch::Tensor A, torch::Tensor B, torch:
 torch::Tensor cusparse_mmul(torch::Tensor A_values, torch::Tensor A_columns, torch::Tensor A_offsets, int nnzA, int A_rows, int A_cols, torch::Tensor B, torch::Tensor C)
 {
   // handles 2d sparse-dense matrix multiplications with cuSPARSE
-  // this function takes two dense matrices, and sparsifies A.
+  // this function takes a sparse A and a dense B.
   int B_rows = B.size(0);
   int B_cols = B.size(1);
   
@@ -192,6 +197,58 @@ torch::Tensor cusparse_mmul_csr_conversion(torch::Tensor A, torch::Tensor B, tor
    
   free_csr(d_A_values, d_A_columns, d_A_offsets);
   return C;
+}
+
+/*
+The following methods use the TiledSpMM interface for matrix multiplication
+You must do an inspection step where you create the handle for each unique matrix
+Note that it uses the following convention:
+C = M x K
+A = M x N
+B = N x K
+*/
+
+struct TiledSpMM_handle* spmm_handle = nullptr;
+
+void tiledspmm_inspect_naive(torch::Tensor A_values, torch::Tensor A_columns, atorch::Tensor A_offsets, int M, int N, int K)
+{
+  // handles 2d sparse-dense matrix multiplications with the TiledSpMM interface
+  // THIS IS A NAIVE METHOD, NOT THE FULL TILEDSPMM
+  // this function takes a sparse A and dimensions to create a handle.
+
+  // M = A_rows
+  // N = A_cols
+  // K = B_cols
+  
+  float *d_A_values = A_values.data_ptr<float>();
+  int *d_A_columns = A_columns.data_ptr<int>();
+  int *d_A_offsets = A_offsets.data_ptr<int>();
+
+  spmm_handle = new TiledSpMM_handle;  
+
+  TiledSpMM_inspect(M, N, K, d_A_offsets, d_A_columns, d_A_values, spmm_handle);
+}
+
+torch::Tensor tiledspmm_mm_naive(torch::Tensor B, torch::Tensor C)
+{
+  // handles 2d sparse-dense matrix multiplications with the TiledSpMM interface
+  // THIS IS A NAIVE METHOD, NOT THE FULL TILEDSPMM
+  // this function takes a dense B and uses stored handle for A.
+  float *d_B = B.data_ptr<float>();
+  float *d_C = C.data_ptr<float>();
+
+  TiledSpMM_multiply(d_B, d_C, spmm_handle);
+  return C;
+}
+
+void clean_tiledspmm_handle()
+{
+  // handles 2d sparse-dense matrix multiplications with the TiledSpMM interface
+  // THIS IS A NAIVE METHOD, NOT THE FULL TILEDSPMM
+  // this function frees the handle for A
+
+  TiledSpMM_free(spmm_handle);
+  delete spmm_handle;
 }
 
 // handle initialization/destruction functions
@@ -232,11 +289,18 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
   m.def("init_cublas", &init_cublas_handle, "Create cuBLAS handle.");
   m.def("destroy_cublas", &destroy_cublas_handle, "Destroy cuBLAS handle.");
+
   m.def("init_cusparse", &init_cusparse_handle, "Create cuSPARSE handle.");
   m.def("destroy_cusparse", &destroy_cusparse_handle, "Destroy cuSPARSE handle.");
+
   m.def("cublas_mmul", &cublas_mmul, "cuBLAS Torch Matrix Multiplication");
   m.def("cublas_bmm", &cublas_bmm, "cuBLAS Batched Torch Matrix Multiplication");
   m.def("cusparse_mmul", &cusparse_mmul, "cuSPARSE Torch Matrix Multiplication");
+
   m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
   m.def("naive_spmm", &naive_spmm, "A naive implementation of Sparse Matrix Multiplication");
+
+  m.def("tiledspmm_naive_inspect", &tiledspmm_inspect_naive, "Inspect function for Naive CSR MM");
+  m.def("tiledspmm_naive_mm", &tiledspmm_mm_naive, "MM function for Naive CSR MM");
+  m.def("tiledspmm_naive_clean", &clean_tiledspmm_handle, "Cleanup function for Naive CSR MM");
 }
