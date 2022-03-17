@@ -215,7 +215,8 @@ def sparse_matmul(a: torch.Tensor,
             a = a.to_sparse_csr()
         # flatten B into a 2d tensor
         ldb, dim1, dim2 = b_shape
-        _b = b.reshape(ldb * dim1, dim2)
+        _b = b.reshape(dim1, ldb*dim2)
+        c = torch.zeros(a.shape[0], ldb*dim2, device=torch.device('cuda'))
         c = mm_op(*get_sparse_tensor_properties(a), _b, c).reshape(ldb, -1, dim2)
     elif len(a_shape) >= 3 and len(b_shape) >= 3:
         lda, ldb = a_shape[0], b_shape[0]

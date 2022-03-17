@@ -1,7 +1,8 @@
+baseline_mm.cu
 custom_mm.cpp
-default_mm.cu
-mm_kernels.cu
+naive_sparse_mm.cu
 setup.py
+sparse_mm.cu
 custom_mm.egg-info/PKG-INFO
 custom_mm.egg-info/SOURCES.txt
 custom_mm.egg-info/dependency_links.txt

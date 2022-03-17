@@ -160,8 +160,8 @@ torch::Tensor cusparse_mmul(torch::Tensor A_values, torch::Tensor A_columns, tor
   // handles 2d sparse-dense matrix multiplications with cuSPARSE
   // this function takes two dense matrices, and sparsifies A.
   int B_rows = B.size(0);
-  int B_cols = B.size(1);;
-
+  int B_cols = B.size(1);
+  
   float *d_A_values = A_values.data_ptr<float>();
   int *d_A_columns = A_columns.data_ptr<int>();
   int *d_A_offsets = A_offsets.data_ptr<int>();
@@ -178,7 +178,7 @@ torch::Tensor cusparse_mmul_csr_conversion(torch::Tensor A, torch::Tensor B, tor
   int A_rows = A.size(0);
   int A_cols = A.size(1);
   int B_rows = B.size(0);
-  int B_cols = B.size(1);;
+  int B_cols = B.size(1);
 
   float *d_A_values = nullptr;
   int *d_A_columns = nullptr;
@@ -189,7 +189,7 @@ torch::Tensor cusparse_mmul_csr_conversion(torch::Tensor A, torch::Tensor B, tor
 
   cusparse_mm_wrapper(g_cusparse_handle, d_A_values, d_A_columns, d_A_offsets, nnzA,
                       A_rows, A_cols, B, B_rows, B_cols, C);
-      
+   
   free_csr(d_A_values, d_A_columns, d_A_offsets);
   return C;
 }

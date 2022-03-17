@@ -33,23 +33,26 @@ shapes = [
           ((n, n), (n, n)),
           ((n, 2*n), (2*n, n)),
           ((n, n), (n, int(n/2))),
-          ((2*n, n), (n, int(n/2)))
+          ((2*n, n), (n, int(n/2))),
+          ((512, 1024), (8, 1024, 256))
         ]
 
 # use these for sparse-sparse matrix multiplication
 # b_coords = gen_coords(n_vals, b_rows, b_cols)
 # b = sparsify(b_coords, n)
 
-for i, ((a_rows, a_cols), (b_rows, b_cols)) in enumerate(shapes):
+for i, ((a_rows, a_cols), b_shape) in enumerate(shapes):
     # sparse dense matrix multiplication
     a_n_vals = (a_rows * a_cols) / n_vals # scales number of values to be (1/n_vals)% sparsity
     a_coords = gen_coords(a_n_vals, a_rows, a_cols)
-    a = sparsify(a_coords, a_rows, a_cols).to_sparse_csr()
+    a = sparsify(a_coords, a_rows, a_cols)
     
-    b = torch.rand((b_rows, b_cols), device=torch.device('cuda'))
+    b = torch.rand(b_shape, device=torch.device('cuda'))
     #c = torch.zeros((a_rows, b_cols), device=torch.device('cuda'))
 
     exp = a@b
+    print(a.shape, b.shape)
+    a = a.to_sparse_csr()
     our = matmuls.cusparseMM.apply(a,b)
 
     if torch.allclose(exp, our):
