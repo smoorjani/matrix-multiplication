@@ -51,8 +51,9 @@ void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 				torch::Tensor C);
 
 // tiledspmm naive mm forward declaration
-void TiledSpMM_inspect(int M, int N, int K, int *rowdispl, int *colindex, T *nnzvalue, TiledSpMM_handle *handle);
-void TiledSpMM_multiply(T *B, T *C, TiledSpMM_handle handle);
+struct TiledSpMM_handle;
+void TiledSpMM_inspect(int M, int N, int K, int *rowdispl, int *colindex, float *nnzvalue, TiledSpMM_handle *handle);
+void TiledSpMM_multiply(float *B, float *C, TiledSpMM_handle handle);
 void TiledSpMM_free(TiledSpMM_handle handle);
 
 // manual handles in case none exist.
@@ -210,7 +211,7 @@ B = N x K
 
 struct TiledSpMM_handle* spmm_handle = nullptr;
 
-void tiledspmm_inspect_naive(torch::Tensor A_values, torch::Tensor A_columns, atorch::Tensor A_offsets, int M, int N, int K)
+void tiledspmm_inspect_naive(torch::Tensor A_values, torch::Tensor A_columns, torch::Tensor A_offsets, int M, int N, int K)
 {
   // handles 2d sparse-dense matrix multiplications with the TiledSpMM interface
   // THIS IS A NAIVE METHOD, NOT THE FULL TILEDSPMM

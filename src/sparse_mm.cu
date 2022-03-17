@@ -1,9 +1,7 @@
 #ifndef __SPARSE_MM_
 #define __SPARSE_MM_
 
-#include <torch/extension.h>
-
-#define T double
+#define T float
 
 __global__ void kernel_CSR(T *B, T *C, int *rowdispl, int *colindex, T *nnzvalue, int M, int K) {
   int tid = blockIdx.x*blockDim.x+threadIdx.x;
