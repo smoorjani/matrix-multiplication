@@ -1,10 +1,16 @@
 import torch
 import random
-import matmuls
-import custom_mm
+import tiledspmm
 
-n = 10
-n_vals = 10
+from numpy import random
+random.seed(123)
+torch.manual_seed(123)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(123)
+
+
+n = 1024
+n_vals = n * n
 
 def gen_coords(num_vals, dim1, dim2):
     coords = set()
@@ -36,33 +42,36 @@ shapes = [
 # b_coords = gen_coords(n_vals, b_rows, b_cols)
 # b = sparsify(b_coords, n)
 
-for i, ((a_rows, a_cols), b_shape) in enumerate(shapes):
+for i, ((a_rows, a_cols), (b_rows, b_cols)) in enumerate(shapes):
     # sparse dense matrix multiplication
     a_n_vals = (a_rows * a_cols) / n_vals # scales number of values to be (1/n_vals)% sparsity
     a_coords = gen_coords(a_n_vals, a_rows, a_cols)
     a = sparsify(a_coords, a_rows, a_cols)
     
-    b = torch.rand(b_shape, device=torch.device('cuda'))
-    c = torch.zeros((a_rows, b_shape[-1]), device=torch.device('cuda'))
+    b = torch.rand((b_rows, b_cols), device=torch.device('cuda'))
+    c = torch.zeros((a_rows, b_cols), device=torch.device('cuda'))
 
     exp = a@b
-    print(a.shape, b.shape)
-    _a = a.t()
-    a = _a.to_sparse_csr()
     
+    a = a.to_sparse()
+    vals = torch.Tensor.values(a).to('cpu')
+    indices = torch.Tensor.indices(a).type(torch.IntTensor)
+    rows = indices[0].to('cpu')
+    cols = indices[1].to('cpu')
+    nnz = len(vals)
 
-    vals = torch.Tensor.values(a)
-    cols = torch.Tensor.col_indices(a).type(torch.IntTensor)
-    offsets = torch.Tensor.crow_indices(a).type(torch.IntTensor)
-    print('inspecting!')
-    custom_mm.tiledspmm_naive_inspect(vals, cols, offsets, a_rows, a_cols, b_shape[-1])
-    print('multiplying!')
-    b = b.t()
-    c = custom_mm.tiledspmm_naive_mm(b, c)
-    c = c.t()
-    print((a.t() @ b.t()).t())
-    print('cleaning up!')
-    custom_mm.tiledspmm_naive_clean()
+    layer = "layer" + str(i)
+    tiledspmm.tiledspmm_inspect_coo(a_rows, a_cols, b_cols, nnz, rows, cols, vals, layer)
+    
+    '''
+    a = a.to_sparse_csr()
+    vals = torch.Tensor.values(a).to('cpu')
+    displ = torch.Tensor.crow_indices(a).type(torch.LongTensor).to('cpu')
+    indices = torch.Tensor.col_indices(a).type(torch.LongTensor).to('cpu')
+
+    tiledspmm.tiledspmm_inspect_csr(a_rows, a_cols, b_cols, displ, indices, vals)
+    '''
+    tiledspmm.tiledspmm_mm(b, c, layer)
 
     if torch.allclose(exp, c):
         print(f'\nTest {i} passed!\n')
@@ -73,3 +82,4 @@ for i, ((a_rows, a_cols), b_shape) in enumerate(shapes):
         print('# nonzero in exp:', torch.nonzero(exp).shape)
         print('# nonzero in ours:', torch.nonzero(c).shape)
 
+tiledspmm.tiledspmm_clean()

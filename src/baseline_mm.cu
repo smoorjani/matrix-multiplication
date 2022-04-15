@@ -269,4 +269,55 @@ void free_csr(float *d_csr_values, int *d_csr_columns, int *d_csr_offsets) {
     checkCudaStatus(cudaFree(d_csr_offsets));
 }
 
+void torch_cusparse_mm_wrapper(cusparseHandle_t handle,
+                         float *dA_values, int *dA_columns, int *dA_csrOffsets,
+                         int A_nnz, int A_rows, int A_cols,
+                         torch::Tensor B, int B_rows, int B_cols,
+                         torch::Tensor C)
+{
+    float *dB = B.data_ptr<float>();
+    float *dC = C.data_ptr<float>();
+
+    int ldb = B_cols;
+    int ldc = B_cols;
+
+    // CUSPARSE APIs
+    cusparseSpMatDescr_t matA;
+    cusparseDnMatDescr_t matB, matC;
+    void* dBuffer = NULL;
+    size_t bufferSize = 0;
+
+    // Create sparse matrix A in CSR format
+    cusparseSafeCall(cusparseCreateCsr(&matA, A_rows, A_cols, A_nnz,
+                                      dA_csrOffsets, dA_columns, dA_values,
+                                      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
+                                      CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));
+    // Create dense matrix B
+    cusparseSafeCall(cusparseCreateDnMat(&matB, B_rows, B_cols, ldb, dB,
+                                        CUDA_R_32F, CUSPARSE_ORDER_COL));
+    // Create dense matrix C
+    cusparseSafeCall(cusparseCreateDnMat(&matC, A_rows, B_cols, ldc, dC,
+                                        CUDA_R_32F, CUSPARSE_ORDER_COL));
+    // allocate an external buffer if needed
+    float alpha = 1.0f;
+    float beta = 0.0f;
+    cusparseOperation_t transA = CUSPARSE_OPERATION_NON_TRANSPOSE;
+    cusparseOperation_t transB = CUSPARSE_OPERATION_NON_TRANSPOSE;
+
+    cusparseSafeCall(cusparseSpMM_bufferSize(handle, transA, transB,
+                                           &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_MM_ALG_DEFAULT , &bufferSize));
+    checkCudaStatus(cudaMalloc(&dBuffer, bufferSize));
+
+    // execute SpMM
+    cusparseSafeCall(cusparseSpMM(handle, transA, transB,
+                                &alpha, matA, matB, &beta, matC, CUDA_R_32F, CUSPARSE_MM_ALG_DEFAULT , dBuffer));
+
+    // destroy matrix/vector descriptors
+    cusparseSafeCall(cusparseDestroySpMat(matA));
+    cusparseSafeCall(cusparseDestroyDnMat(matB));
+    cusparseSafeCall(cusparseDestroyDnMat(matC));
+
+    return;
+}
+
 #endif // __BASELINE_MM_H_
