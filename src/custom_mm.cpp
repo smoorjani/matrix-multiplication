@@ -51,7 +51,17 @@ void naive_spmm_wrapper(float *dA_values, int *dA_columns, int *dA_csrOffsets,
 				torch::Tensor C);
 
 // tiledspmm naive mm forward declaration
-struct TiledSpMM_handle;
+
+struct TiledSpMM_handle {
+  int M;
+  int N;
+  int K;
+
+  int *rowdispl;
+  int *colindex;
+  float *nnzvalue;
+};
+
 void TiledSpMM_inspect(int M, int N, int K, int *rowdispl, int *colindex, float *nnzvalue, TiledSpMM_handle *handle);
 void TiledSpMM_multiply(float *B, float *C, TiledSpMM_handle handle);
 void TiledSpMM_free(TiledSpMM_handle handle);
@@ -238,7 +248,7 @@ torch::Tensor tiledspmm_mm_naive(torch::Tensor B, torch::Tensor C)
   float *d_B = B.data_ptr<float>();
   float *d_C = C.data_ptr<float>();
 
-  TiledSpMM_multiply(d_B, d_C, spmm_handle);
+  TiledSpMM_multiply(d_B, d_C, *spmm_handle);
   return C;
 }
 
@@ -248,7 +258,7 @@ void clean_tiledspmm_handle()
   // THIS IS A NAIVE METHOD, NOT THE FULL TILEDSPMM
   // this function frees the handle for A
 
-  TiledSpMM_free(spmm_handle);
+  TiledSpMM_free(*spmm_handle);
   delete spmm_handle;
 }
 
@@ -301,7 +311,7 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("dummy_kernel", &dummy_kernel_launch, "Launch dummy kernel.");
   m.def("naive_spmm", &naive_spmm, "A naive implementation of Sparse Matrix Multiplication");
 
-  m.def("tiledspmm_naive_inspect", &tiledspmm_inspect_naive, "Inspect function for Naive CSR MM");
-  m.def("tiledspmm_naive_mm", &tiledspmm_mm_naive, "MM function for Naive CSR MM");
-  m.def("tiledspmm_naive_clean", &clean_tiledspmm_handle, "Cleanup function for Naive CSR MM");
+  // m.def("tiledspmm_naive_inspect", &tiledspmm_inspect_naive, "Inspect function for Naive CSR MM");
+  // m.def("tiledspmm_naive_mm", &tiledspmm_mm_naive, "MM function for Naive CSR MM");
+  // m.def("tiledspmm_naive_clean", &clean_tiledspmm_handle, "Cleanup function for Naive CSR MM");
 }

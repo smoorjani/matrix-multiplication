@@ -47,16 +47,22 @@ for i, ((a_rows, a_cols), b_shape) in enumerate(shapes):
 
     exp = a@b
     print(a.shape, b.shape)
-    a = a.to_sparse_csr()
+    _a = a.t()
+    a = _a.to_sparse_csr()
     
 
-    vals = torch.Tensor.values(a).cuda()
-    cols  = torch.Tensor.col_indices(a).type(torch.IntTensor).cuda()
-    offsets = torch.Tensor.crow_indices(a).type(torch.IntTensor).cuda()
-
+    vals = torch.Tensor.values(a)
+    cols = torch.Tensor.col_indices(a).type(torch.IntTensor)
+    offsets = torch.Tensor.crow_indices(a).type(torch.IntTensor)
+    print('inspecting!')
     custom_mm.tiledspmm_naive_inspect(vals, cols, offsets, a_rows, a_cols, b_shape[-1])
+    print('multiplying!')
+    b = b.t()
     c = custom_mm.tiledspmm_naive_mm(b, c)
-    custom_mm.clean_tiledspmm_handle()
+    c = c.t()
+    print((a.t() @ b.t()).t())
+    print('cleaning up!')
+    custom_mm.tiledspmm_naive_clean()
 
     if torch.allclose(exp, c):
         print(f'\nTest {i} passed!\n')
