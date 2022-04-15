@@ -222,8 +222,8 @@ struct CuSPARSE_handle {
   int N;
   int K;
 
-  long *displ;
-  long *colind;
+  int *displ;
+  int *colind;
   float *values;
 
   int nnz;
@@ -235,8 +235,8 @@ std::unordered_map<std::string, int> cusparse_layer_lookup;
 
 void cusparse_inspect(torch::Tensor displ, torch::Tensor colindex, torch::Tensor value, int nnz, int M, int N, int K, std::string layer)
 {
-  long *_displ = displ.data_ptr<long>();
-  long *_colindex = colindex.data_ptr<long>();
+  int *_displ = displ.data_ptr<int>();
+  int *_colindex = colindex.data_ptr<int>();
   float *_value = value.data_ptr<float>();
 
   CuSPARSE_handle *cur_handle = new CuSPARSE_handle;

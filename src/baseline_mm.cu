@@ -278,8 +278,8 @@ void torch_cusparse_mm_wrapper(cusparseHandle_t handle,
     float *dB = B.data_ptr<float>();
     float *dC = C.data_ptr<float>();
 
-    int ldb = B_cols;
-    int ldc = B_cols;
+    int ldb = B_rows;
+    int ldc = A_rows;
 
     // CUSPARSE APIs
     cusparseSpMatDescr_t matA;

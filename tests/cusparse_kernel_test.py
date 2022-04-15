@@ -34,7 +34,7 @@ shapes = [
           ((n, 2*n), (2*n, n)),
           ((n, n), (n, int(n/2))),
           ((2*n, n), (n, int(n/2))),
-          ((512, 1024), (8, 1024, 256))
+          ((512, 1024), (1024, 256))
         ]
 
 # use these for sparse-sparse matrix multiplication
